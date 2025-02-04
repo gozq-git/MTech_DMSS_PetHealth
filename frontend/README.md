@@ -1,7 +1,19 @@
-# To load app (DEV)
-Run commands`docker buildx build -t frontend-app . --no-cache`
+# To run app in local dev environment
+1. After cloning repo, run `npm install`
+2. Create a .env file in frontend director
+3. Add env variable VITE_MSAL_CLIENT_ID=our-msal-client-id
+4. Run `npm run dev`
+5. Open [localhost:5173](http://localhost:5173)
 
-`--no-cache` is optional
+# To run app in docker (DEV)
+**Note:The docker setup has not been properly configured to provide persistent volumes for HMR.**
+**Use the local set-up for now (5 FEB 2025)**
+
+Run command:`docker buildx build -t frontend-app . --no-cache`
+
+or `docker buildx build -t frontend-app .`
+
+**`--no-cache` is optional**
 
 Followed by: `docker run -p 5173:5173 frontend-app`
 
