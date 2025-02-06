@@ -1,9 +1,16 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import {PublicClientApplication,EventType} from "@azure/msal-browser";
-import { msalConfig } from './authConfig.ts';
+import 'src/index.css'
+import App from 'src/App'
+import {PublicClientApplication, EventType, AccountInfo} from "@azure/msal-browser";
+
+import { HelmetProvider } from 'react-helmet-async';
+
+import { Suspense, StrictMode } from 'react';
+
+import { BrowserRouter } from 'react-router-dom';
+
+import { msalConfig } from 'src/authConfig';
+
 /**
  * MSAL should be instantiated outside of the component tree to prevent it from being re-instantiated on re-renders.
  * For more, visit: https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-react/docs/getting-started.md
@@ -27,8 +34,16 @@ msalInstance.addEventCallback((event) => {
         }
     }
 });
+
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App instance={msalInstance}/>
-  </StrictMode>,
-)
+    <StrictMode>
+    <HelmetProvider>
+      <BrowserRouter>
+        <Suspense>
+        <App instance={msalInstance}/>
+        </Suspense>
+      </BrowserRouter>
+    </HelmetProvider>
+    
+  </StrictMode>
+  )
