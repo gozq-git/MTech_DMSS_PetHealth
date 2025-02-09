@@ -1,6 +1,6 @@
 # To run app in local dev environment
 1. After cloning repo, run `npm install`
-2. Create a .env file in frontend director
+2. Create a .env file in the _/frontend_ directory
 3. Add env variable VITE_MSAL_CLIENT_ID=our-msal-client-id
 4. Run `npm run dev`
 5. Open [localhost:5173](http://localhost:5173)
