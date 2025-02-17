@@ -12,14 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.users = void 0;
+exports.pets = void 0;
 const express_1 = __importDefault(require("express"));
-const users_controller_1 = __importDefault(require("./users.controller"));
-exports.users = express_1.default.Router();
+const pets_controller_1 = __importDefault(require("./pets.controller"));
+exports.pets = express_1.default.Router();
 /**
   * @swagger
   *
-  * /users/retrieveUser/{id}:
+  * /pets/retrievePet/{id}:
   *   get:
   *    summary: Retrieve a single JSONPlaceholder user.
   *    description: Retrieve a single JSONPlaceholder user. Can be used to populate a user profile when prototyping or testing an API.
@@ -52,11 +52,11 @@ exports.users = express_1.default.Router();
   *                        description: The user's name.
   *                        example: Leanne Graham
   */
-exports.users.get('/retrieveUser/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.params.id);
     // res.send(`Retrieving user ${req.params.id}`);
     try {
-        const result = yield users_controller_1.default.retrieveUser(req.params.id);
+        const result = yield pets_controller_1.default.retrievePet(req.params.id);
         res.status(200).send(result);
     }
     catch (error) {
@@ -93,11 +93,11 @@ exports.users.get('/retrieveUser/:id', (req, res) => __awaiter(void 0, void 0, v
   *                        description: The user's name.
   *                        example: Leanne Graham
   */
-exports.users.get('/getUsers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.pets.get('/getPets', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.params.id);
     // res.send(`Retrieving user ${req.params.id}`);
     try {
-        const result = yield users_controller_1.default.getUsers();
+        const result = yield pets_controller_1.default.getPets();
         res.status(200).send(result);
     }
     catch (error) {

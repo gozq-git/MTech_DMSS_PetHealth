@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
-export const users = {
-    name: 'USERS',
+export const pets = {
+    name: 'PETS',
     model: {
         ID: { type: DataTypes.STRING, primaryKey: true },
         ACCOUNT_TYPE: { type: DataTypes.STRING },
