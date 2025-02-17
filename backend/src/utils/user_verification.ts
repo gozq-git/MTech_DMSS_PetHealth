@@ -33,17 +33,17 @@ function verifyToken(token: string) {
 
 module.exports = {
   verifyJWT(req: any, res: any, next: any) {
-  console.log('Verifying token...');
-  console.log(req, res, next);
-  
-  verifyToken(req.headers.authorization)
-    .then((decoded) => {
-      console.log('Token is valid:', decoded);
-      next();
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(401).send('Unauthorized');
-    });
+    console.log('Verifying token...');
+    console.log(req, res, next);
+    
+    verifyToken(req.headers.authorization)
+      .then((decoded) => {
+        console.log('Token is valid:', decoded);
+        next();
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(401).send('Unauthorized');
+      });
 }
 }
