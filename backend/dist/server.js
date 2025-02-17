@@ -4,14 +4,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/index.ts
+const { config } = require('./config/config');
+const logger = require('./utils/logger');
 const express_1 = __importDefault(require("express"));
-const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const routes_1 = require("./routes");
-const swaggerSpec = require('./swagger');
 const app = (0, express_1.default)();
-const port = process.env.PORT || 8000;
+const port = config.port;
 app.use('/api', routes_1.routes);
-app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
+switch (config.env) {
+    case 'production':
+        break;
+    default: // development
+        logger.info('Loading Swagger UI');
+        const swaggerUI = require("swagger-ui-express");
+        const swaggerSpec = require('./swagger');
+        app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+        break;
+}
 app.listen(port, () => {
-    console.log(`[server]: Server is running at http://localhost:${port}`);
+    logger.info(`[server]: Server is running at http://localhost:${port} in ${config.env} mode`);
 });

@@ -1,25 +1,12 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.users = void 0;
-const express_1 = __importDefault(require("express"));
-const users_controller_1 = __importDefault(require("./users.controller"));
-exports.users = express_1.default.Router();
+import express, { Request, Response } from 'express';
+import PetsController from "./pets.controller";
+
+export const pets = express.Router();
+
 /**
   * @swagger
-  *
-  * /users/retrieveUser/{id}:
+  * 
+  * /pets/retrievePet/{id}:
   *   get:
   *    summary: Retrieve a single JSONPlaceholder user.
   *    description: Retrieve a single JSONPlaceholder user. Can be used to populate a user profile when prototyping or testing an API.
@@ -52,21 +39,21 @@ exports.users = express_1.default.Router();
   *                        description: The user's name.
   *                        example: Leanne Graham
   */
-exports.users.get('/retrieveUser/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+pets.get('/retrievePet/:id', async (req: Request, res: Response): Promise<void> => {
     console.log(req.params.id);
     // res.send(`Retrieving user ${req.params.id}`);
     try {
-        const result = yield users_controller_1.default.retrieveUser(req.params.id);
-        res.status(200).send(result);
+      const result = await PetsController.retrievePet(req.params.id);
+      res.status(200).send(result);
+    } catch (error) {
+      console.log(error);
+      throw new Error("Error retrieving users");
     }
-    catch (error) {
-        console.log(error);
-        throw new Error("Error retrieving users");
-    }
-}));
+});
+
 /**
   * @swagger
-  *
+  * 
   * /users/getUsers:
   *   get:
   *    summary: Retrieve an array of users.
@@ -93,15 +80,15 @@ exports.users.get('/retrieveUser/:id', (req, res) => __awaiter(void 0, void 0, v
   *                        description: The user's name.
   *                        example: Leanne Graham
   */
-exports.users.get('/getUsers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.params.id);
-    // res.send(`Retrieving user ${req.params.id}`);
-    try {
-        const result = yield users_controller_1.default.getUsers();
-        res.status(200).send(result);
-    }
-    catch (error) {
-        console.log(error);
-        throw new Error("Error retrieving users");
-    }
-}));
+pets.get('/getPets', async (req: Request, res: Response): Promise<void> => {
+  console.log(req.params.id);
+  // res.send(`Retrieving user ${req.params.id}`);
+  try {
+    const result = await PetsController.getPets();
+    res.status(200).send(result);
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error retrieving users");
+  }
+});
+

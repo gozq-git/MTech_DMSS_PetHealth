@@ -1,7 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.pets = void 0;
 const { DataTypes } = require('sequelize');
-
-export const users = {
-    name: 'USERS',
+exports.pets = {
+    name: 'PETS',
     model: {
         ID: { type: DataTypes.STRING, primaryKey: true },
         ACCOUNT_TYPE: { type: DataTypes.STRING },
