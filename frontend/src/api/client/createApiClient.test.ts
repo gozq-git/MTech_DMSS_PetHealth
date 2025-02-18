@@ -4,7 +4,7 @@ import { createApiClient, type ApiError } from './createApiClient';
 describe('createApiClient', () => {
     const baseUrl = 'https://api.example.com';
     const mockFetch = vi.fn();
-    global.fetch = mockFetch;
+    vi.spyOn(global, 'fetch').mockImplementation(mockFetch);
     const apiClient = createApiClient(baseUrl);
 
     beforeEach(() => {

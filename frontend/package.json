@@ -19,6 +19,7 @@
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.3",
     "@toolpad/core": "^0.12.0",
+    "@types/node": "^22.13.4",
     "framer-motion": "^12.4.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
