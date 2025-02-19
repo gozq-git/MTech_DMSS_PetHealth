@@ -6,6 +6,13 @@ interface SnackbarContextType {
     showSnackbar: (message: string, severity?: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
+export const SNACKBAR_SEVERITY = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning',
+    INFO: 'info'
+} as const;
+
 export const SnackbarContext = createContext<SnackbarContextType>({
     showSnackbar: () => {}
 });
