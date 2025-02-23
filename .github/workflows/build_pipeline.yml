@@ -41,7 +41,8 @@ on:
 
 permissions:
   contents: read
-
+  packages: write
+  
 jobs:
   build:
     name: Publish | GitHub Registry
