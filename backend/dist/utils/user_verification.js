@@ -32,11 +32,11 @@ function verifyToken(token) {
 }
 module.exports = {
     verifyJWT(req, res, next) {
-        console.log('Verifying token...');
-        console.log(req, res, next);
+        console.log('Verifying token...', req.headers.authorization);
         verifyToken(req.headers.authorization)
             .then((decoded) => {
             console.log('Token is valid:', decoded);
+            req.headers.userInfo = decoded;
             next();
         })
             .catch((error) => {

@@ -1,4 +1,4 @@
-import {  config } from "../config/config";
+import { config } from "../config/config";
 const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 
@@ -33,12 +33,12 @@ function verifyToken(token: string) {
 
 module.exports = {
   verifyJWT(req: any, res: any, next: any) {
-    console.log('Verifying token...');
-    console.log(req, res, next);
+    console.log('Verifying token...', req.headers.authorization);
     
     verifyToken(req.headers.authorization)
       .then((decoded) => {
         console.log('Token is valid:', decoded);
+        req.headers.userInfo = decoded;
         next();
       })
       .catch((error) => {
