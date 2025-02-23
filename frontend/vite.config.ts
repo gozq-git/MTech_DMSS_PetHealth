@@ -9,7 +9,8 @@ export default defineConfig({
     port: 5173,
     watch:{
       usePolling: true,
-    }
+    },
+    allowedHosts: ['pethealthplatform-dev.azurewebsites.net']
   },
   plugins: [react()],
 })
