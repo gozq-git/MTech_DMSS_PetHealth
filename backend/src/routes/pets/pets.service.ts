@@ -3,23 +3,31 @@ import { QueryTypes } from "sequelize";
 
 const models = sequelize.models;
 
-const PetsServices = {
+const PetsService = {
   getPets: async () => {
-    const users = await models.PETS.findAll({});
-    return users;
+    const pets = await models.PETS.findAll({});
+    return pets;
   },
-  retrievePet: async (ID: string) => {
-    const users = await models.PETS.findOne({
+  retrievePet: async (id: string) => {
+    const pet = await models.PETS.findOne({
       where: {
-        ID
+        id
       }
     });
-    return users;
+    return pet;
   },
-  registerUser: async (user: any) => {
-    const newUser = await models.PETS.create(user);
-    return newUser;
+  getPetsByOwner: async (ownerId: string) => {
+    const pets = await models.PETS.findAll({
+      where: {
+        ownerId
+      }
+    });
+    return pets;
+  },
+  insertPet: async (petData: any) => {
+    const newPet = await models.PETS.create(petData);
+    return newPet;
   }
 }
 
-export default PetsServices;
+export default PetsService;
