@@ -21,4 +21,4 @@ services:
       dockerfile: Dockerfile
     command: pm2-runtime ./config/ecosystem.config.js --env development
     ports:
-      - 8001:8000
+      - 8001:8001

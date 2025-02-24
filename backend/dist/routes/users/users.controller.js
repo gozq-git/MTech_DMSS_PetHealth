@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const users_service_1 = __importDefault(require("./users.service"));
+const logger = require('../../utils/logger');
 const UsersController = {
     getUsers: () => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -20,7 +21,7 @@ const UsersController = {
             return users;
         }
         catch (error) {
-            console.log(error);
+            logger.error(error);
             throw new Error("Error retrieving users");
         }
     }),
@@ -30,8 +31,28 @@ const UsersController = {
             return users;
         }
         catch (error) {
-            console.log(error);
+            logger.error(error);
             throw new Error("Error retrieving user");
+        }
+    }),
+    registerUser: (body) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const users = yield users_service_1.default.registerUser(body);
+            return users;
+        }
+        catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }),
+    updateUser: (body) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const users = yield users_service_1.default.updateUser(body);
+            return users;
+        }
+        catch (error) {
+            logger.error(error);
+            throw error;
         }
     }),
 };
