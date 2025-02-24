@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../../db");
+const logger = require('../../utils/logger');
+const date_fns_1 = require("date-fns");
 const models = db_1.sequelize.models;
 const UsersServices = {
     getUsers: () => __awaiter(void 0, void 0, void 0, function* () {
@@ -25,8 +27,47 @@ const UsersServices = {
         return users;
     }),
     registerUser: (user) => __awaiter(void 0, void 0, void 0, function* () {
-        const newUser = yield models.USERS.create(user);
-        return newUser;
+        try {
+            const newUser = yield models.USERS.create({
+                ID: user.id,
+                EMAIL: user.email,
+                ACCOUNT_TYPE: user.account_type,
+                LAST_ACTIVE: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+                ACCOUNT_CREATED: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+                BIO: user.bio,
+                PROFILE_PICTURE: user.profile_picture,
+                DISPLAY_NAME: user.display_name,
+            });
+            return newUser;
+        }
+        catch (error) {
+            logger.error(error);
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                throw new Error("User already exists");
+            }
+            throw new Error("Error registering user");
+        }
+    }),
+    updateUser: (user) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const updatedUser = yield models.USERS.update({
+                EMAIL: user.email,
+                ACCOUNT_TYPE: user.account_type,
+                LAST_ACTIVE: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+                BIO: user.bio,
+                PROFILE_PICTURE: user.profile_picture,
+                DISPLAY_NAME: user.display_name,
+            }, {
+                where: {
+                    ID: user.id
+                }
+            });
+            return updatedUser;
+        }
+        catch (error) {
+            logger.error(error);
+            throw new Error("Error updating user");
+        }
     })
 };
 exports.default = UsersServices;

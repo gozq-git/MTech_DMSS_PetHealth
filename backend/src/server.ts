@@ -2,10 +2,14 @@
 const { config } = require('./config/config');
 const logger = require('./utils/logger');
 import express, { Express, Request, Response } from "express";
+import cors from 'cors';
+import bodyParser from 'body-parser';
 import { routes } from './routes';
 
 
 const app: Express = express();
+app.use(cors());
+app.use(bodyParser.json());
 const port = config.port;
 
 app.use('/api', routes);

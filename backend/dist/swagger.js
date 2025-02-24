@@ -1,4 +1,5 @@
 const swaggerJSDoc = require('swagger-jsdoc');
+const { config } = require('./config/config');
 
 const swaggerDefinition = {
   openapi: '3.0.0',
@@ -9,10 +10,22 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:8000/api',
+      url: `http://localhost:${config.port}/api`,
       description: 'Development server',
     },
   ],
+  components: {
+    securitySchemes: {
+      JWT: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'authorization',  
+      }
+    }
+  },
+  security: [{
+    JWT: []
+  }]
 };
 
 const options = {
