@@ -1,6 +1,8 @@
 /**
  * src/api/createApiClient.ts
  */
+import {acquireAccessToken} from "../../auth/msalService.ts";
+import {msalInstance} from "../../main.tsx";
 
 export interface ApiResponse<T> {
     data: T;
@@ -17,7 +19,7 @@ export interface RequestConfig extends RequestInit {
     params?: Record<string, string>;
 }
 
-export interface ApiClient {
+export interface BaseApiClient {
     get: <T>(endpoint: string, config?: RequestConfig) => Promise<T>;
     post: <T>(endpoint: string, data?: unknown, config?: RequestConfig) => Promise<T>;
     put: <T>(endpoint: string, data?: unknown, config?: RequestConfig) => Promise<T>;
@@ -29,13 +31,15 @@ export interface ApiClient {
  * @param baseUrl - Base URL for all API requests
  * @returns API client instance with HTTP methods
  */
-export const createApiClient = (baseUrl: string): ApiClient => {
+export const createApiClient = (baseUrl: string): BaseApiClient => {
+
     const request = async <T>(endpoint: string, options: RequestConfig = {}): Promise<T> => {
         const { params, ...config } = options;
         const queryString = params ? `?${new URLSearchParams(params)}` : '';
-
+        const accessToken = await acquireAccessToken(msalInstance)
         const headers = {
             'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
             ...options.headers,
         };
 
