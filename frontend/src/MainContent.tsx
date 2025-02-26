@@ -1,15 +1,8 @@
 import {AuthenticatedTemplate, UnauthenticatedTemplate, useMsal} from "@azure/msal-react";
 import {loginRequest} from "./authConfig.ts";
 import './App.css'
-import LandingPage from "./pages/Landing.tsx";
-import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import PetPage from "./pages/PetPage.tsx";
+import {BrowserRouter} from "react-router-dom";
 import PageLayout from "./components/PageLayout.tsx";
-import HomePage from "./pages/HomePage.tsx";
-import HealthcarePage from "./pages/HealthcarePage.tsx";
-import ServicesPage from "./pages/ServicesPage.tsx";
-import ProfilePage from "./pages/ProfilePage.tsx";
-import SettingsPage from "./pages/SettingsPage.tsx";
 import {AuthenticatedRoutes, UnauthenticatedRoutes} from "./routes/AppRouter.tsx";
 
 const MainContent = () => {
