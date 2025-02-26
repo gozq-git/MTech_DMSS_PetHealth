@@ -1,7 +1,7 @@
 // src/hooks/useApi.ts
 
 import { useState, useCallback } from 'react';
-import {ApiClient, ApiError, RequestConfig} from "../client/createApiClient.ts";
+import {BaseApiClient, ApiError, RequestConfig} from "../client/createApiClient.ts";
 
 // This defines the shape of an object that useApi will return
 interface UseApiResponse<T> {
@@ -9,7 +9,7 @@ interface UseApiResponse<T> {
     loading: boolean;    // True/false flag for loading state
     error: ApiError | null;  // Can be ApiError type or null
     request: <R extends T>(  // A function that accepts a type R that must extend T
-        method: keyof ApiClient,  // Must be a key from ApiClient (get/post/put/delete)
+        method: keyof BaseApiClient,  // Must be a key from ApiClient (get/post/put/delete)
         endpoint: string,         // API endpoint path
         data?: unknown,          // Optional data parameter of any type
         config?: RequestConfig   // Optional config parameter
@@ -17,7 +17,7 @@ interface UseApiResponse<T> {
 }
 
 // Custom hook that takes an ApiClient and returns UseApiResponse
-export const useApi = <T>(apiClient: ApiClient): UseApiResponse<T> => {
+export const useApi = <T>(apiClient: BaseApiClient): UseApiResponse<T> => {
     // State hooks with types
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export const useApi = <T>(apiClient: ApiClient): UseApiResponse<T> => {
 
     // useCallback to memoize the request function
     const request = useCallback(async <R extends T>(
-        method: keyof ApiClient,
+        method: keyof BaseApiClient,
         endpoint: string,
         data?: unknown,
         config?: RequestConfig
