@@ -1,7 +1,7 @@
 import {Button, Container, Paper, Stack, TextField, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useContext, useState} from "react";
-import {SNACKBAR_SEVERITY, SnackbarContext} from "../providers/SnackbarProvider.tsx";
+import {SNACKBAR_SEVERITY, SnackbarContext} from "../../providers/SnackbarProvider.tsx";
 import Divider from "@mui/material/Divider";
 
 interface UserProfileFormItem {
