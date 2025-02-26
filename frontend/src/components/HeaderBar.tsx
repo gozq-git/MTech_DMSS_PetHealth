@@ -60,6 +60,11 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
     handleClose();
   };
 
+  const handleVetPortal = () => {
+    handleNavigation(ROUTES.VET_PORTAL.path);
+    handleClose();
+  };
+
   return (
       <AppBar position="fixed" sx={{ backgroundColor: '#795548' }}>
         <Toolbar>
@@ -100,6 +105,7 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
                     <Divider />
                     <MenuItem onClick={handleProfile}>Profile</MenuItem>
                     <MenuItem onClick={handleSettings}>Settings</MenuItem>
+                    <MenuItem onClick={handleVetPortal}>Vet Portal</MenuItem>
                     <Divider />
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                   </>
