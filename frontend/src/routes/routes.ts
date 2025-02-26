@@ -26,5 +26,9 @@ export const ROUTES = {
     SETTINGS: {
         path: '/settings',
         label: 'Settings'
+    },
+    VET_PORTAL: {
+        path: '/vetportal',
+        label: 'Vet Portal'
     }
 } as const;
