@@ -31,8 +31,8 @@ export interface SideBarItem {
 const sideBarItems: SideBarItem[] = [
     {
         id: 'home',
-        text: 'Home',
-        description: 'Navigate to Home',
+        text: 'home',
+        description: 'Navigate to home',
         icon: Home,
         endpoint: '/home'
     },
