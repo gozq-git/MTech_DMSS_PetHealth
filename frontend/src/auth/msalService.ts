@@ -32,7 +32,7 @@ export const acquireAccessToken = async (msalInstance: PublicClientApplication) 
         */
     }
     const request = {
-        scopes: ["User.Read"],
+        scopes: ["api://35d05786-2bf0-44fe-b044-ed646698228f/.default"],
         account: activeAccount || accounts[0]
     };
 
