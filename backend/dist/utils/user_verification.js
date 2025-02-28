@@ -32,8 +32,8 @@ function verifyToken(token) {
 }
 module.exports = {
     verifyJWT(req, res, next) {
-        console.log('Verifying token...', req.headers.authorization);
-        verifyToken(req.headers.authorization)
+        console.log('Verifying token...', req.headers.authorization.split(" ")[1]);
+        verifyToken(req.headers.authorization.split(" ")[1])
             .then((decoded) => {
             console.log('Token is valid:', decoded);
             req.headers.userInfo = decoded;
