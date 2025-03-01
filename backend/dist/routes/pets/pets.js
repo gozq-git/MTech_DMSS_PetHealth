@@ -17,91 +17,247 @@ const express_1 = __importDefault(require("express"));
 const pets_controller_1 = __importDefault(require("./pets.controller"));
 exports.pets = express_1.default.Router();
 /**
-  * @swagger
-  *
-  * /pets/retrievePet/{id}:
-  *   get:
-  *    summary: Retrieve a single JSONPlaceholder user.
-  *    description: Retrieve a single JSONPlaceholder user. Can be used to populate a user profile when prototyping or testing an API.
-  *    parameters:
-  *      - in: path
-  *        name: id
-  *        required: true
-  *        description: Numeric ID of the user to retrieve.
-  *        schema:
-  *          type: integer
-  *    responses:
-  *      200:
-  *        description: A list of users.
-  *        content:
-  *          application/json:
-  *            schema:
-  *              type: object
-  *              properties:
-  *                data:
-  *                  type: array
-  *                  items:
-  *                    type: object
-  *                    properties:
-  *                      id:
-  *                        type: integer
-  *                        description: The user ID.
-  *                        example: 0
-  *                      name:
-  *                        type: string
-  *                        description: The user's name.
-  *                        example: Leanne Graham
-  */
+ * @swagger
+ * /pets/retrievePet/{id}:
+ *   get:
+ *     summary: Retrieve a single pet by ID.
+ *     description: Retrieve a single pet by ID. Can be used to populate a pet profile when prototyping or testing an API.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Numeric ID of the pet to retrieve.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: A single pet.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 owner_id:
+ *                   type: string
+ *                 species:
+ *                   type: string
+ *                 breed:
+ *                   type: string
+ *                 date_of_birth:
+ *                   type: string
+ *                   format: date
+ *                 weight:
+ *                   type: number
+ *                 height_cm:
+ *                   type: number
+ *                 length_cm:
+ *                   type: number
+ *                 neck_girth_cm:
+ *                   type: number
+ *                 chest_girth_cm:
+ *                   type: number
+ *                 last_measured:
+ *                   type: string
+ *                   format: date
+ *                 is_neutered:
+ *                   type: boolean
+ *                 microchip_number:
+ *                   type: string
+ *                 photo_url:
+ *                   type: string
+ *                 created_at:
+ *                   type: string
+ *                   format: date-time
+ *                 updated_at:
+ *                   type: string
+ *                   format: date-time
+ *                 is_deleted:
+ *                   type: boolean
+ */
 exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.params.id);
-    // res.send(`Retrieving user ${req.params.id}`);
     try {
         const result = yield pets_controller_1.default.retrievePet(req.params.id);
         res.status(200).send(result);
     }
     catch (error) {
-        console.log(error);
-        throw new Error("Error retrieving users");
+        console.error(error);
+        res.status(500).send({ error: "Error retrieving pet" });
     }
 }));
 /**
-  * @swagger
-  *
-  * /users/getUsers:
-  *   get:
-  *    summary: Retrieve an array of users.
-  *    description: Retrieve an array of users
-  *    responses:
-  *      200:
-  *        description: A list of users.
-  *        content:
-  *          application/json:
-  *            schema:
-  *              type: object
-  *              properties:
-  *                data:
-  *                  type: array
-  *                  items:
-  *                    type: object
-  *                    properties:
-  *                      id:
-  *                        type: integer
-  *                        description: The user ID.
-  *                        example: 0
-  *                      name:
-  *                        type: string
-  *                        description: The user's name.
-  *                        example: Leanne Graham
-  */
+ * @swagger
+ * /pets/getPetsByOwner/{ownerId}:
+ *   get:
+ *     summary: Retrieve all pets by owner ID.
+ *     description: Retrieve a list of all pets owned by a specific owner.
+ *     parameters:
+ *       - in: path
+ *         name: ownerId
+ *         required: true
+ *         description: Numeric ID of the owner.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: A list of pets.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The pet ID.
+ *                     example: 0
+ *                   name:
+ *                     type: string
+ *                     description: The pet's name.
+ *                     example: Leanne Graham
+ */
+exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield pets_controller_1.default.getPetsByOwner(req.params.ownerId);
+        res.status(200).send(result);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Error retrieving pets by owner ID" });
+    }
+}));
+/**
+ * @swagger
+ * /pets/insertPet:
+ *   post:
+ *     summary: Insert a new pet.
+ *     description: Insert a new pet into the database.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               owner_id:
+ *                 type: string
+ *               species:
+ *                 type: string
+ *               breed:
+ *                 type: string
+ *               date_of_birth:
+ *                 type: string
+ *                 format: date
+ *               weight:
+ *                 type: number
+ *               height_cm:
+ *                 type: number
+ *               length_cm:
+ *                 type: number
+ *               neck_girth_cm:
+ *                 type: number
+ *               chest_girth_cm:
+ *                 type: number
+ *               is_neutered:
+ *                 type: boolean
+ *               microchip_number:
+ *                 type: string
+ *               photo_url:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Pet created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 owner_id:
+ *                   type: string
+ *                 species:
+ *                   type: string
+ *                 breed:
+ *                   type: string
+ *                 date_of_birth:
+ *                   type: string
+ *                   format: date
+ *                 weight:
+ *                   type: number
+ *                 height_cm:
+ *                   type: number
+ *                 length_cm:
+ *                   type: number
+ *                 neck_girth_cm:
+ *                   type: number
+ *                 chest_girth_cm:
+ *                   type: number
+ *                 is_neutered:
+ *                   type: boolean
+ *                 microchip_number:
+ *                   type: string
+ *                 photo_url:
+ *                   type: string
+ *                 created_at:
+ *                   type: string
+ *                   format: date-time
+ *                 updated_at:
+ *                   type: string
+ *                   format: date-time
+ *                 is_deleted:
+ *                   type: boolean
+ */
+exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield pets_controller_1.default.insertPet(req.body);
+        res.status(201).send(result);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Error inserting pet" });
+    }
+}));
+/**
+ * @swagger
+ * /pets/getPets:
+ *   get:
+ *     summary: Retrieve all pets.
+ *     description: Retrieve a list of all pets.
+ *     responses:
+ *       200:
+ *         description: A list of pets.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The pet ID.
+ *                     example: 0
+ *                   name:
+ *                     type: string
+ *                     description: The pet's name.
+ *                     example: Leanne Graham
+ */
 exports.pets.get('/getPets', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.params.id);
-    // res.send(`Retrieving user ${req.params.id}`);
     try {
         const result = yield pets_controller_1.default.getPets();
         res.status(200).send(result);
     }
     catch (error) {
-        console.log(error);
-        throw new Error("Error retrieving users");
+        console.error(error);
+        res.status(500).send({ error: "Error retrieving pets" });
     }
 }));
