@@ -1,9 +1,11 @@
 import {AuthenticatedTemplate, UnauthenticatedTemplate, useMsal} from "@azure/msal-react";
 import {loginRequest} from "./authConfig.ts";
+import { useEffect, useState, useContext } from "react";
 import './App.css'
-import {BrowserRouter} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import PageLayout from "./components/PageLayout.tsx";
 import {AuthenticatedRoutes, UnauthenticatedRoutes} from "./routes/AppRouter.tsx";
+import { ApiClientContext } from "./providers/ApiClientProvider.tsx";
 
 const MainContent = () => {
     /**
@@ -30,18 +32,49 @@ const MainContent = () => {
             })
             .catch((error) => console.log(error));
     };
-    return (
-        <BrowserRouter>
-            <PageLayout>
-                <AuthenticatedTemplate>
-                    <AuthenticatedRoutes />
-                </AuthenticatedTemplate>
 
-                <UnauthenticatedTemplate>
-                    <UnauthenticatedRoutes />
-                </UnauthenticatedTemplate>
-            </PageLayout>
-        </BrowserRouter>
+    const navigate = useNavigate(); 
+    const { userApi } = useContext(ApiClientContext); 
+
+    // useEffect(() => {
+    //     if (!activeAccount) return;
+    
+    //     const fetchUsers = async () => {
+    //         try {
+    //             const users = await userApi.getUsers();
+    
+    //             const loggedInUser = users.find(
+    //                 (user) => user.ID?.trim() === activeAccount.username.trim()
+    //             );
+    
+    //             if (!loggedInUser) {
+    //                 console.warn("User not found in system.");
+    //                 return;
+    //             }
+    
+    //             console.log("Logged in user:", loggedInUser);
+    
+    //             navigate(loggedInUser.ACCOUNT_TYPE === null ? "/profile" : "/pets");
+    //         } catch (error) {
+    //             console.error("Failed to fetch users:", error);
+    //         }
+    //     };
+    
+    //     fetchUsers();
+    // }, [activeAccount, navigate, userApi]);
+    
+    
+
+    return (
+        <PageLayout>
+            <AuthenticatedTemplate>
+                <AuthenticatedRoutes />
+            </AuthenticatedTemplate>
+
+            <UnauthenticatedTemplate>
+                <UnauthenticatedRoutes />
+            </UnauthenticatedTemplate>
+        </PageLayout>
     );
 };
 
