@@ -4,6 +4,7 @@ import {MsalProvider} from "@azure/msal-react";
 import MainContent from "./MainContent.tsx";
 import {SnackbarProvider} from "./providers/SnackbarProvider.tsx";
 import {ApiClientProvider} from "./providers/ApiClientProvider.tsx";
+import {BrowserRouter} from "react-router-dom";
 
 interface AppProps {
     instance: PublicClientApplication;
@@ -14,7 +15,9 @@ const App = ({instance}: AppProps) => {
         <MsalProvider instance={instance}>
             <ApiClientProvider>
                 <SnackbarProvider>
-                    <MainContent/>
+                    <BrowserRouter>
+                        <MainContent/>
+                    </BrowserRouter>
                 </SnackbarProvider>
             </ApiClientProvider>
         </MsalProvider>
