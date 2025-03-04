@@ -26,3 +26,4 @@ exports.sequelize = sequelize;
     const importedModel = require(`./models/${model}`)[model.split('.')[0]];
     sequelize.define(importedModel.name, importedModel.model, importedModel.options);
 });
+sequelize.sync({ alter: true });

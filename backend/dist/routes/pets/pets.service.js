@@ -11,22 +11,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../../db");
 const models = db_1.sequelize.models;
-const PetsServices = {
+const PetsService = {
     getPets: () => __awaiter(void 0, void 0, void 0, function* () {
-        const users = yield models.PETS.findAll({});
-        return users;
+        const pets = yield models.PETS.findAll({});
+        return pets;
     }),
-    retrievePet: (ID) => __awaiter(void 0, void 0, void 0, function* () {
-        const users = yield models.PETS.findOne({
+    retrievePet: (id) => __awaiter(void 0, void 0, void 0, function* () {
+        const pet = yield models.PETS.findOne({
             where: {
-                ID
+                id
             }
         });
-        return users;
+        return pet;
     }),
-    registerUser: (user) => __awaiter(void 0, void 0, void 0, function* () {
-        const newUser = yield models.PETS.create(user);
-        return newUser;
+    getPetsByOwner: (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
+        const pets = yield models.PETS.findAll({
+            where: {
+                ownerId
+            }
+        });
+        return pets;
+    }),
+    insertPet: (petData) => __awaiter(void 0, void 0, void 0, function* () {
+        const newPet = yield models.PETS.create(petData);
+        return newPet;
     })
 };
-exports.default = PetsServices;
+exports.default = PetsService;

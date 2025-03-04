@@ -20,18 +20,38 @@ const PetsController = {
             return pets;
         }
         catch (error) {
-            console.log(error);
-            throw new Error("Error retrieving Pets");
+            console.error(error);
+            throw new Error("Error retrieving pets");
         }
     }),
-    retrievePet: (ID) => __awaiter(void 0, void 0, void 0, function* () {
+    retrievePet: (id) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const pets = yield pets_service_1.default.retrievePet(ID);
+            const pet = yield pets_service_1.default.retrievePet(id);
+            return pet;
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error("Error retrieving pet");
+        }
+    }),
+    getPetsByOwner: (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const pets = yield pets_service_1.default.getPetsByOwner(ownerId);
             return pets;
         }
         catch (error) {
-            console.log(error);
-            throw new Error("Error retrieving user");
+            console.error(error);
+            throw new Error("Error retrieving pets by owner ID");
+        }
+    }),
+    insertPet: (petData) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const newPet = yield pets_service_1.default.insertPet(petData);
+            return newPet;
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error("Error inserting pet");
         }
     }),
 };
