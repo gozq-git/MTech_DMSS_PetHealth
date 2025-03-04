@@ -22,6 +22,8 @@ exports.pets = express_1.default.Router();
  *   get:
  *     summary: Retrieve a single pet by ID.
  *     description: Retrieve a single pet by ID. Can be used to populate a pet profile when prototyping or testing an API.
+ *     tags:
+ *       - pets
  *     parameters:
  *       - in: path
  *         name: id
@@ -94,6 +96,8 @@ exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, voi
  *   get:
  *     summary: Retrieve all pets by owner ID.
  *     description: Retrieve a list of all pets owned by a specific owner.
+ *     tags:
+ *       - pets
  *     parameters:
  *       - in: path
  *         name: ownerId
@@ -112,13 +116,45 @@ exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, voi
  *                 type: object
  *                 properties:
  *                   id:
- *                     type: integer
- *                     description: The pet ID.
- *                     example: 0
+ *                     type: string
  *                   name:
  *                     type: string
- *                     description: The pet's name.
- *                     example: Leanne Graham
+ *                   owner_id:
+ *                     type: string
+ *                   species:
+ *                     type: string
+ *                   breed:
+ *                     type: string
+ *                   date_of_birth:
+ *                     type: string
+ *                     format: date
+ *                   weight:
+ *                     type: number
+ *                   height_cm:
+ *                     type: number
+ *                   length_cm:
+ *                     type: number
+ *                   neck_girth_cm:
+ *                     type: number
+ *                   chest_girth_cm:
+ *                     type: number
+ *                   last_measured:
+ *                     type: string
+ *                     format: date
+ *                   is_neutered:
+ *                     type: boolean
+ *                   microchip_number:
+ *                     type: string
+ *                   photo_url:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                   is_deleted:
+ *                     type: boolean
  */
 exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -136,6 +172,8 @@ exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, voi
  *   post:
  *     summary: Insert a new pet.
  *     description: Insert a new pet into the database.
+ *     tags:
+ *       - pets
  *     requestBody:
  *       required: true
  *       content:
@@ -232,6 +270,8 @@ exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, 
  *   get:
  *     summary: Retrieve all pets.
  *     description: Retrieve a list of all pets.
+ *     tags:
+ *       - pets
  *     responses:
  *       200:
  *         description: A list of pets.
@@ -243,13 +283,45 @@ exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, 
  *                 type: object
  *                 properties:
  *                   id:
- *                     type: integer
- *                     description: The pet ID.
- *                     example: 0
+ *                     type: string
  *                   name:
  *                     type: string
- *                     description: The pet's name.
- *                     example: Leanne Graham
+ *                   owner_id:
+ *                     type: string
+ *                   species:
+ *                     type: string
+ *                   breed:
+ *                     type: string
+ *                   date_of_birth:
+ *                     type: string
+ *                     format: date
+ *                   weight:
+ *                     type: number
+ *                   height_cm:
+ *                     type: number
+ *                   length_cm:
+ *                     type: number
+ *                   neck_girth_cm:
+ *                     type: number
+ *                   chest_girth_cm:
+ *                     type: number
+ *                   last_measured:
+ *                     type: string
+ *                     format: date
+ *                   is_neutered:
+ *                     type: boolean
+ *                   microchip_number:
+ *                     type: string
+ *                   photo_url:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                   is_deleted:
+ *                     type: boolean
  */
 exports.pets.get('/getPets', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
