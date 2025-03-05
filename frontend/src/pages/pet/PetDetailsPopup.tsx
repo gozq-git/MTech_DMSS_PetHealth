@@ -1,25 +1,8 @@
-import {Dialog, DialogTitle, DialogContent, Typography, DialogActions, Button} from "@mui/material";
 import {Pet} from "../../api/types/pet.ts";
-
-// interface Pet {
-//     name: string;
-//     image: string;
-//     gender: string;
-//     species: string;
-//     breed: string;
-//     dateOfBirth: string;
-//     age: number;
-//     weight: number;
-//     height: number;
-//     length: number;
-//     neckGirth: number | unknown;
-//     chestGirth: number | unknown;
-//     lastMeasured: Date | null;
-//     isNeutered: boolean;
-//     microchipNumber: number;
-//     lastUpdated: Date | null;
-//     dateAdded: Date | null;
-// }
+import React from "react";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
 
 interface PetDetailsPopupProps {
     pet: Pet;
@@ -69,7 +52,16 @@ const PetDetailsPopup: React.FC<PetDetailsPopupProps> = ({pet, onClose}) => {
         <Dialog open={Boolean(pet)} onClose={onClose}>
             <DialogTitle>{pet.name}</DialogTitle>
             <DialogContent>
-                <img src={pet.photoUrl} alt={pet.name} style={{width: "100%"}}/>
+                <Avatar
+                    src={pet.photoUrl}
+                    alt={pet.name}
+                    sx={{
+                        width: 120,
+                        height: 120,
+                        border: '4px solid white',
+                        mb: 2
+                    }}
+                />
                 {petDetails}
             </DialogContent>
             <DialogActions>
