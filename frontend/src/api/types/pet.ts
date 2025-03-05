@@ -29,8 +29,9 @@ export interface PetCreateInput {
     weight?: number;
     height?: number;
     neckGirthCm?: number;
-    chesGirthCm?: number;
-    lastMeasured: number;
+    chestGirthCm?: number;
+    lastMeasured: string;
     isNeutered?: boolean;
-    microchipNumber: number;
+    microchipNumber: string;
+    photoUrl: string;
 }
