@@ -27,7 +27,7 @@ const PetsService = {
     getPetsByOwner: (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
         const pets = yield models.PETS.findAll({
             where: {
-                ownerId
+                owner_id: ownerId
             }
         });
         return pets;

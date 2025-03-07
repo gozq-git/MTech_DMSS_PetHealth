@@ -1,12 +1,12 @@
 // src/api/types/user.ts
 export interface User {
-    id: string;
+    ID: string;
     name: string;
     email: string;
     lastActive: string;
     bio: string;
     profilePictureUrl: string;
-    accountType: 'user' | 'vet';
+    ACCOUNT_TYPE: string;
     accountCreated: string;
     isDeleted: boolean;
 }
