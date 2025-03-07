@@ -2,6 +2,7 @@ import {Avatar, Box, Card, CardContent, Chip, Typography} from "@mui/material";
 import {Pet} from "../../api/types/pet.ts";
 import React from "react";
 import {calculateAge} from "./util/ageCalculator.ts";
+import {toProperCase} from "../../util/toProperCase.ts";
 
 export interface PetCardProps {
     pet: Pet;
@@ -51,14 +52,14 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                 </Typography>
                 <Box sx={{display: 'flex', mt: 1, gap: 1}}>
                     <Chip
-                        label={pet.species}
+                        label={toProperCase(pet.species)}
                         size="small"
                         color="primary"
                         variant="outlined"
                         sx={{bgcolor: 'rgba(255,255,255,0.8)', color: 'primary.dark'}}
                     />
                     <Chip
-                        label={pet.breed}
+                        label={toProperCase(pet.breed)}
                         size="small"
                         color="primary"
                         variant="outlined"
@@ -83,26 +84,6 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                     </Typography>
                 </Box>
             </CardContent>
-            {/*<Box sx={{*/}
-            {/*    p: 2,*/}
-            {/*    width: '100%',*/}
-            {/*    display: 'flex',*/}
-            {/*    flexDirection: 'column',*/}
-            {/*    alignItems: 'center'*/}
-            {/*}}>*/}
-            {/*    /!* Circular Avatar *!/*/}
-            {/*    <Avatar*/}
-            {/*        src={pet.photoUrl}*/}
-            {/*        alt={pet.name}*/}
-            {/*        sx={{width: 80, height: 80, mb: 1}}*/}
-            {/*    />*/}
-            {/*    <CardContent sx={{textAlign: "center", p: 1, "&:last-child": {pb: 1}}}>*/}
-            {/*        <Typography variant="h6" fontWeight="bold">{pet.name}</Typography>*/}
-            {/*        <Typography variant="body2" color="text.secondary">*/}
-            {/*            {pet.species} • {pet.breed}*/}
-            {/*        </Typography>*/}
-            {/*    </CardContent>*/}
-            {/*</Box>*/}
         </Card>
     )
 }
