@@ -33,10 +33,10 @@ env:
   AZURE_WEBAPP_NAME: az-devdays-appservice
 
 on:
-  # push:
-  #   branches: [ "dev" ]
-  #   paths:
-  #   - backend/**
+  push:
+    branches: [ "dev" ]
+    paths:
+    - backend/**
   workflow_dispatch:
 
 permissions:

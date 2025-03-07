@@ -19,7 +19,7 @@ const PetsService = {
   getPetsByOwner: async (ownerId: string) => {
     const pets = await models.PETS.findAll({
       where: {
-        ownerId
+        owner_id: ownerId
       }
     });
     return pets;
