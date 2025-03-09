@@ -103,6 +103,7 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           # tags: ${{ steps.meta.outputs.tags }}
+          tags: latest
 
 
   deploy:
