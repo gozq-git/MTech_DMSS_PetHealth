@@ -109,6 +109,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: az-registry
     steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZ_SP_FE_DEV }}
+
       - name: 'Deploy to Azure Web App for Container'
         uses: azure/webapps-deploy@v2
         with: 
