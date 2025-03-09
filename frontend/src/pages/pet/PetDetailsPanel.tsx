@@ -19,6 +19,7 @@ import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
 import {Pet} from "../../api/types/pet.ts";
 import VaccinationRecord from "../../api/types/vaccinationRecord.ts";
 import Divider from "@mui/material/Divider";
+import {toProperCase} from "../../util/toProperCase.ts";
 
 interface PetDetailsPopupContentProps {
     pet: Pet;
@@ -47,7 +48,7 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({pet, vac
             label: 'Gender',
             icon: pet.gender === 'Male' ? <MaleOutlined color="primary"/> : <FemaleOutlined color="secondary"/>
         },
-        {key: 'species', label: 'Type', icon: <PetsOutlined/>},
+        {key: 'species', label: 'Type', icon: <PetsOutlined/>, format: (value) => toProperCase(value.toString())},
         {key: 'breed', label: 'Breed', icon: <PetsOutlined/>},
         {key: 'dateOfBirth', label: 'Date of Birth', icon: <CakeOutlined/>},
         {key: 'weight', label: 'Weight', icon: <ScaleOutlined/>, format: (value) => `${value} kg`},
