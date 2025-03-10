@@ -25,6 +25,9 @@ jobs:
         registry: ${{ env.AZ_REGISTRY }}
         username: ${{ secrets.AZ_SP_CLIENT_ID }}
         password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+    
+    - name: Pull image from ACR (FE)
+      run: docker pull ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
         
     - name: Run Snyk to check Docker image for vulnerabilities (FE)
       uses: snyk/actions/docker@master
@@ -32,6 +35,9 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         image: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+    
+    - name: Pull image from ACR (BE)
+      run: docker pull ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
 
     - name: Run Snyk to check Docker image for vulnerabilities (BE)
       uses: snyk/actions/docker@master
