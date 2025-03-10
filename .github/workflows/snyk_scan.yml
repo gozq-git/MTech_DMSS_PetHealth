@@ -13,10 +13,49 @@ on:
   workflow_dispatch:
 
 jobs:
-  security:
+  security-FE:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
       - uses: actions/checkout@master
+      - name: Get Node v18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Snyk to check for vulnerabilities (SCA)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: test
+
+      - name: Run Snyk to check for vulnerabilities (SAST)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
+
+  security-BE:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@master
+      - name: Get Node v18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
 
       - name: Run Snyk to check for vulnerabilities (SCA)
         uses: snyk/actions/node@master
