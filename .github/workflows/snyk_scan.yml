@@ -27,6 +27,14 @@ jobs:
       # - name: Install dependencies
       #   run: npm install
 
+      - name: Move files to root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv frontend/* .
+          rm -rf frontend
+          ls -lah
+
       - name: Run Snyk to check for vulnerabilities (SCA)
         uses: snyk/actions/node@master
         continue-on-error: true
@@ -56,6 +64,13 @@ jobs:
       #     node-version: 18
       # - name: Install dependencies
       #   run: npm install
+      - name: Move files to root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv backend/* .
+          rm -rf backend
+          ls -lah
 
       - name: Run Snyk to check for vulnerabilities (SCA)
         uses: snyk/actions/node@master
