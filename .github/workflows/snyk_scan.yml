@@ -17,10 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      
+      - name: Run Snyk to check for vulnerabilities (FE)
         uses: snyk/actions/node@master
+        working-directory: ./frontend
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
+
+      - name: Run Snyk to check for vulnerabilities (BE)
+        uses: snyk/actions/node@master
+        working-directory: ./backend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
   
 # jobs:
 #   security:
