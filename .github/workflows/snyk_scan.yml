@@ -4,6 +4,7 @@ env:
   IMAGE_NAME_FRONTEND: "frontend-dev"
   IMAGE_NAME_BACKEND: "backend-dev"
   AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
 on:
   # push:
@@ -20,19 +21,17 @@ jobs:
 
       - name: Run Snyk to check for vulnerabilities (FE)
         uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        # env:
+        #   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
             command: code test
-            working-directory: ./frontend
 
       - name: Run Snyk to check for vulnerabilities (BE)
         uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        # env:
+        #   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
             command: code test
-            working-directory: ./backend
   
 # jobs:
 #   security:
