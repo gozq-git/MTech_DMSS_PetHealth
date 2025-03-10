@@ -1,0 +1,41 @@
+name: Snyk scan of Docker Image
+
+env:
+  IMAGE_NAME_FRONTEND: "frontend-dev"
+  IMAGE_NAME_BACKEND: "backend-dev"
+  AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+
+on:
+  # push:
+  #   branches: [ "dev" ]
+  #   paths:
+  #   - backend/**
+  workflow_dispatch:
+  
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Log in to the Azure Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.AZ_REGISTRY }}
+        username: ${{ secrets.AZ_SP_CLIENT_ID }}
+        password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+        
+    - name: Run Snyk to check Docker image for vulnerabilities (FE)
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+
+    - name: Run Snyk to check Docker image for vulnerabilities (BE)
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
