@@ -15,17 +15,17 @@ on:
 jobs:
   security-FE:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
     steps:
       - uses: actions/checkout@master
-      - name: Get Node v18
-        uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+            sparse-checkout: 'frontend'
+            sparse-checkout-cone-mode: false
+      # - name: Get Node v18
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: 18
+      # - name: Install dependencies
+      #   run: npm install
 
       - name: Run Snyk to check for vulnerabilities (SCA)
         uses: snyk/actions/node@master
@@ -43,19 +43,20 @@ jobs:
         with:
             command: code test
 
+jobs:
   security-BE:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
     steps:
       - uses: actions/checkout@master
-      - name: Get Node v18
-        uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+            sparse-checkout: 'backend'
+            sparse-checkout-cone-mode: false
+      # - name: Get Node v18
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: 18
+      # - name: Install dependencies
+      #   run: npm install
 
       - name: Run Snyk to check for vulnerabilities (SCA)
         uses: snyk/actions/node@master
@@ -72,6 +73,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
             command: code test
+
 
 # jobs:
 #   security:
