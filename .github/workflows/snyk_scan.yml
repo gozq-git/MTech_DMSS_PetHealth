@@ -43,7 +43,6 @@ jobs:
         with:
             command: code test
 
-jobs:
   security-BE:
     runs-on: ubuntu-latest
     steps:
