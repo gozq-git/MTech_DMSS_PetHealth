@@ -40,7 +40,7 @@ users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> =>
     const userInfo = req.headers.userInfo as any;
     try {
       const result = await UsersController.retrieveUser(userInfo?.preferred_username);
-      res.status(200).send(result);
+      res.status(200).type('text').send(result);
     } catch (error) {
       logger.error(error);
       throw new Error("Error retrieving users");
@@ -83,7 +83,7 @@ users.get('/getUsers', async (req: Request, res: Response): Promise<void> => {
   // res.send(`Retrieving user ${req.params.id}`);
   try {
     const result = await UsersController.getUsers();
-    res.status(200).send(result);
+    res.status(200).type('text').send(result);
   } catch (error) {
     logger.error(error);
     throw new Error("Error retrieving users");
@@ -136,7 +136,7 @@ users.post('/registerUser', async (req: Request, res: Response): Promise<void> =
   const userInfo = req.headers.userInfo as any;
   try {
     const result = await UsersController.registerUser({id: userInfo.preferred_username, ...req.body});
-    res.status(200).send(result);
+    res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
     res.status(200).send(error.message);
@@ -188,7 +188,7 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
   const userInfo = req.headers.userInfo as any;
   try {
     const result = await UsersController.updateUser({id: userInfo.preferred_username, ...req.body});
-    res.status(200).send(result);
+    res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
     res.status(200).send(error.message);

@@ -8,6 +8,7 @@ import { routes } from './routes';
 
 
 const app: Express = express();
+app.disable('x-powered-by');
 app.use(cors());
 app.use(bodyParser.json());
 const port = config.port;
