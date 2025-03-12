@@ -2,18 +2,9 @@ import UsersService from "./users.service";
 const logger = require('../../utils/logger');
 
 const UsersController = {
-  getUsers: async () => {
+  retrieveUser: async (account_name: string) => {
     try {
-      const users = await UsersService.getUsers();
-      return users;
-    } catch (error) {
-      logger.error(error);
-      throw new Error("Error retrieving users");
-    }
-  },
-  retrieveUser: async (ID: string) => {
-    try {
-      const users = await UsersService.retrieveUser(ID);
+      const users = await UsersService.retrieveUser(account_name);
       return users;
     } catch (error) {
       logger.error(error);
@@ -32,6 +23,15 @@ const UsersController = {
   updateUser: async (body: Object) => {
     try {
       const users = await UsersService.updateUser(body);
+      return users;
+    } catch (error) {
+      logger.error(error);
+      throw error;
+    }
+  },
+  deleteUser: async (account_name: string) => {
+    try {
+      const users = await UsersService.deleteUser(account_name);
       return users;
     } catch (error) {
       logger.error(error);

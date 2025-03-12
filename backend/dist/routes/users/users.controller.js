@@ -15,19 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const users_service_1 = __importDefault(require("./users.service"));
 const logger = require('../../utils/logger');
 const UsersController = {
-    getUsers: () => __awaiter(void 0, void 0, void 0, function* () {
+    retrieveUser: (account_name) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const users = yield users_service_1.default.getUsers();
-            return users;
-        }
-        catch (error) {
-            logger.error(error);
-            throw new Error("Error retrieving users");
-        }
-    }),
-    retrieveUser: (ID) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const users = yield users_service_1.default.retrieveUser(ID);
+            const users = yield users_service_1.default.retrieveUser(account_name);
             return users;
         }
         catch (error) {
@@ -48,6 +38,16 @@ const UsersController = {
     updateUser: (body) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const users = yield users_service_1.default.updateUser(body);
+            return users;
+        }
+        catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }),
+    deleteUser: (account_name) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const users = yield users_service_1.default.deleteUser(account_name);
             return users;
         }
         catch (error) {
