@@ -5,16 +5,28 @@ const { DataTypes } = require('sequelize');
 exports.users = {
     name: 'USERS',
     model: {
-        ID: { type: DataTypes.STRING, primaryKey: true },
-        ACCOUNT_TYPE: { type: DataTypes.STRING },
-        LAST_ACTIVE: { type: DataTypes.STRING },
-        ACCOUNT_CREATED: { type: DataTypes.STRING },
-        BIO: { type: DataTypes.STRING },
-        PROFILE_PICTURE: { type: DataTypes.STRING },
-        DISPLAY_NAME: { type: DataTypes.STRING },
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true
+        },
+        account_name: { type: DataTypes.STRING, unique: true },
+        display_name: { type: DataTypes.STRING },
+        email: { type: DataTypes.STRING, unique: true },
+        last_active: { type: DataTypes.STRING },
+        account_created: { type: DataTypes.STRING },
+        bio: { type: DataTypes.TEXT },
+        profile_picture: { type: DataTypes.STRING },
     },
     options: {
         freezeTableName: true,
         timestamps: false,
     },
+    associate: (models) => {
+        models.USERS.hasOne(models.VETS, {
+            foreignKey: 'id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+        });
+    }
 };

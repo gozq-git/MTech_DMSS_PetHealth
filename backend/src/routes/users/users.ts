@@ -35,7 +35,6 @@ export const users = express.Router();
   *                        example: Leanne Bob
   */
 users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> => {
-    console.log(req.headers.users);
     // res.send(`Retrieving user ${req.params.id}`);
     const userInfo = req.headers.userInfo as any;
     try {
@@ -46,50 +45,6 @@ users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> =>
       throw new Error("Error retrieving users");
     }
 });
-
-/**
-  * @swagger
-  * 
-  * /users/getUsers:
-  *   get:
-  *    summary: Retrieve an array of users.
-  *    tags:
-  *      - users
-  *    description: Retrieve an array of users
-  *    responses:
-  *      200:
-  *        description: A list of users.
-  *        content:
-  *          application/json:
-  *            schema:
-  *              type: object
-  *              properties:
-  *                data:
-  *                  type: array
-  *                  items:
-  *                    type: object
-  *                    properties:
-  *                      id:
-  *                        type: integer
-  *                        description: The user ID.
-  *                        example: 0
-  *                      name:
-  *                        type: string
-  *                        description: The user's name.
-  *                        example: Leanne Graham
-  */
-users.get('/getUsers', async (req: Request, res: Response): Promise<void> => {
-  console.log(req.params.id);
-  // res.send(`Retrieving user ${req.params.id}`);
-  try {
-    const result = await UsersController.getUsers();
-    res.status(200).type('text').send(result);
-  } catch (error) {
-    logger.error(error);
-    throw new Error("Error retrieving users");
-  }
-});
-
 
 /**
   * @swagger
@@ -135,7 +90,7 @@ users.post('/registerUser', async (req: Request, res: Response): Promise<void> =
   logger.info(req.body);
   const userInfo = req.headers.userInfo as any;
   try {
-    const result = await UsersController.registerUser({id: userInfo.preferred_username, ...req.body});
+    const result = await UsersController.registerUser({account_name: userInfo.preferred_username, ...req.body});
     res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
@@ -187,10 +142,63 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
   logger.info(req.body);
   const userInfo = req.headers.userInfo as any;
   try {
-    const result = await UsersController.updateUser({id: userInfo.preferred_username, ...req.body});
+    const result = await UsersController.updateUser({account_name: userInfo.preferred_username, ...req.body});
     res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
     res.status(200).send(error.message);
   }
 });
+
+/**
+  * @swagger
+  * 
+  * /users/updateUser:
+  *   post:
+  *     summary: Register a user.
+  *     tags:
+  *       - users
+  *     description: Register a user
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           example:
+  *             email: test@mail.com
+  *             account_type: pet_owner
+  *             bio: Loerm Ipsum
+  *             profile_picture: hash
+  *             display_name: testuser
+  *     responses:
+  *       200:
+  *         description: A list of users.
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *               data:
+  *                 type: objcet
+  *                 properties:
+  *                   id:
+  *                     type: integer
+  *                     description: The user ID.
+  *                     example: 0
+  *                   name:
+  *                     type: string
+  *                     description: The user's name.
+  *                     example: Leanne Graham
+  */
+users.delete('/deleteUser', async (req: Request, res: Response): Promise<void> => {
+  logger.info(req.headers.userInfo);
+  logger.info(req.body);
+  const userInfo = req.headers.userInfo as any;
+  try {
+    const result = await UsersController.deleteUser(userInfo?.preferred_username);
+    res.status(200).type('text').send();
+  } catch (error: any) {
+    logger.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
