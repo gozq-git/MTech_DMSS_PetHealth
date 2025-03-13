@@ -1,0 +1,20 @@
+name: OWASP ZAP Scan
+on:
+  # push:
+  #   branches: [ "dev" ]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  owasp-zap:
+    name: OWASP ZAP Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'https://pethealthplatform-dev.azurewebsites.net'
+          allow_issue_writing: false
+          

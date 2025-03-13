@@ -53,7 +53,7 @@ exports.users.get('/retrieveUser', (req, res) => __awaiter(void 0, void 0, void 
     const userInfo = req.headers.userInfo;
     try {
         const result = yield users_controller_1.default.retrieveUser(userInfo === null || userInfo === void 0 ? void 0 : userInfo.preferred_username);
-        res.status(200).send(result);
+        res.status(200).type('text').send(result);
     }
     catch (error) {
         logger.error(error);
@@ -105,7 +105,7 @@ exports.users.post('/registerUser', (req, res) => __awaiter(void 0, void 0, void
     const userInfo = req.headers.userInfo;
     try {
         const result = yield users_controller_1.default.registerUser(Object.assign({ account_name: userInfo.preferred_username }, req.body));
-        res.status(200).send(result);
+        res.status(200).type('text').send(result);
     }
     catch (error) {
         logger.error(error);
@@ -157,7 +157,7 @@ exports.users.post('/updateUser', (req, res) => __awaiter(void 0, void 0, void 0
     const userInfo = req.headers.userInfo;
     try {
         const result = yield users_controller_1.default.updateUser(Object.assign({ account_name: userInfo.preferred_username }, req.body));
-        res.status(200).send(result);
+        res.status(200).type('text').send(result);
     }
     catch (error) {
         logger.error(error);
@@ -209,7 +209,7 @@ exports.users.delete('/deleteUser', (req, res) => __awaiter(void 0, void 0, void
     const userInfo = req.headers.userInfo;
     try {
         const result = yield users_controller_1.default.deleteUser(userInfo === null || userInfo === void 0 ? void 0 : userInfo.preferred_username);
-        res.status(200).send();
+        res.status(200).type('text').send();
     }
     catch (error) {
         logger.error(error);

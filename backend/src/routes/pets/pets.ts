@@ -73,7 +73,7 @@ pets.get('/retrievePet/:id', async (req: Request, res: Response): Promise<void> 
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error retrieving pet" });
+        res.status(500).type('text').send({ error: "Error retrieving pet" });
     }
 });
 
@@ -149,7 +149,7 @@ pets.get('/getPetsByOwner/:ownerId', async (req: Request, res: Response): Promis
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error retrieving pets by owner ID" });
+        res.status(500).type('text').send({ error: "Error retrieving pets by owner ID" });
     }
 });
 
@@ -247,7 +247,7 @@ pets.post('/insertPet', async (req: Request, res: Response): Promise<void> => {
         res.status(201).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error inserting pet" });
+        res.status(500).type('text').send({ error: "Error inserting pet" });
     }
 });
 
@@ -316,6 +316,6 @@ pets.get('/getPets', async (req: Request, res: Response): Promise<void> => {
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error retrieving pets" });
+        res.status(500).type('text').send({ error: "Error retrieving pets" });
     }
 });
