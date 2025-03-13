@@ -13,6 +13,7 @@
     "start:dev:local": "pm2 start ./dist/config/ecosystem.config.js --env development --watch"
   },
   "dependencies": {
+    "@types/jest": "^29.5.14",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
