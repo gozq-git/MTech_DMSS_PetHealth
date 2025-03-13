@@ -39,7 +39,7 @@ users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> =>
     const userInfo = req.headers.userInfo as any;
     try {
       const result = await UsersController.retrieveUser(userInfo?.preferred_username);
-      res.status(200).send(result);
+      res.status(200).type('text').send(result);
     } catch (error) {
       logger.error(error);
       throw new Error("Error retrieving users");
@@ -91,7 +91,7 @@ users.post('/registerUser', async (req: Request, res: Response): Promise<void> =
   const userInfo = req.headers.userInfo as any;
   try {
     const result = await UsersController.registerUser({account_name: userInfo.preferred_username, ...req.body});
-    res.status(200).send(result);
+    res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
     res.status(200).send(error.message);
@@ -143,7 +143,7 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
   const userInfo = req.headers.userInfo as any;
   try {
     const result = await UsersController.updateUser({account_name: userInfo.preferred_username, ...req.body});
-    res.status(200).send(result);
+    res.status(200).type('text').send(result);
   } catch (error: any) {
     logger.error(error);
     res.status(200).send(error.message);
@@ -195,7 +195,7 @@ users.delete('/deleteUser', async (req: Request, res: Response): Promise<void> =
   const userInfo = req.headers.userInfo as any;
   try {
     const result = await UsersController.deleteUser(userInfo?.preferred_username);
-    res.status(200).send();
+    res.status(200).type('text').send();
   } catch (error: any) {
     logger.error(error);
     res.status(500).send(error.message);
