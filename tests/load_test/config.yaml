@@ -1,5 +1,5 @@
 displayName: Load_test
-testPlan: ./test/load_test/url-test.json
+testPlan: url-test.json
 description: ''
 engineInstances: 1
 testId: 6db8a7a2-9bf8-4736-8c2e-02f9fdfaa03e
