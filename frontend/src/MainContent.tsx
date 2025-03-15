@@ -36,33 +36,33 @@ const MainContent = () => {
     const navigate = useNavigate(); 
     const { userApi } = useContext(ApiClientContext); 
 
-    // useEffect(() => {
-    //     if (!activeAccount) return;
+    useEffect(() => {
+        if (!activeAccount) return;
     
-    //     const fetchUsers = async () => {
-    //         try {
-    //             const users = await userApi.getUsers();
+        const fetchUser = async () => {
+            try {
+                // Use the retrieveUser API to get the specific user directly
+                const loggedInUser = await userApi.retrieveUser();
     
-    //             const loggedInUser = users.find(
-    //                 (user) => user.ID?.trim() === activeAccount.username.trim()
-    //             );
+                if (!loggedInUser) {
+                    // If the user is not found, redirect to the profile page
+                    console.warn("User not found in system. Redirecting to profile page.");
+                    navigate("/profile");
+                    return;
+                }
     
-    //             if (!loggedInUser) {
-    //                 console.warn("User not found in system.");
-    //                 return;
-    //             }
+                // If the user is found, redirect to the pets page
+                console.log("Logged in user:", loggedInUser);
+                navigate("/pets");
+            } catch (error) {
+                console.error("Failed to fetch user:", error);
+                // In case of an error, redirect to the profile page
+                navigate("/profile");
+            }
+        };
     
-    //             console.log("Logged in user:", loggedInUser);
-    
-    //             navigate(loggedInUser.ACCOUNT_TYPE === null ? "/profile" : "/pets");
-    //         } catch (error) {
-    //             console.error("Failed to fetch users:", error);
-    //         }
-    //     };
-    
-    //     fetchUsers();
-    // }, [activeAccount, navigate, userApi]);
-    
+        fetchUser();
+    }, [activeAccount, navigate, userApi]);
     
 
     return (
