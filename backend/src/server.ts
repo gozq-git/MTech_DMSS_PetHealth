@@ -9,7 +9,6 @@ import { routes } from './routes';
 
 const app: Express = express();
 app.disable('x-powered-by');
-app.use(cors());
 app.use(bodyParser.json());
 const port = config.port;
 
@@ -22,6 +21,7 @@ switch (config.env) {
     
     default: // development
     logger.info('Loading Swagger UI');
+    app.use(cors());
     const swaggerUI = require("swagger-ui-express");
     const swaggerSpec = require('./swagger');
     app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
