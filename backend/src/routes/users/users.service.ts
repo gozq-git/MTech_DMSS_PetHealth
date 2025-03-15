@@ -44,8 +44,8 @@ const UsersServices = {
   updateUser: async (user: any) => {
     try {
       const updatedUser = await models.USERS.update({
+        account_name: user.account_name,
         email: user.email,
-        account_type: user.account_type,
         last_active: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
         bio: user.bio,
         profile_picture: user.profile_picture,
