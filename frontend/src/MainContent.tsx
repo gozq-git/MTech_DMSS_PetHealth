@@ -38,29 +38,28 @@ const MainContent = () => {
 
     useEffect(() => {
         if (!activeAccount) return;
-    
+
         const fetchUser = async () => {
             try {
-                // Use the retrieveUser API to get the specific user directly
-                const loggedInUser = await userApi.retrieveUser();
-    
-                if (!loggedInUser) {
+                // Use the retrieveUser API to get the specific user
+                const registeredUser = await userApi.retrieveUser();
+
+                if (!registeredUser) {
                     // If the user is not found, redirect to the profile page
                     console.warn("User not found in system. Redirecting to profile page.");
                     navigate("/profile");
                     return;
                 }
-    
-                // If the user is found, redirect to the pets page
-                console.log("Logged in user:", loggedInUser);
-                navigate("/pets");
+
+                // If the user is found, allow them to access the entire application
+                console.log("Registered user:", registeredUser);
             } catch (error) {
                 console.error("Failed to fetch user:", error);
                 // In case of an error, redirect to the profile page
                 navigate("/profile");
             }
         };
-    
+
         fetchUser();
     }, [activeAccount, navigate, userApi]);
     
