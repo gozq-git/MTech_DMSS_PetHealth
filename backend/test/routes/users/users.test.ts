@@ -1,10 +1,10 @@
-const express = require('express');
-const db = require("../dist/db");
+import express = require('express');
+import request = require('supertest');
+const db = require("../../../src/db");
 const { format } = require('date-fns');
-const request = require('supertest');
-const users = require('../dist/routes/users/users')['users'];
+const users = require('../../../src/routes/users/users')['users'];
 
-function parseUserInfo (req, res, next) {
+function parseUserInfo (req: any, res: any, next: any) {
   console.log('Request URL:', req.originalUrl)
   req.headers.userInfo = JSON.parse(req.headers.userinfo)
   console.log('USERINFO', req.headers.userInfo);
@@ -69,6 +69,33 @@ describe('Users Routes', () => {
 
       expect(response.status).toBe(200);
       // expect(response.body).toEqual({...mockUser, id: 'john_doe', VET: null});
+    });
+
+    // it('should handle errors', async () => {
+    //   const errorMessage = 'Error retrieving users';
+    //   UsersController.retrieveUser.mockRejectedValue(new Error(errorMessage));
+
+    //   const response = await request(app)
+    //     .get('/users/retrieveUser')
+    //     .set('userInfo', JSON.stringify({ preferred_username: 'john_doe' }));
+
+    //   expect(response.status).toBe(500);
+    //   expect(response.body).toEqual({ error: errorMessage });
+    //   expect(logger.error).toHaveBeenCalledWith(new Error(errorMessage));
+    // });
+  });
+
+  describe('POST /users/updateUser', () => {
+    it('should update user successfully', async () => {
+      mockUser.bio = 'I am an updated test user!';
+      const response = await request(app)
+        .post('/users/updateUser')
+        .set('userInfo', JSON.stringify({ preferred_username: 'john_doe' }))
+        .send(mockUser);
+      console.log(response.body);
+      console.log(response.headers);
+
+      expect(response.status).toBe(200);
     });
 
     // it('should handle errors', async () => {
