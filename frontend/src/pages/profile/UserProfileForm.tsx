@@ -22,49 +22,6 @@ interface UserProfileFormValues {
 
 const userProfileFormItems: UserProfileFormItem[] = [
     {
-<<<<<<< HEAD
-        id: "firstName",
-        label: "First Name",
-    },
-    {
-        id: "lastName",
-        label: "Last Name",
-    },
-    {
-        id: "phoneNumber",
-        label: "Phone Number",
-    }
-]
-
-export const UserProfileForm = () => {
-    const {showSnackbar} = useContext(SnackbarContext);
-    const [formValues, setFormValues] = useState<UserProfileFormValues>({
-        firstName: '',
-        lastName: '',
-        phoneNumber: ''
-    });
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormValues({...formValues, [e.target.name]: e.target.value});
-    }
-    const submitForm = () => {
-        const request = JSON.stringify(formValues);
-
-        showSnackbar(`TODO: PUT Request:${request} `, SNACKBAR_SEVERITY.WARNING)
-    }
-    return (
-        <Container maxWidth="lg">
-            <Paper elevation={3} sx={{p: 4, mt: 4}}>
-                {/*<Box>*/}
-                <Typography variant="h4" gutterBottom>
-                    User Profile
-                </Typography>
-                <Typography variant="body1" gutterBottom color="text.secondary" sx={{mb: 4}}>
-                    Please fill in your personal information below
-                </Typography>
-
-                <Divider sx={{mb: 4}}/>
-=======
         id: "account_name",
         label: "Account Name",
         type: "text",
@@ -155,7 +112,6 @@ export const UserProfileForm = () => {
                 </Typography>
 
                 <Divider sx={{ mb: 4 }} />
->>>>>>> 0d2c568c942effc6a79e73b9069b2f4fa6663ecd
 
                 <Stack spacing={3} justifyContent="space-between">
                     {userProfileFormItems.map((item) => (
@@ -166,47 +122,26 @@ export const UserProfileForm = () => {
                             label={item.label}
                             variant="outlined"
                             fullWidth
-<<<<<<< HEAD
-=======
                             type={item.type || "text"} // Use the specified type or default to "text"
->>>>>>> 0d2c568c942effc6a79e73b9069b2f4fa6663ecd
                             value={formValues[item.id as keyof UserProfileFormValues]}
                             onChange={handleChange}
                         />
                     ))}
 
-<<<<<<< HEAD
-                    <Box sx={{mt: 4}}>
-                        <Divider sx={{mb: 4}}/>
-=======
                     <Box sx={{ mt: 4 }}>
                         <Divider sx={{ mb: 4 }} />
->>>>>>> 0d2c568c942effc6a79e73b9069b2f4fa6663ecd
                         <Stack direction="row" spacing={2} justifyContent="center">
                             <Button
                                 variant="contained"
                                 onClick={submitForm}
-<<<<<<< HEAD
-                                sx={{px: 4}}
-=======
                                 sx={{ px: 4 }}
->>>>>>> 0d2c568c942effc6a79e73b9069b2f4fa6663ecd
                             >
                                 Submit
                             </Button>
                         </Stack>
                     </Box>
                 </Stack>
-<<<<<<< HEAD
-                {/*</Box>*/}
-            </Paper>
-        </Container>
-    )
-}
-
-=======
             </Paper>
         </Container>
     );
 };
->>>>>>> 0d2c568c942effc6a79e73b9069b2f4fa6663ecd
