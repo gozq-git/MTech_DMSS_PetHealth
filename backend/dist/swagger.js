@@ -10,7 +10,7 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: `http://localhost:${config.port}/api`,
+      url: `https://pethealthplatform-api-uat.azurewebsites.net:${config.port}/api`,
       description: 'Development server',
     },
   ],

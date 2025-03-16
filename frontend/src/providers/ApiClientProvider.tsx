@@ -8,7 +8,7 @@ const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_AP
 console.debug(`USE_MOCK_API: ${USE_MOCK_API}`);
 // Base url
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001"
-console.log(`BASE URL: ${apiBaseUrl}`)
+console.log(`API BASE URL: ${apiBaseUrl}`)
 
 // API Client
 const baseApiClient = createApiClient(apiBaseUrl);
