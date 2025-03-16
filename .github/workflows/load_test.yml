@@ -1,7 +1,7 @@
 name: Load test (Azure)
 on:
   # push:
-  #   branches: [ "dev" ]
+  #   branches: [ "uat" ]
   # pull_request:
   #   types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
         uses: azure/load-testing@v1
         with:
           loadTestConfigFile: './tests/load_test/config.yaml'
-          loadTestResource: azureloadtesting-dev
+          loadTestResource: azureloadtesting-uat
           resourceGroup: php-rg
 
       - uses: actions/upload-artifact@v4
