@@ -17,4 +17,5 @@ exports.config = {
     db_password: env.DB_PASSWORD,
     db_name: env.DB_NAME,
     port: 8001,
+    base_url: env.BASE_URL,
 };
