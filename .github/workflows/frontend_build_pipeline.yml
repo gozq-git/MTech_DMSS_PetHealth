@@ -5,7 +5,6 @@ env:
   GH_REGISTRY: "ghcr.io"
   AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
   AZURE_WEBAPP_NAME: pethealthplatform-uat
-  VITE_API_BASE_URL: "https://pethealthplatform-api-uat.azurewebsites.net"
 
 on:
   push:
@@ -52,8 +51,6 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            VITE_API_BASE_URL=${{ env.VITE_API_BASE_URL }}
 
 
   deploy:
