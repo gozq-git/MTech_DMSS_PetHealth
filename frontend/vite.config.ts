@@ -10,7 +10,7 @@ export default defineConfig({
     watch:{
       usePolling: true,
     },
-    allowedHosts: ['pethealthplatform-dev.azurewebsites.net']
+    allowedHosts: ['pethealthplatform-uat.azurewebsites.net']
   },
   plugins: [react()],
 })
