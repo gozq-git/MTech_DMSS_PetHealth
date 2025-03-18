@@ -8,9 +8,9 @@ export const users = {
             defaultValue: DataTypes.UUIDV4, 
             primaryKey: true 
         },
-        account_name: { type: DataTypes.STRING, unique: true },
+        account_name: { type: DataTypes.STRING, unique: {msg: "Account name is already registered"} },
         display_name: { type: DataTypes.STRING },
-        email: { type: DataTypes.STRING, unique: true },
+        email: { type: DataTypes.STRING, unique: {msg: "Email is already registered"} },
         last_active: { type: DataTypes.STRING },
         account_created: { type: DataTypes.STRING },
         bio: { type: DataTypes.TEXT },
