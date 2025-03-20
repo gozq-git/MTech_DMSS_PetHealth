@@ -22,7 +22,7 @@ function verifyToken(token) {
     return new Promise((resolve, reject) => {
         jwt.verify(token, getKey, { algorithms: ['RS256'] }, (err, decoded) => {
             if (err) {
-                reject(`Token verification failed: ${err.message}`);
+                reject(new Error(`Token verification failed: ${err.message}`));
             }
             else {
                 resolve(decoded); // token is valid

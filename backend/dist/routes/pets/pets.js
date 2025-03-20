@@ -159,11 +159,11 @@ exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, voi
 exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield pets_controller_1.default.getPetsByOwner(req.params.ownerId);
-        res.status(200).type('text').send(result);
+        res.status(200).send(result);
     }
     catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error retrieving pets by owner ID" });
+        res.status(500).type('text').send({ error: "Error retrieving pets by owner ID" });
     }
 }));
 /**
@@ -257,11 +257,11 @@ exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, voi
 exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield pets_controller_1.default.insertPet(req.body);
-        res.status(201).type('text').send(result);
+        res.status(201).send(result);
     }
     catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error inserting pet" });
+        res.status(500).type('text').send({ error: "Error inserting pet" });
     }
 }));
 /**
@@ -326,10 +326,10 @@ exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, 
 exports.pets.get('/getPets', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield pets_controller_1.default.getPets();
-        res.status(200).type('text').send(result);
+        res.status(200).send(result);
     }
     catch (error) {
         console.error(error);
-        res.status(500).send({ error: "Error retrieving pets" });
+        res.status(500).type('text').send({ error: "Error retrieving pets" });
     }
 }));
