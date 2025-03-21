@@ -53,8 +53,8 @@ const UsersServices = {
     updateUser: (user) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const updatedUser = yield models.USERS.update({
+                account_name: user.account_name,
                 email: user.email,
-                account_type: user.account_type,
                 last_active: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
                 bio: user.bio,
                 profile_picture: user.profile_picture,
