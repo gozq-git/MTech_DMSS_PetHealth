@@ -4,11 +4,6 @@
 import {acquireAccessToken} from "../../auth/msalService.ts";
 import {msalInstance} from "../../main.tsx";
 
-export interface ApiResponse<T> {
-    data: T;
-    status: number;
-}
-
 export interface ApiError {
     message: string;
     code: string;
@@ -48,7 +43,7 @@ export const createApiClient = (baseUrl: string): BaseApiClient => {
                 ...config,
                 headers,
             });
-
+            console.log(response);
             if (!response.ok) {
                 throw await response.json();
             }
