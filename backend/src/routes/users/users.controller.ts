@@ -13,8 +13,8 @@ const UsersController = {
   },
   registerUser: async (body: Object) => {
     try {
-      const users = await UsersService.registerUser(body);
-      return users;
+      const user = await UsersService.registerUser(body);
+      return user;
     } catch (error) {
       logger.error(error);
       throw error;
@@ -22,8 +22,8 @@ const UsersController = {
   },
   updateUser: async (body: Object) => {
     try {
-      const users = await UsersService.updateUser(body);
-      return users;
+      const user = await UsersService.updateUser(body);
+      return user;
     } catch (error) {
       logger.error(error);
       throw error;
@@ -31,8 +31,8 @@ const UsersController = {
   },
   deleteUser: async (account_name: string) => {
     try {
-      const users = await UsersService.deleteUser(account_name);
-      return users;
+      const user = await UsersService.deleteUser(account_name);
+      return user;
     } catch (error) {
       logger.error(error);
       throw error;

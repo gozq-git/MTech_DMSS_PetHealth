@@ -1,13 +1,15 @@
 // src/api/types/user.ts
 // User interface
 export interface User {
-    ID?: string;
-    account_name?: string;
-    display_name?: string;
-    email?: string;
-    account_type?: string;
-    bio?: string;
-    profile_picture?: string;
+    id: string;
+    account_name: string;
+    display_name: string;
+    email: string;
+    last_active: string;
+    account_created: string;
+    bio: string;
+    profile_picture: string;
+    VET: any | null;
 }
 
 export interface UserCreateInput extends Omit<User, 'id'> {
