@@ -38,11 +38,15 @@ users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> =>
     // res.send(`Retrieving user ${req.params.id}`);
     const userInfo = req.headers.userInfo as any;
     try {
-      const result = await UsersController.retrieveUser(userInfo?.preferred_username);
-      res.status(200).type('text').send(result);
+      const result: any = await UsersController.retrieveUser(userInfo?.preferred_username);
+      if (result.length === 0) {
+        res.status(200).type('text').send({status: 'error', message: 'User not found'});
+      } else {
+        res.status(200).type('json').send({status: 'success', message: result});
+      }
     } catch (error) {
       logger.error(error);
-      throw new Error("Error retrieving users");
+      res.status(200).type('text').send({status: 'error', message: error});
     }
 });
 
