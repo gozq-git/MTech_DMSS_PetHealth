@@ -6,10 +6,10 @@ import { format } from 'date-fns';
 const models = sequelize.models;
 
 const UsersServices = {
-  retrieveUser: async (account_name: string) => {
-    const users = await models.USERS.findOne({
+  retrieveUser: async (preferred_username: string) => {
+    const user = await models.USERS.findOne({
       where: {
-        account_name
+        preferred_username
       },
       include: [
         {
@@ -17,7 +17,7 @@ const UsersServices = {
         }
       ]
     });
-    return users;
+    return user;
   },
   registerUser: async (user: any) => {
     try {

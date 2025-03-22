@@ -2,10 +2,10 @@ import UsersService from "./users.service";
 const logger = require('../../utils/logger');
 
 const UsersController = {
-  retrieveUser: async (account_name: string) => {
+  retrieveUser: async (preferred_username: string) => {
     try {
-      const users = await UsersService.retrieveUser(account_name);
-      return users;
+      const user = await UsersService.retrieveUser(preferred_username);
+      return user;
     } catch (error) {
       logger.error(error);
       throw new Error("Error retrieving user");

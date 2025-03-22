@@ -4,49 +4,87 @@ const logger = require('../../utils/logger');
 export const users = express.Router();
 
 /**
-  * @swagger
-  * 
-  * /users/retrieveUser:
-  *   get:
-  *    summary: Retrieve a single JSONPlaceholder user.
-  *    tags:
-  *      - users
-  *    description: Retrieve a single JSONPlaceholder user. Can be used to populate a user profile when prototyping or testing an API.
-  *    responses:
-  *      200:
-  *        description: Logged in user details.
-  *        content:
-  *          application/json:
-  *            schema:
-  *              type: object
-  *              properties:
-  *                data:
-  *                  type: array
-  *                  items:
-  *                    type: object
-  *                    properties:
-  *                      id:
-  *                        type: string
-  *                        description: The user ID.
-  *                        example: 0
-  *                      name:
-  *                        type: string
-  *                        description: The user's name.
-  *                        example: Leanne Bob
-  */
+ * @swagger
+ *
+ * /users/retrieveUser:
+ *   get:
+ *    summary: Retrieve the current user's profile.
+ *    tags:
+ *      - users
+ *    description: Retrieves the user profile based on the preferred_username extracted from the Azure access token.
+ *    responses:
+ *      200:
+ *        description: User details with success or error status.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                status:
+ *                  type: string
+ *                  enum: [success, error]
+ *                  description: Status of the request.
+ *                  example: success
+ *                message:
+ *                  oneOf:
+ *                    - type: object
+ *                      properties:
+ *                        id:
+ *                          type: string
+ *                          description: The user ID.
+ *                          example: "1f005b07-46cb-6670-85cc-854ff2948567"
+ *                        account_name:
+ *                          type: string
+ *                          description: The user's account name (matches preferred_username).
+ *                          example: "xueyang"
+ *                        display_name:
+ *                          type: string
+ *                          description: The user's display name.
+ *                          example: "xueyang"
+ *                        email:
+ *                          type: string
+ *                          description: The user's email address.
+ *                          example: "pangxueyang@gmail.com"
+ *                        last_active:
+ *                          type: string
+ *                          format: date-time
+ *                          description: Last active timestamp.
+ *                          example: "2025-03-20 17:26:27"
+ *                        account_created:
+ *                          type: string
+ *                          format: date-time
+ *                          description: Account creation timestamp.
+ *                          example: "2025-03-20 17:26:27"
+ *                        bio:
+ *                          type: string
+ *                          description: User's biography.
+ *                          example: "kiyo's owner"
+ *                        profile_picture:
+ *                          type: string
+ *                          description: URL or hash of profile picture.
+ *                          example: ""
+ *                        VET:
+ *                          type: object
+ *                          nullable: true
+ *                          description: Veterinarian details if the user is a vet.
+ *                          example: null
+ *                    - type: string
+ *                      description: Error message when user is not found.
+ *                      example: "User not found"
+ */
 users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> => {
     // res.send(`Retrieving user ${req.params.id}`);
     const userInfo = req.headers.userInfo as any;
     try {
-      const result: any = await UsersController.retrieveUser(userInfo?.preferred_username);
-      if (result.length === 0) {
-        res.status(200).type('text').send({status: 'error', message: 'User not found'});
-      } else {
-        res.status(200).type('json').send({status: 'success', message: result});
-      }
+        const result: any = await UsersController.retrieveUser(userInfo?.preferred_username);
+        if (result === null || result === undefined ||result.length === 0) {
+            res.status(200).type('text').send({status: 'error', message: 'User not found'});
+        } else {
+            res.status(200).type('json').send({status: 'success', message: result});
+        }
     } catch (error) {
-      logger.error(error);
-      res.status(200).type('text').send({status: 'error', message: error});
+        logger.error(error);
+        res.status(200).type('text').send({status: 'error', message: error});
     }
 });
 
