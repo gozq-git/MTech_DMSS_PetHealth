@@ -1,0 +1,107 @@
+import express, { Request, Response } from 'express';
+import VaccinationRecordsController from './vaccination_records.controller';
+
+export const vaccination_records = express.Router();
+
+/**
+ * @swagger
+ * /vaccination_records/{petId}:
+ *   get:
+ *     summary: Get vaccination records for a pet
+ *     description: Retrieve all vaccination records associated with a given pet ID.
+ *     tags:
+ *       - vaccination-records
+ *     parameters:
+ *       - in: path
+ *         name: petId
+ *         required: true
+ *         description: UUID of the pet
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A list of vaccination records.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id: { type: string }
+ *                   pet_id: { type: string }
+ *                   name: { type: string }
+ *                   description: { type: string }
+ *                   administered_at: { type: string, format: date-time }
+ *                   expires_at: { type: string, format: date-time }
+ *                   lot_number: { type: string }
+ *                   administered_by: { type: string }
+ *                   next_due_at: { type: string, format: date-time }
+ *                   is_valid: { type: boolean }
+ *                   created_at: { type: string, format: date-time }
+ *                   updated_at: { type: string, format: date-time }
+ */
+vaccination_records.get('/:petId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await VaccinationRecordsController.getVaccinationRecordsByPetId(req.params.petId);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).type('text').send({ error: 'Error retrieving vaccination records' });
+  }
+});
+
+/**
+ * @swagger
+ * /vaccination_records/{petId}:
+ *   post:
+ *     summary: Insert a vaccination record for a pet
+ *     description: Adds a new vaccination record associated with a given pet ID.
+ *     tags:
+ *       - vaccination-records
+ *     parameters:
+ *       - in: path
+ *         name: petId
+ *         required: true
+ *         description: UUID of the pet
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *               administered_at: { type: string, format: date-time }
+ *               expires_at: { type: string, format: date-time }
+ *               lot_number: { type: string }
+ *               administered_by: { type: string }
+ *               next_due_at: { type: string, format: date-time }
+ *               is_valid: { type: boolean }
+ *     responses:
+ *       201:
+ *         description: Vaccination record created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id: { type: string }
+ *                 pet_id: { type: string }
+ *                 name: { type: string }
+ *                 created_at: { type: string, format: date-time }
+ */
+vaccination_records.post('/:petId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await VaccinationRecordsController.insertVaccinationRecord(req.params.petId, req.body);
+    res.status(201).send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).type('text').send({ error: 'Error inserting vaccination record' });
+  }
+});
