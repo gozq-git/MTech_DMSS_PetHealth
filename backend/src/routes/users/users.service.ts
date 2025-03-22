@@ -9,7 +9,7 @@ const UsersServices = {
   retrieveUser: async (preferred_username: string) => {
     const user = await models.USERS.findOne({
       where: {
-        preferred_username
+        email: preferred_username,
       },
       include: [
         {
