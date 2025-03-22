@@ -52,7 +52,7 @@ const UsersServices = {
         display_name: user.display_name,
       }, {
         where: {
-          ID: user.id
+          account_name: user.account_name,
         }
     });
       return updatedUser;
