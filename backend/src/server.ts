@@ -5,6 +5,7 @@ import express, { Express, Request, Response } from "express";
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { routes } from './routes';
+const wss = require ('./utils/wss');
 
 
 const app: Express = express();
@@ -13,6 +14,8 @@ app.use(bodyParser.json());
 const port = config.port;
 app.use(cors());
 app.use('/api', routes);
+
+wss.init(config.wssport)
 
 switch (config.env) {
   case 'production':

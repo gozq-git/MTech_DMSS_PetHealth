@@ -9,6 +9,7 @@ import ProfilePage from "../pages/profile/ProfilePage.tsx";
 import SettingsPage from "../pages/settings/SettingsPage.tsx";
 import LandingPage from "../pages/landing/Landing.tsx";
 import VetPortalPage from "../pages/vetportal/VetPortalPage.tsx";
+import TeleconsultationPage from "../pages/teleconsultation/TeleconsultationPage.tsx";
 
 export const AuthenticatedRoutes = () => {
     return (
@@ -21,6 +22,7 @@ export const AuthenticatedRoutes = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/vetportal" element={<VetPortalPage />} />
+            <Route path="/teleconsultation" element={<TeleconsultationPage />} />
         </Routes>
     );
 };

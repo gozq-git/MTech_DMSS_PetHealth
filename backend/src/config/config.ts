@@ -13,4 +13,5 @@ export const config = {
   db_password: env.DB_PASSWORD as string,
   db_name: env.DB_NAME as string,
   port: 8001,
+  wssport: 8090,
 };
