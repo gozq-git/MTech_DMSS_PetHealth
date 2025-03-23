@@ -51,6 +51,13 @@ const sideBarItems: SideBarItem[] = [
         endpoint: '/healthcare'
     },
     {
+        id: 'teleconsultation',
+        text: 'Teleconsultation',
+        description: 'Teleconsultation Service',
+        icon: MedicalServices,
+        endpoint: '/teleconsultation'
+    },
+    {
         id: 'services',
         text: 'Other Services',
         description: 'Other Services',
