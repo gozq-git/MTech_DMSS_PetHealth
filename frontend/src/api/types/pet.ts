@@ -19,9 +19,9 @@ export interface Pet {
     isDeleted: boolean;
 }
 
-export interface PetCreateInput {
-    ownerId: string;
+export interface CreatePetRequestBody {
     name: string;
+    ownerId: string;
     gender: string;
     species: 'dog' | 'cat' | 'bird' | 'other'
     breed: string;
