@@ -37,7 +37,7 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                 color: 'white'
             }}>
                 <Avatar
-                    src={pet.photoUrl}
+                    src={pet.photo_url}
                     alt={pet.name}
                     sx={{
                         width: 120,
@@ -48,7 +48,7 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                 />
                 <Typography variant="h5" fontWeight="bold">{pet.name}</Typography>
                 <Typography variant="body1">
-                    {pet.dateOfBirth ? calculateAge(pet.dateOfBirth) : 'Age unknown'}
+                    {pet.date_of_birth ? calculateAge(pet.date_of_birth) : 'Age unknown'}
                 </Typography>
                 <Box sx={{display: 'flex', mt: 1, gap: 1}}>
                     <Chip
@@ -70,17 +70,17 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
             <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 1}}>ID &
                     Registration</Typography>
-                {pet.microchipNumber && (
+                {pet.microchip_number && (
                     <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 1}}>
                         <Typography variant="body2" color="text.secondary">Microchip</Typography>
                         <Typography variant="body2"
-                                    fontWeight="medium">{pet.microchipNumber}</Typography>
+                                    fontWeight="medium">{pet.microchip_number}</Typography>
                     </Box>
                 )}
                 <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                     <Typography variant="body2" color="text.secondary">Registered</Typography>
                     <Typography variant="body2" fontWeight="medium">
-                        {new Date(pet.createdAt).toLocaleDateString()}
+                        {new Date(pet.created_at).toLocaleDateString()}
                     </Typography>
                 </Box>
             </CardContent>
