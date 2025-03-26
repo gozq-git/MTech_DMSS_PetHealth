@@ -80,9 +80,6 @@ function AddPetPopup({open, onClose, onAdd}: AddPetPopupProps) {
                 isNeutered: newPet.isNeutered ?? false, // Ensure isNeutered is always a boolean
             };
             const createPetApiResponse = await petApi.insertPet(petToInsert); // Now passing the proper object to API
-            // success: boolean;
-            // data: Pet[] | Pet | null;
-            // message: string;
             if(createPetApiResponse.success) {
                 setLoading(false);
                 showSnackbar("Successfully added pet!", SNACKBAR_SEVERITY.SUCCESS);
