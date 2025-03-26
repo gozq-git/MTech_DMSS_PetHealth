@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {Card, CardContent, Chip, Fab, Grid2, Paper, Stack, Tab, Tabs, Tooltip} from "@mui/material";
+import {Button, Card, CardContent, Chip, Grid2, Paper, Stack, Tab, Tabs} from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {
@@ -17,7 +17,7 @@ import {
 import {TabPanel} from "./TabPanel.tsx";
 import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator} from "@mui/lab";
 import {Pet} from "../../api/types/pet.ts";
-import VaccinationRecord from "../../api/types/vaccinationRecord.ts";
+import {VaccinationRecord} from "../../api/types/vaccinationRecord.ts";
 import Divider from "@mui/material/Divider";
 import {toProperCase} from "../../util/toProperCase.ts";
 import {MedicationRecord} from "../../api/types/medicationRecord.ts";
@@ -41,8 +41,6 @@ type PetPropertyConfig<K extends keyof Pet> = {
     format?: (value: Pet[K]) => string;
 };
 
-type RecordType = 'vaccination' | 'medication';
-
 export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                                            pet,
                                                                            vaccinationRecords,
@@ -52,58 +50,29 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
     const {petApi} = useContext(ApiClientContext);
     const {showSnackbar} = useContext(SnackbarContext);
     const [tabValue, setTabValue] = useState(0);
-    const [openRecordModal, setOpenRecordModal] = useState(false);
-    const [recordType, setRecordType] = useState<RecordType>('vaccination');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isAddVacFormOpen, setIsAddVacFormOpen] = useState(false);
+    const [isAddMedFormOpen, setIsAddMedFormOpen] = useState(false);
+
 
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         console.log(event);
         setTabValue(newValue);
     };
-    // Handler for opening the form modal
-    const handleOpenAddRecord = (type: RecordType) => {
-        setRecordType(type);
-        setOpenRecordModal(true);
-    };
-
-    // Handler for closing the form modal
-    const handleCloseRecordModal = () => {
-        setOpenRecordModal(false);
-    };
-    // Handler for submitting vaccination record
-    const handleSubmitVaccination = async (data: Partial<VaccinationRecord>) => {
-        setIsSubmitting(true);
-        try {
-            await petApi.createVaccinationRecord(data);
-            showSnackbar("Vaccination Record created successfully.", SNACKBAR_SEVERITY.SUCCESS);
-            if (onRecordAdded) {
-                onRecordAdded();
-            }
-        } catch (error) {
-            console.error("Error adding vaccination record:", error);
-            showSnackbar("An error occurred adding vaccination record.", SNACKBAR_SEVERITY.ERROR);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // Handler for submitting medication record
-    const handleSubmitMedication = async (data: Partial<MedicationRecord>) => {
-        setIsSubmitting(true);
-        try {
-            await petApi.createMedicationRecord(data);
-            showSnackbar("Medication Record created successfully.", SNACKBAR_SEVERITY.SUCCESS);
-            if (onRecordAdded) {
-                onRecordAdded();
-            }
-        } catch (error) {
-            console.error("Error adding medication record:", error);
-            showSnackbar("An error occurred adding medication record.", SNACKBAR_SEVERITY.ERROR);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    const handleOpenAddVacForm = () => {
+        handleCloseAddMedForm()
+        setIsAddVacFormOpen(true);
+    }
+    const handleOpenAddMedForm = () => {
+        handleCloseAddVacForm()
+        setIsAddMedFormOpen(true)
+    }
+    const handleCloseAddVacForm = () => {
+        setIsAddVacFormOpen(false);
+    }
+    const handleCloseAddMedForm = () => {
+        setIsAddMedFormOpen(false);
+    }
 
     const petProperties: PetPropertyConfig<keyof Pet>[] = [
         {
@@ -124,8 +93,9 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
     ];
     const contentHeight = "calc(100vh - 250px)";
 
+
     return (
-        <Paper elevation={0} sx={{borderRadius: 4, mt: 2, display: 'flex', flexDirection: 'column', height: '100%'}}>
+        <Paper elevation={0} sx={{borderRadius: 4, display: 'flex', flexDirection: 'column', maxHeight: '60vh'}}>
             {/* Tabs - START */}
             <Box sx={{
                 borderBottom: 1,
@@ -152,147 +122,42 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
             <Box sx={{flexGrow: 1, position: 'relative'}}>
                 {/* Pet Details Tab - START */}
                 <TabPanel value={tabValue} index={0}>
-                    <Box sx={{height: contentHeight, overflow: "auto", p: 3}}>
-                        <Grid2 container spacing={3}>
-                            {/* Pet Details */}
-                            <Grid2 size={{md: 8}}>
-                                <Card elevation={2} sx={{borderRadius: 4}}>
-                                    <CardContent>
-                                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                            Physical Information
-                                        </Typography>
-
-                                        <Grid2 container spacing={2}>
-                                            {petProperties.filter(prop =>
-                                                ['gender', 'weight', 'height', 'dateOfBirth'].includes(prop.key as string) &&
-                                                pet[prop.key] !== null &&
-                                                pet[prop.key] !== undefined
-                                            ).map(property => {
-                                                const value = pet[property.key];
-                                                const displayValue = property.format ? property.format(value) : String(value);
-
-                                                return (
-                                                    <Grid2 size={{xs: 12, sm: 6}} key={property.key}>
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            p: 2,
-                                                            borderRadius: 2,
-                                                            bgcolor: '#f5f5f5'
-                                                        }}>
-                                                            <Box sx={{mr: 2, color: 'primary.main'}}>
-                                                                {property.icon}
-                                                            </Box>
-                                                            <Box>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {property.label}
-                                                                </Typography>
-                                                                <Typography variant="body1" fontWeight="medium">
-                                                                    {displayValue}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Grid2>
-                                                );
-                                            })}
+                    <Grid2 container spacing={3} overflow='auto'>
+                        <Grid2 size={{md: 12}}>
+                            <Grid2 container spacing={2}>
+                                {petProperties.filter(prop =>
+                                    pet[prop.key] !== null &&
+                                    pet[prop.key] !== undefined
+                                ).map(property => {
+                                    const value = pet[property.key];
+                                    const displayValue = property.format ? property.format(value) : String(value);
+                                    return (
+                                        <Grid2 size={6} key={property.key}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                p: 2,
+                                                borderRadius: 2,
+                                                bgcolor: '#f5f5f5'
+                                            }}>
+                                                <Box sx={{mr: 2, color: 'primary.main'}}>
+                                                    {property.icon}
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {property.label}
+                                                    </Typography>
+                                                    <Typography variant="body1" fontWeight="medium">
+                                                        {displayValue}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
                                         </Grid2>
-                                    </CardContent>
-                                </Card>
-                            </Grid2>
-                            {/*<Divider sx={{my: 3}}/>*/}
-                            <Grid2 size={{md: 8}}>
-                                <Card elevation={2} sx={{borderRadius: 4}}>
-                                    <CardContent>
-                                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                            Measurements
-                                        </Typography>
-
-                                        <Grid2 container spacing={2}>
-                                            {petProperties.filter(prop =>
-                                                ['neckGirthCm', 'chestGirthCm', 'lastMeasured'].includes(prop.key as string) &&
-                                                pet[prop.key] !== null &&
-                                                pet[prop.key] !== undefined
-                                            ).map(property => {
-                                                const value = pet[property.key];
-                                                const displayValue = property.format ? property.format(value) : String(value);
-
-                                                return (
-                                                    <Grid2 size={{xs: 12, sm: 6}} key={property.key}>
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            p: 2,
-                                                            borderRadius: 2,
-                                                            bgcolor: '#f5f5f5'
-                                                        }}>
-                                                            <Box sx={{mr: 2, color: 'primary.main'}}>
-                                                                {property.icon}
-                                                            </Box>
-                                                            <Box>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {property.label}
-                                                                </Typography>
-                                                                <Typography variant="body1" fontWeight="medium">
-                                                                    {displayValue}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Grid2>
-                                                );
-                                            })}
-                                        </Grid2>
-
-                                        {/*<Divider sx={{my: 3}}/>*/}
-                                    </CardContent>
-                                </Card>
-                            </Grid2>
-                            <Grid2 size={{md: 8}}>
-                                <Card elevation={2} sx={{borderRadius: 4}}>
-                                    <CardContent>
-                                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                            Additional Information
-                                        </Typography>
-
-                                        <Grid2 container spacing={2}>
-                                            {petProperties.filter(prop =>
-                                                ['isNeutered', 'breed', 'species'].includes(prop.key as string) &&
-                                                !['gender', 'dateOfBirth', 'weight', 'height', 'neckGirthCm', 'chestGirthCm', 'lastMeasured'].includes(prop.key as string) &&
-                                                pet[prop.key] !== null &&
-                                                pet[prop.key] !== undefined
-                                            ).map(property => {
-                                                const value = pet[property.key];
-                                                const displayValue = property.format ? property.format(value) : String(value);
-
-                                                return (
-                                                    <Grid2 size={{xs: 12, sm: 6}} key={property.key}>
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            p: 2,
-                                                            borderRadius: 2,
-                                                            bgcolor: '#f5f5f5'
-                                                        }}>
-                                                            <Box sx={{mr: 2, color: 'primary.main'}}>
-                                                                {property.icon}
-                                                            </Box>
-                                                            <Box>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {property.label}
-                                                                </Typography>
-                                                                <Typography variant="body1" fontWeight="medium">
-                                                                    {displayValue}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Grid2>
-                                                );
-                                            })}
-                                        </Grid2>
-                                    </CardContent>
-                                </Card>
+                                    );
+                                })}
                             </Grid2>
                         </Grid2>
-                    </Box>
+                    </Grid2>
                 </TabPanel>
                 {/* Pet Details Tab - END */}
                 {/* Timeline Tab - START */}
@@ -336,54 +201,71 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                 {/* Vaccinations Tab - START */}
                 <TabPanel value={tabValue} index={2}>
                     <Box sx={{height: contentHeight, overflow: "auto"}}>
-                        <Grid2 container spacing={2}>
-                            {vaccinationRecords.map((record) => (
-                                <Grid2 size={{xs: 12, sm: 6}} key={record.id}>
-                                    <Card sx={{height: '100%'}}>
-                                        <CardContent>
-                                            <Box sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                mb: 1
-                                            }}>
-                                                <Typography variant="h6">
-                                                    {record.name}
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon/>}
+                            onClick={handleOpenAddVacForm}
+                            sx={{marginBottom:"16px", borderRadius: "20px", textTransform: "none", fontSize: "16px"}}
+                        >
+                            Vaccination Record
+                        </Button>
+                        {vaccinationRecords.length > 0 ? (
+                            <Grid2 container spacing={2}>
+                                {vaccinationRecords.map((record) => (
+                                    <Grid2 size={{xs: 12, sm: 6}} key={record.id}>
+                                        <Card sx={{height: '100%'}}>
+                                            <CardContent>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    mb: 1
+                                                }}>
+                                                    <Typography variant="h6">
+                                                        {record.name}
+                                                    </Typography>
+                                                    <Chip
+                                                        size="small"
+                                                        color={record.isValid ? "success" : "error"}
+                                                        label={record.isValid ? "Valid" : "Expired"}
+                                                    />
+                                                </Box>
+                                                <Typography variant="body2" sx={{mb: 2}}>
+                                                    {record.description}
                                                 </Typography>
-                                                <Chip
-                                                    size="small"
-                                                    color={record.isValid ? "success" : "error"}
-                                                    label={record.isValid ? "Valid" : "Expired"}
-                                                />
-                                            </Box>
-                                            <Typography variant="body2" sx={{mb: 2}}>
-                                                {record.description}
-                                            </Typography>
-                                            <Divider sx={{mb: 2}}/>
-                                            <Grid2 container spacing={1}>
-                                                <Grid2 size={{xs: 12, sm: 6}}>
-                                                    <Typography variant="body2"
-                                                                color="text.secondary">Administered</Typography>
-                                                    <Typography
-                                                        variant="body1">{new Date(record.administeredDate).toLocaleDateString()}</Typography>
+                                                <Divider sx={{mb: 2}}/>
+                                                <Grid2 container spacing={1}>
+                                                    <Grid2 size={{xs: 12, sm: 6}}>
+                                                        <Typography variant="body2"
+                                                                    color="text.secondary">Administered</Typography>
+                                                        <Typography
+                                                            variant="body1">{new Date(record.administeredDate).toLocaleDateString()}</Typography>
+                                                    </Grid2>
+                                                    <Grid2 size={{xs: 12, sm: 6}}>
+                                                        <Typography variant="body2" color="text.secondary">Next
+                                                            Due</Typography>
+                                                        <Typography
+                                                            variant="body1">{new Date(record.nextDueDate).toLocaleDateString()}</Typography>
+                                                    </Grid2>
+                                                    <Grid2 size={{xs: 12}}>
+                                                        <Typography variant="body2" color="text.secondary">Administered
+                                                            By</Typography>
+                                                        <Typography variant="body1">{record.administeredBy}</Typography>
+                                                    </Grid2>
                                                 </Grid2>
-                                                <Grid2 size={{xs: 12, sm: 6}}>
-                                                    <Typography variant="body2" color="text.secondary">Next
-                                                        Due</Typography>
-                                                    <Typography
-                                                        variant="body1">{new Date(record.nextDueDate).toLocaleDateString()}</Typography>
-                                                </Grid2>
-                                                <Grid2 size={{xs: 12}}>
-                                                    <Typography variant="body2" color="text.secondary">Administered
-                                                        By</Typography>
-                                                    <Typography variant="body1">{record.administeredBy}</Typography>
-                                                </Grid2>
-                                            </Grid2>
-                                        </CardContent>
-                                    </Card>
-                                </Grid2>
-                            ))}
-                        </Grid2>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid2>
+                                ))}
+                            </Grid2>) : (
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 4}}>
+                                <VaccinesOutlined sx={{fontSize: 60, color: 'text.disabled', mb: 2}}/>
+                                <Typography variant="body1" color="text.secondary">
+                                    No vaccination records available
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
 
                 </TabPanel>
@@ -391,6 +273,15 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                 {/* Medications Tab - START */}
                 <TabPanel value={tabValue} index={3}>
                     <Box sx={{height: contentHeight, overflow: "auto"}}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon/>}
+                            onClick={handleOpenAddMedForm}
+                            sx={{borderRadius: "20px", textTransform: "none", fontSize: "16px"}}
+                        >
+                            Medication Record
+                        </Button>
                         {medicationRecords.length > 0 ? (
                             <Grid2 container spacing={2}>
                                 {medicationRecords.map((medication) => (
@@ -477,35 +368,18 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                 </TabPanel>
                 {/* Medications Tab - END */}
             </Box>
-            <Tooltip title="Add Vaccination Record">
-                <Fab
-                    color="primary"
-                    size="medium"
-                    onClick={() => handleOpenAddRecord('vaccination')}
-                    sx={{position: 'absolute', bottom: 16, right: 16}}
-                >
-                    <AddIcon/>
-                </Fab>
-            </Tooltip>
             {/* Add vaccination/medication record form - START */}
+            <VaccinationForm
+                open={isAddVacFormOpen}
+                onClose={handleCloseAddVacForm}
+                pet={pet}
+            />
 
-            {recordType === 'vaccination' ? (
-                <VaccinationForm
-                    open={openRecordModal && recordType === 'vaccination'}
-                    onClose={handleCloseRecordModal}
-                    pet={pet}
-                    onSubmit={handleSubmitVaccination}
-                    isSubmitting={isSubmitting}
-                />
-            ) : (
-                <MedicationForm
-                    open={openRecordModal && recordType === 'medication'}
-                    onClose={handleCloseRecordModal}
-                    pet={pet}
-                    onSubmit={handleSubmitMedication}
-                    isSubmitting={isSubmitting}
-                />
-            )}
+            <MedicationForm
+                open={isAddMedFormOpen}
+                onClose={handleCloseAddMedForm}
+                pet={pet}
+            />
             {/* Add vaccination/medication record form - END */}
         </Paper>
     )
