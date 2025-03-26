@@ -5,7 +5,7 @@ import {mockVaccinationRecords} from "./mockData/mockVaccinationRecords.ts";
 import {MedicationRecord} from "../types/medicationRecord.ts";
 import {mockMedicationRecords} from "./mockData/mockMedicationRecords.ts";
 import VaccinationRecord from "../types/vaccinationRecord.ts";
-import {randomUUID} from "node:crypto";
+import {v4 as uuid} from "uuid";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -46,12 +46,7 @@ export const createMockPetApiClient = (): PetApi => {
         // insertPet: (petData: CreatePetRequestBody) => Promise<PetsApiResponse>;
         insertPet: async (petData) => {
             await delay(500); // Simulate network delay
-            const id = randomUUID();
-            // type PetsApiResponse = {
-            //     success: boolean;
-            //     data: Pet[] | Pet | null;
-            //     message: string;
-            // };
+            const id = uuid()
             return {
                 success: true,
                 data: {
@@ -61,10 +56,10 @@ export const createMockPetApiClient = (): PetApi => {
                     dateOfBirth: petData.dateOfBirth ? petData.dateOfBirth : new Date().toISOString(),
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
-                    weight: petData.weight ? petData.weight: 0,
-                    height: petData.height ? petData.height: 0,
-                    neckGirthCm: petData.neckGirthCm ? petData.neckGirthCm: 0,
-                    chestGirthCm: petData.chestGirthCm ? petData.chestGirthCm: 0,
+                    weight: petData.weight ? petData.weight : 0,
+                    height: petData.height ? petData.height : 0,
+                    neckGirthCm: petData.neckGirthCm ? petData.neckGirthCm : 0,
+                    chestGirthCm: petData.chestGirthCm ? petData.chestGirthCm : 0,
                     isNeutered: petData.isNeutered ? petData.isNeutered : false,
                 },
                 message: "Insert success"
