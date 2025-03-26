@@ -1,4 +1,4 @@
-import {Avatar, Box, Card, CardContent, Chip, Typography} from "@mui/material";
+import {Avatar, Box, Card, CardContent, Chip, Stack, Typography} from "@mui/material";
 import {Pet} from "../../api/types/pet.ts";
 import React from "react";
 import {calculateAge} from "./util/ageCalculator.ts";
@@ -50,7 +50,7 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                 <Typography variant="body1">
                     {pet.date_of_birth ? calculateAge(pet.date_of_birth) : 'Age unknown'}
                 </Typography>
-                <Box sx={{display: 'flex', mt: 1, gap: 1}}>
+                <Stack sx={{ mt: 1, gap: 1}}>
                     <Chip
                         label={toProperCase(pet.species)}
                         size="small"
@@ -65,7 +65,8 @@ export const PetCard : React.FC<PetCardProps> = ({pet,selectedPet,handleOpenPet}
                         variant="outlined"
                         sx={{bgcolor: 'rgba(255,255,255,0.8)', color: 'primary.dark'}}
                     />
-                </Box>
+                </Stack>
+
             </Box>
             <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 1}}>ID &

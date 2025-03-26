@@ -7,7 +7,7 @@ import AddPetPopup from "./AddPetPopup.tsx";
 import {Pet} from "../../api/types/pet.ts";
 import {ApiClientContext} from "../../providers/ApiClientProvider.tsx";
 import {SNACKBAR_SEVERITY, SnackbarContext} from "../../providers/SnackbarProvider.tsx";
-import VaccinationRecord from "../../api/types/vaccinationRecord.ts";
+import {VaccinationRecord} from "../../api/types/vaccinationRecord.ts";
 import {PetCard} from "./PetCard.tsx";
 import {PetDetailsPanel} from "./PetDetailsPanel.tsx";
 import {MedicationRecord} from "../../api/types/medicationRecord.ts";
@@ -67,14 +67,12 @@ const PetPage = () => {
             } else {
                 const user = await userApi.retrieveUser()
                 const ownerId = user.data?.id
-                console.info("ownerId:", ownerId) // 1f005b07-46cb-6670-85cc-854ff2948567
                 if (ownerId) {
                     const petsApiResponse = await petApi.getPetsByOwnerId(ownerId)
                     if (petsApiResponse.data) {
                         const pets = petsApiResponse.data as Pet[];
                         setPets(pets)
                     }
-                    // console.log(petsApiResponse)
                 }
             }
         } catch (error) {
