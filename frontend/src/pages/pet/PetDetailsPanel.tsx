@@ -24,7 +24,7 @@ import {MedicationRecord} from "../../api/types/medicationRecord.ts";
 import {VaccinationForm} from "./VaccinationForm.tsx";
 import {MedicationForm} from "./MedicationForm.tsx";
 import {ApiClientContext} from "../../providers/ApiClientProvider.tsx";
-import {SNACKBAR_SEVERITY, SnackbarContext} from "../../providers/SnackbarProvider.tsx";
+import {SnackbarContext} from "../../providers/SnackbarProvider.tsx";
 import AddIcon from "@mui/icons-material/Add";
 
 interface PetDetailsPopupContentProps {
@@ -53,8 +53,6 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
     const [isAddVacFormOpen, setIsAddVacFormOpen] = useState(false);
     const [isAddMedFormOpen, setIsAddMedFormOpen] = useState(false);
 
-
-
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         console.log(event);
         setTabValue(newValue);
@@ -82,15 +80,30 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
         },
         {key: 'species', label: 'Type', icon: <PetsOutlined/>, format: (value) => toProperCase(value.toString())},
         {key: 'breed', label: 'Breed', icon: <PetsOutlined/>},
-        {key: 'dateOfBirth', label: 'Date of Birth', icon: <CakeOutlined/>},
+        {key: 'date_of_birth', label: 'Date of Birth', icon: <CakeOutlined/>, format: (value) => formatDate(value)},
         {key: 'weight', label: 'Weight', icon: <ScaleOutlined/>, format: (value) => `${value} kg`},
-        {key: 'height', label: 'Height', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
-        {key: 'neckGirthCm', label: 'Neck Girth', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
-        {key: 'chestGirthCm', label: 'Chest Girth', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
-        {key: 'lastMeasured', label: 'Last Measured', icon: <CalendarTodayOutlined/>},
-        {key: 'isNeutered', label: 'Neutered', format: (value) => value ? 'Yes' : 'No'},
-        {key: 'microchipNumber', label: 'Microchip Number'}
+        {key: 'height_cm', label: 'Height', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
+        {key: 'neck_girth_cm', label: 'Neck Girth', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
+        {key: 'chest_girth_cm', label: 'Chest Girth', icon: <StraightenOutlined/>, format: (value) => `${value} cm`},
+        {key: 'last_measured', label: 'Last Measured', icon: <CalendarTodayOutlined/>},
+        {key: 'is_neutered', label: 'Neutered', format: (value) => value ? 'Yes' : 'No'},
+        {key: 'microchip_number', label: 'Microchip Number'}
     ];
+    const formatDate = (value: string | number | boolean): string => {
+        if (typeof value === 'string' && value) {
+            try {
+                return new Date(value).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return String(value);
+            }
+        }
+        return String(value);
+    };
+
     const contentHeight = "calc(100vh - 250px)";
 
 
@@ -176,17 +189,14 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                 <Typography variant="subtitle1" fontWeight="bold">
                                                     {record.name}
                                                 </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Administered: {new Date(record.administeredDate).toLocaleDateString()}
-                                                </Typography>
                                                 <Typography variant="body2">
                                                     {record.description}
                                                 </Typography>
                                                 <Box sx={{mt: 1}}>
                                                     <Chip
                                                         size="small"
-                                                        color={record.isValid ? "success" : "error"}
-                                                        label={record.isValid ? "Valid" : "Expired"}
+                                                        color={record.is_valid ? "success" : "error"}
+                                                        label={record.is_valid ? "Valid" : "Expired"}
                                                     />
                                                 </Box>
                                             </CardContent>
@@ -206,7 +216,7 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                             color="primary"
                             startIcon={<AddIcon/>}
                             onClick={handleOpenAddVacForm}
-                            sx={{marginBottom:"16px", borderRadius: "20px", textTransform: "none", fontSize: "16px"}}
+                            sx={{marginBottom: "16px", borderRadius: "20px", textTransform: "none", fontSize: "16px"}}
                         >
                             Vaccination Record
                         </Button>
@@ -227,8 +237,8 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                     </Typography>
                                                     <Chip
                                                         size="small"
-                                                        color={record.isValid ? "success" : "error"}
-                                                        label={record.isValid ? "Valid" : "Expired"}
+                                                        color={record.is_valid ? "success" : "error"}
+                                                        label={record.is_valid ? "Valid" : "Expired"}
                                                     />
                                                 </Box>
                                                 <Typography variant="body2" sx={{mb: 2}}>
@@ -237,21 +247,27 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                 <Divider sx={{mb: 2}}/>
                                                 <Grid2 container spacing={1}>
                                                     <Grid2 size={{xs: 12, sm: 6}}>
-                                                        <Typography variant="body2"
-                                                                    color="text.secondary">Administered</Typography>
-                                                        <Typography
-                                                            variant="body1">{new Date(record.administeredDate).toLocaleDateString()}</Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Administered
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {new Date(record.administered_at).toLocaleString()}
+                                                        </Typography>
                                                     </Grid2>
                                                     <Grid2 size={{xs: 12, sm: 6}}>
-                                                        <Typography variant="body2" color="text.secondary">Next
-                                                            Due</Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Next Due
+                                                        </Typography>
                                                         <Typography
-                                                            variant="body1">{new Date(record.nextDueDate).toLocaleDateString()}</Typography>
+                                                            variant="body1">{new Date(record.next_due_at).toLocaleString()}
+                                                        </Typography>
                                                     </Grid2>
                                                     <Grid2 size={{xs: 12}}>
-                                                        <Typography variant="body2" color="text.secondary">Administered
-                                                            By</Typography>
-                                                        <Typography variant="body1">{record.administeredBy}</Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Administered By
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body1">{record.administered_by}</Typography>
                                                     </Grid2>
                                                 </Grid2>
                                             </CardContent>
