@@ -4,7 +4,7 @@ import {createPetApiClient, PetApi} from "../api/client/petApi.ts";
 import {createUserApiClient, UserApi} from "../api/client/userApi.ts";
 import {createMockPetApiClient} from "../api/client/mockPetApi.ts";
 
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_AP
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API
 console.debug(`USE_MOCK_API: ${USE_MOCK_API}`);
 // Base url
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001"
