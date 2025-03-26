@@ -37,7 +37,7 @@ const PetPage = () => {
 
     const handleOpenPet = (pet: Pet) => {
         loadVaccinationRecords(pet.id).then();
-        loadMedicationRecords(pet.id).then();
+        // loadMedicationRecords(pet.id).then();
         setSelectedPet(pet);
     };
 
@@ -60,26 +60,21 @@ const PetPage = () => {
             const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API
             if (USE_MOCK_API === false) {
                 const petsApiResponse = await petApi.getPetsByOwnerId("owner-789012")
-                console.log(pets)
-                if(petsApiResponse.data){
-                    setPets(Array.isArray(petsApiResponse.data)
-                        ? petsApiResponse.data
-                        : [petsApiResponse.data]
-                    )
+                if (petsApiResponse.data) {
+                    const pets = petsApiResponse.data as Pet[];
+                    setPets(pets)
                 }
             } else {
                 const user = await userApi.retrieveUser()
                 const ownerId = user.data?.id
-                console.info("ownerId:",ownerId) // 1f005b07-46cb-6670-85cc-854ff2948567
+                console.info("ownerId:", ownerId) // 1f005b07-46cb-6670-85cc-854ff2948567
                 if (ownerId) {
                     const petsApiResponse = await petApi.getPetsByOwnerId(ownerId)
-                    if(petsApiResponse.data){
-                        setPets(Array.isArray(petsApiResponse.data)
-                            ? petsApiResponse.data
-                            : [petsApiResponse.data]
-                        )
+                    if (petsApiResponse.data) {
+                        const pets = petsApiResponse.data as Pet[];
+                        setPets(pets)
                     }
-                    console.log(petsApiResponse)
+                    // console.log(petsApiResponse)
                 }
             }
         } catch (error) {
@@ -106,8 +101,16 @@ const PetPage = () => {
 
     const loadVaccinationRecords = async (petId: string) => {
         try {
-            const records = await petApi.getVaccinationRecords(petId);
-            setVaccinationRecords(records);
+            const response = await petApi.getVaccinationRecords(petId);
+            if(response.success) {
+                const vaccinationRecords = response.data as VaccinationRecord[];
+                if(vaccinationRecords.length > 0) {
+                    setVaccinationRecords(vaccinationRecords);
+                }
+            } else {
+                showSnackbar(response.message, SNACKBAR_SEVERITY.ERROR)
+            }
+            // console.log(`loadVaccinationRecords:`,response);
         } catch (error) {
             let errorMessage = "Error loading vaccination records";
             if (error instanceof Error) errorMessage = error.message;
@@ -155,7 +158,7 @@ const PetPage = () => {
     const handleRecordAdded = () => {
         if (selectedPet) {
             loadVaccinationRecords(selectedPet.id).then();
-            loadMedicationRecords(selectedPet.id).then();
+            // loadMedicationRecords(selectedPet.id).then();
         }
     }
 
@@ -259,10 +262,11 @@ const PetPage = () => {
                             <Grid2 size={{md: 9}} sx={{height: '100%'}}>
                                 <Card sx={{
                                     borderRadius: 4,
-                                    overflow: 'hidden',
+                                    // overflow: 'hidden',
                                     height: '100%',
                                     display: 'flex,',
-                                    flexDirection: 'column'
+                                    flexDirection: 'column',
+                                    // backgroundColor: 'orange'
                                 }}>
                                     <Box sx={{
                                         display: 'flex',
@@ -270,7 +274,8 @@ const PetPage = () => {
                                         alignItems: 'center',
                                         p: 2,
                                         borderBottom: '1px solid',
-                                        borderColor: 'divider'
+                                        borderColor: 'divider',
+                                        // backgroundColor: 'pink'
                                     }}>
                                         <Typography variant="h6" fontWeight="bold">
                                             {selectedPet.name}'s Health Records
@@ -279,23 +284,12 @@ const PetPage = () => {
                                             <CloseIcon/>
                                         </IconButton>
                                     </Box>
-                                    <Box
-                                        sx={{
-                                            // flexGrow: 1,
-                                            height: 'calc(100vh - 250px)',
-                                            // overflow: 'auto',
-                                            padding: 0,
-                                            border: "2px solid blue",
-                                            borderRadius: "8px",
-                                        }}
-                                    >
-                                        <PetDetailsPanel
-                                            pet={selectedPet}
-                                            vaccinationRecords={vaccinationRecords}
-                                            medicationRecords={medicationRecords}
-                                            onRecordAdded={handleRecordAdded}
-                                        />
-                                    </Box>
+                                    <PetDetailsPanel
+                                        pet={selectedPet}
+                                        vaccinationRecords={vaccinationRecords}
+                                        medicationRecords={medicationRecords}
+                                        onRecordAdded={handleRecordAdded}
+                                    />
                                 </Card>
                             </Grid2>
                         )}
