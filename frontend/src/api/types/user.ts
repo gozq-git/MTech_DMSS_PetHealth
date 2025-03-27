@@ -23,4 +23,8 @@ export interface UserUpdateInput {
     bio?: string;
     profile_picture?: string;
     role?: 'admin' | 'user';
-}
+    // Additional vet fields:
+    vet_license?: string;
+    vet_center?: string;
+    vet_phone?: string;
+  }

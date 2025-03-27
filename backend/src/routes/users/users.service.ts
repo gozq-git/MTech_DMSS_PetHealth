@@ -44,28 +44,55 @@ const UsersServices = {
     },
     updateUser: async (user: any) => {
         try {
-            const updatedUser = await models.USERS.update(
-                {
-                    account_name: user.account_name,
-                    email: user.preferred_username,
-                    last_active: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                    bio: user.bio,
-                    profile_picture: user.profile_picture,
-                    display_name: user.display_name,
-                },
-                {
-                    where: {
-                        email: user.preferred_username,
-                    },
-                    returning: true,
-                }
-            );
-            return updatedUser;
+          // Update the user record first
+          const updatedResult = await models.USERS.update(
+            {
+              account_name: user.account_name,
+              email: user.preferred_username,
+              last_active: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+              bio: user.bio,
+              profile_picture: user.profile_picture,
+              display_name: user.display_name,
+            },
+            {
+              where: {
+                email: user.preferred_username,
+              },
+              returning: true, // returns an array: [affectedCount, affectedRows]
+            }
+          );
+      
+          // Get the updated user's id (assuming one row was updated)
+          const updatedUser = updatedResult[1][0];
+          const userId = updatedUser.get('id');
+      
+          // If vet-related fields are provided, update or create the vet record
+          if (user.vet_license || user.vet_center || user.vet_phone) {
+            const vetData = {
+              id: userId, // same as user id
+              vet_license: user.vet_license,
+              vet_center: user.vet_center,
+              vet_phone: user.vet_phone,
+            };
+      
+            // Check if a vet record already exists for this user
+            const existingVet = await models.VETS.findOne({ where: { id: userId } });
+            if (existingVet) {
+              // Update the existing vet record
+              await models.VETS.update(vetData, { where: { id: userId } });
+            } else {
+              // Create a new vet record
+              await models.VETS.create(vetData);
+            }
+          }
+      
+          return updatedResult;
         } catch (error: any) {
-            logger.error(error);
-            throw new Error("Error updating user");
+          logger.error(error);
+          throw new Error("Error updating user");
         }
-    },
+      },
+      
     deleteUser: async (account_name: string) => {
         try {
             const deleted = await models.USERS.destroy({

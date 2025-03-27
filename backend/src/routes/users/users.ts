@@ -236,12 +236,18 @@ users.post('/registerUser', async (req: Request, res: Response): Promise<void> =
  *                       description: Human-readable success message.
  *                       example: "Successfully updated 1 user"
  */
+// user.ts
 users.post('/updateUser', async (req: Request, res: Response): Promise<void> => {
     logger.info(req.headers.userInfo);
     logger.info(req.body);
     const userInfo = req.headers.userInfo as any;
     try {
-        const result = await UsersController.updateUser({preferred_username: userInfo.preferred_username, ...req.body});
+        // Pass along vet fields along with user fields
+        const result = await UsersController.updateUser({
+            preferred_username: userInfo.preferred_username,
+            ...req.body // expects fields like account_name, display_name, bio, profile_picture,
+                     // plus vet_license, vet_center, and vet_phone if provided
+        });
         if (result === null || result === undefined) {
             res.status(200).type('json').send({status: 'error', message: 'User failed to update'});
         } else {
@@ -260,6 +266,7 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
         res.status(200).send(error.message);
     }
 });
+
 
 /**
  * @swagger
