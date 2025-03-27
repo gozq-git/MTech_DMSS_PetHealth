@@ -30,5 +30,32 @@ export const ROUTES = {
     VET_PORTAL: {
         path: '/vetportal',
         label: 'Vet Portal'
+    },
+    // Vet-specific routes
+    VET: {
+        HOME: {
+            path: '/vet/home',
+            label: 'Home'
+        },
+        PETS: {
+            path: '/vet/pets',
+            label: 'Pets'
+        },
+        HEALTHCARE: {
+            path: '/vet/healthcare',
+            label: 'Healthcare'
+        },
+        SERVICES: {
+            path: '/vet/services',
+            label: 'Services'
+        },
+        PROFILE: {
+            path: '/vet/profile',
+            label: 'Profile'
+        },
+        SETTINGS: {
+            path: '/vet/settings',
+            label: 'Settings'
+        }
     }
 } as const;

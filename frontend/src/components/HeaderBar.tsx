@@ -11,23 +11,23 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import {useMsal} from "@azure/msal-react";
-import {loginRequest} from "../authConfig";
-import {useNavigate} from "react-router-dom";
-import {ROUTES} from "../routes/routes.ts";
-import {CopyAccessTokenComponent} from "./CopyAccessTokenComponent.tsx";
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../authConfig";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../routes/routes.ts";
+import { AccountTypeContext } from "../contexts/AccountTypeContext";
+import { CopyAccessTokenComponent } from "./CopyAccessTokenComponent.tsx";
 
 interface HeaderBarProps {
     onMenuClick: () => void;
 }
 
-const HeaderBar = ({onMenuClick}: HeaderBarProps) => {
-    const {instance} = useMsal();
+const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
+    const { instance } = useMsal();
     const activeAccount = instance.getActiveAccount();
     const navigate = useNavigate();
-    const handleNavigation = (endpoint: String) => {
-        navigate(endpoint.toString()); // Convert String to string if needed
-    }
+    const { accountType, setAccountType } = React.useContext(AccountTypeContext);
+
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -39,60 +39,57 @@ const HeaderBar = ({onMenuClick}: HeaderBarProps) => {
         setAnchorEl(null);
     };
 
+    const handleNavigation = (path: string) => {
+        navigate(path);
+        handleClose();
+    };
+
+    const handleToggleVetMode = () => {
+        if (accountType === "vet") {
+            // Switch to User mode, show user pages
+            setAccountType("user");
+            navigate("/home");  // Redirect to user home
+        } else {
+            // Switch to Vet mode, check profile
+            setAccountType("vet");
+            navigate("/vetportal");  // Redirect to vet portal for profile check
+        }
+        handleClose();
+    };
+
     const handleLogin = () => {
         instance.loginRedirect(loginRequest).catch(console.error);
     };
 
     const handleSignUp = () => {
-        instance.loginRedirect({...loginRequest, prompt: 'create'}).catch(console.error);
+        instance.loginRedirect({ ...loginRequest, prompt: 'create' }).catch(console.error);
     };
 
     const handleLogout = () => {
         instance.logoutRedirect().catch(console.error);
     };
 
-    const handleProfile = () => {
-        handleNavigation(ROUTES.PROFILE.path);
-        handleClose();
-    };
-
-    const handleSettings = () => {
-        handleNavigation(ROUTES.SETTINGS.path);
-        handleClose();
-    };
-
-    const handleVetPortal = () => {
-        handleNavigation(ROUTES.VET_PORTAL.path);
-        handleClose();
-    };
-
     return (
-        <AppBar position="fixed" sx={{backgroundColor: '#795548'}}>
+        <AppBar position="fixed" sx={{ backgroundColor: '#795548' }}>
             <Toolbar>
-                <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{mr: 2}}>
-                    <MenuIcon/>
+                <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{ mr: 2 }}>
+                    <MenuIcon />
                 </IconButton>
-                <PetsIcon sx={{mr: 1}}/>
+                <PetsIcon sx={{ mr: 1 }} />
                 <Typography variant="h6" noWrap>
                     Pet Health Platform
                 </Typography>
-                <div style={{marginLeft: 'auto'}}>
+                <div style={{ marginLeft: 'auto' }}>
                     <IconButton color="inherit" onClick={handleMenu}>
-                        <AccountCircle/>
+                        <AccountCircle />
                     </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                    >
+                    <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
                         {activeAccount ? (
                             <>
-                                <Box sx={{px: 2, py: 1}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                        <Avatar
-                                            sx={{width: 40, height: 40, mr: 2}}
-                                            src={activeAccount.username ? `https://api.dicebear.com/9.x/pixel-art/svg` : undefined}
-                                        />
+                                {/* User Avatar and Info */}
+                                <Box sx={{ px: 2, py: 1 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <Avatar sx={{ width: 40, height: 40, mr: 2 }} />
                                         <Box>
                                             <Typography variant="subtitle1">
                                                 {activeAccount.name || 'User'}
@@ -103,12 +100,30 @@ const HeaderBar = ({onMenuClick}: HeaderBarProps) => {
                                         </Box>
                                     </Box>
                                 </Box>
-                                {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent/></MenuItem>}
-                                <Divider/>
-                                <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                                <MenuItem onClick={handleSettings}>Settings</MenuItem>
-                                <MenuItem onClick={handleVetPortal}>Vet Portal</MenuItem>
-                                <Divider/>
+
+                                {/* Show access token in DEV mode */}
+                                {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent /></MenuItem>}
+
+                                <Divider />
+
+                                {/* Profile & Settings */}
+                                <MenuItem onClick={() => handleNavigation(ROUTES.PROFILE.path)}>
+                                    Profile
+                                </MenuItem>
+                                <MenuItem onClick={() => handleNavigation(ROUTES.SETTINGS.path)}>
+                                    Settings
+                                </MenuItem>
+
+                                <Divider />
+
+                                {/* Vet Mode Toggle */}
+                                <MenuItem onClick={handleToggleVetMode}>
+                                    {accountType === "vet" ? "Switch to User Mode" : "Go to Vet Portal"}
+                                </MenuItem>
+
+                                <Divider />
+
+                                {/* Logout */}
                                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
                             </>
                         ) : (

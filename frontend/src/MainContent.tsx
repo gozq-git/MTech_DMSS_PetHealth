@@ -1,20 +1,24 @@
-import {AuthenticatedTemplate, UnauthenticatedTemplate} from "@azure/msal-react";
+// App.tsx or MainContent.tsx
+import { AccountTypeProvider } from "./contexts/AccountTypeContext";
+import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
 import './App.css'
 import PageLayout from "./components/PageLayout.tsx";
-import {AuthenticatedRoutes, UnauthenticatedRoutes} from "./routes/AppRouter.tsx";
+import { AuthenticatedRoutes, UnauthenticatedRoutes } from "./routes/AppRouter.tsx";
 
 const MainContent = () => {
-    return (
-        <PageLayout>
-            <AuthenticatedTemplate>
-                <AuthenticatedRoutes/>
-            </AuthenticatedTemplate>
+  return (
+    <AccountTypeProvider>
+      <PageLayout>
+        <AuthenticatedTemplate>
+          <AuthenticatedRoutes />
+        </AuthenticatedTemplate>
 
-            <UnauthenticatedTemplate>
-                <UnauthenticatedRoutes/>
-            </UnauthenticatedTemplate>
-        </PageLayout>
-    );
+        <UnauthenticatedTemplate>
+          <UnauthenticatedRoutes />
+        </UnauthenticatedTemplate>
+      </PageLayout>
+    </AccountTypeProvider>
+  );
 };
 
 export default MainContent;
