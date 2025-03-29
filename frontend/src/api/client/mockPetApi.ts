@@ -4,7 +4,7 @@ import {mockPets} from "./mockData/mockPets.ts";
 import {mockVaccinationRecords} from "./mockData/mockVaccinationRecords.ts";
 import {MedicationRecord} from "../types/medicationRecord.ts";
 import {mockMedicationRecords} from "./mockData/mockMedicationRecords.ts";
-import VaccinationRecord from "../types/vaccinationRecord.ts";
+import {VaccinationRecord, VaccinationRecordRequest} from "../types/vaccinationRecord.ts";
 import {v4 as uuid} from "uuid";
 
 // Helper function to simulate API delay
@@ -27,7 +27,7 @@ export const createMockPetApiClient = (): PetApi => {
             if (ownerId.includes("error")) {
                 throw new Error("Owner not found or has no pets");
             }
-            const pets = mockPets.filter(pet => pet.ownerId === ownerId)
+            const pets = mockPets.filter(pet => pet.owner_id === ownerId)
             if (!pets) {
                 return {
                     success: false,
@@ -50,17 +50,24 @@ export const createMockPetApiClient = (): PetApi => {
             return {
                 success: true,
                 data: {
-                    ...petData,
                     id: id,
-                    isDeleted: false,
-                    dateOfBirth: petData.dateOfBirth ? petData.dateOfBirth : new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
+                    owner_id: petData.ownerId,
+                    name: petData.name,
+                    gender: petData.gender,
+                    species: petData.species,
+                    breed: petData.breed,
+                    date_of_birth: petData.dateOfBirth ? petData.dateOfBirth : new Date().toISOString(),
                     weight: petData.weight ? petData.weight : 0,
-                    height: petData.height ? petData.height : 0,
-                    neckGirthCm: petData.neckGirthCm ? petData.neckGirthCm : 0,
-                    chestGirthCm: petData.chestGirthCm ? petData.chestGirthCm : 0,
-                    isNeutered: petData.isNeutered ? petData.isNeutered : false,
+                    height_cm: petData.height ? petData.height : 0,
+                    neck_girth_cm: petData.neckGirthCm ? petData.neckGirthCm : 0,
+                    chest_girth_cm: petData.chestGirthCm ? petData.chestGirthCm : 0,
+                    last_measured: petData.lastMeasured,
+                    is_neutered: petData.isNeutered ? petData.isNeutered : false,
+                    microchip_number: petData.microchipNumber,
+                    photo_url: petData.photoUrl,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    is_deleted: false,
                 },
                 message: "Insert success"
             }
@@ -71,11 +78,15 @@ export const createMockPetApiClient = (): PetApi => {
             if (petId.includes("error")) {
                 throw new Error("Error fetching vaccination records");
             }
-            const records = mockVaccinationRecords.filter(record => record.petId === petId);
+            const records = mockVaccinationRecords.filter(record => record.pet_id === petId);
             if (!records || records.length === 0) {
                 throw new Error(`Health record for pet ID ${petId} not found`);
             }
-            return records;
+            return {
+                success: true,
+                data: records,
+                message: 'Vaccination records retrieved successfully'
+            };
         },
 
         getMedicationRecords: async (petId: string): Promise<MedicationRecord[]> => {
@@ -90,28 +101,34 @@ export const createMockPetApiClient = (): PetApi => {
             return records;
         },
 
-        createVaccinationRecord: async (vaccinationData: Partial<VaccinationRecord>): Promise<VaccinationRecord> => {
+        createVaccinationRecord: async (petId: string, request: VaccinationRecordRequest) => {
             await delay(500); // Simulate network delay
             const id = "vac-" + Math.random().toString(36).substring(2, 7);
             const now = new Date().toISOString();
 
             const newRecord: VaccinationRecord = {
                 id,
-                petId: vaccinationData.petId || "",
-                name: vaccinationData.name || "",
-                description: vaccinationData.description || "",
-                administeredDate: vaccinationData.administeredDate || now,
-                administeredBy: vaccinationData.administeredBy || "",
-                nextDueDate: vaccinationData.nextDueDate || now,
-                isValid: vaccinationData.isValid !== undefined ? vaccinationData.isValid : true,
-                created: now,
-                updated: now
+                pet_id: petId || "",
+                name: request.name || "",
+                description: request.description || "",
+                administered_at: request.administered_at || now,
+                administered_by: request.administered_by || "",
+                next_due_at: request.next_due_at || now,
+                is_valid: request.is_valid !== undefined ? request.is_valid : true,
+                created_at: now,
+                updated_at: now,
+                expires_at: request.expires_at,
+                lot_number:request.lot_number
             };
 
             // Add to mock data array (this won't persist after page refresh in a real app)
             mockVaccinationRecords.push(newRecord);
 
-            return newRecord;
+            return {
+                success: true,
+                data: null,
+                message: 'Vaccination added successfully'
+            };
         },
 
         createMedicationRecord: async (medicationData: Partial<MedicationRecord>): Promise<MedicationRecord> => {
@@ -138,6 +155,5 @@ export const createMockPetApiClient = (): PetApi => {
 
             return newRecord;
         }
-
     };
 };
