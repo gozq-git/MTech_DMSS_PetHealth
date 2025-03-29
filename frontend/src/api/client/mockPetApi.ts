@@ -3,7 +3,7 @@ import {PetApi} from "./petApi";
 import {mockPets} from "./mockData/mockPets.ts";
 import {mockVaccinationRecords} from "./mockData/mockVaccinationRecords.ts";
 import {MedicationRecord} from "../types/medicationRecord.ts";
-import {mockMedicationRecords} from "./mockData/mockMedicationRecords.ts";
+// import {mockMedicationRecords} from "./mockData/mockMedicationRecords.ts";
 import VaccinationRecord from "../types/vaccinationRecord.ts";
 import {v4 as uuid} from "uuid";
 
@@ -78,17 +78,17 @@ export const createMockPetApiClient = (): PetApi => {
             return records;
         },
 
-        getMedicationRecords: async (petId: string): Promise<MedicationRecord[]> => {
-            await delay(500); // Simulate network delay
-            if (petId.includes("error")) {
-                throw new Error("Error fetching medication records");
-            }
-            const records = mockMedicationRecords.filter(record => record.petId === petId);
-            if (!records || records.length === 0) {
-                throw new Error(`Medication record for pet ID ${petId} not found`);
-            }
-            return records;
-        },
+        // getMedicationRecords: async (petId: string): Promise<MedicationRecord[]> => {
+        //     await delay(500); // Simulate network delay
+        //     if (petId.includes("error")) {
+        //         throw new Error("Error fetching medication records");
+        //     }
+        //     const records = mockMedicationRecords.filter(record => record.petId === petId);
+        //     if (!records || records.length === 0) {
+        //         throw new Error(`Medication record for pet ID ${petId} not found`);
+        //     }
+        //     return records;
+        // },
 
         createVaccinationRecord: async (vaccinationData: Partial<VaccinationRecord>): Promise<VaccinationRecord> => {
             await delay(500); // Simulate network delay
@@ -134,7 +134,7 @@ export const createMockPetApiClient = (): PetApi => {
             };
 
             // Add to mock data array
-            mockMedicationRecords.push(newRecord);
+            // mockMedicationRecords.push(newRecord);
 
             return newRecord;
         }

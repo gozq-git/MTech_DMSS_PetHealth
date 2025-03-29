@@ -1,10 +1,165 @@
-const VetHealthcarePage = () => {
-    return (
-        <div style={{ padding: "20px", textAlign: "center" }}>
-            <h1>Vet Portal</h1>
-            <p>This is a vet page.</p>
-        </div>
-    );
+import React, { useState, useEffect, useContext } from "react";
+import { Container, Paper, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, TextField } from "@mui/material";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { ApiClientContext } from "../../providers/ApiClientProvider";
+import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
+
+interface Appointment {
+  id: string;
+  user_id: string;
+  appointment_date: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+export const VetHealthcarePage: React.FC = () => {
+  const { appointmentsApi } = useContext(ApiClientContext);
+  const { showSnackbar } = useContext(SnackbarContext);
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [availabilityLoading, setAvailabilityLoading] = useState<boolean>(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [responseDialogOpen, setResponseDialogOpen] = useState<boolean>(false);
+  const [rejectionReason, setRejectionReason] = useState<string>("");
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAppointments(selectedDate);
+    }
+  }, [selectedDate]);
+
+  const fetchAppointments = async (date: string) => {
+    setLoading(true);
+    try {
+      const response = await appointmentsApi.getPendingAppointmentsForVet({ query: { date, vet_id: "YOUR_VET_ID_HERE" } });
+      if (response.success) {
+        setAppointments(response.data || []);
+      } else {
+        showSnackbar("Failed to fetch appointments", SNACKBAR_SEVERITY.ERROR);
+      }
+    } catch (error) {
+      console.error("Error fetching appointments", error);
+      showSnackbar("Error fetching appointments", SNACKBAR_SEVERITY.ERROR);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAvailability = async (date: string) => {
+    setAvailabilityLoading(true);
+    try {
+      const response = await appointmentsApi.markAvailability({ vet_id: "YOUR_VET_ID_HERE", available_date: date });
+      if (response.success) {
+        showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
+      } else {
+        showSnackbar("Failed to mark availability", SNACKBAR_SEVERITY.ERROR);
+      }
+    } catch (error) {
+      console.error("Error marking availability", error);
+      showSnackbar("Error marking availability", SNACKBAR_SEVERITY.ERROR);
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  };
+
+  const handleRespondAppointment = async (status: "accepted" | "rejected") => {
+    if (!selectedAppointment) return;
+    try {
+      const response = await appointmentsApi.respondAppointment({
+        appointment_id: selectedAppointment.id,
+        status,
+        rejection_reason: status === "rejected" ? rejectionReason : undefined,
+      });
+      if (response.success) {
+        showSnackbar("Appointment updated successfully", SNACKBAR_SEVERITY.SUCCESS);
+        if (selectedDate) {
+          fetchAppointments(selectedDate);
+        }
+        setResponseDialogOpen(false);
+      } else {
+        showSnackbar("Failed to update appointment", SNACKBAR_SEVERITY.ERROR);
+      }
+    } catch (error) {
+      console.error("Error updating appointment", error);
+      showSnackbar("Error updating appointment", SNACKBAR_SEVERITY.ERROR);
+    }
+  };
+
+  return (
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper sx={{ p: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Vet Availability & Appointments
+        </Typography>
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          selectable={true}
+          dateClick={(info) => setSelectedDate(info.dateStr)}
+        />
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => selectedDate && markAvailability(selectedDate)}
+          disabled={availabilityLoading}
+          sx={{ mt: 2 }}
+        >
+          {availabilityLoading ? "Marking..." : "Mark Availability for Selected Date"}
+        </Button>
+
+        <Typography variant="h6" sx={{ mt: 3 }}>
+          Pending Appointments on {selectedDate || ""}
+        </Typography>
+        {loading ? (
+          <CircularProgress sx={{ mt: 2 }} />
+        ) : (
+          <>
+            {appointments.length === 0 ? (
+              <Typography variant="body1">No pending appointments on this day.</Typography>
+            ) : (
+              appointments.map((appointment) => (
+                <Button key={appointment.id} onClick={() => { setSelectedAppointment(appointment); setResponseDialogOpen(true); }}>
+                  Appointment with user {appointment.user_id}
+                </Button>
+              ))
+            )}
+          </>
+        )}
+      </Paper>
+
+      <Dialog open={responseDialogOpen} onClose={() => setResponseDialogOpen(false)}>
+        <DialogTitle>Respond to Appointment</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {selectedAppointment && `Appointment from user ${selectedAppointment.user_id}`}
+          </Typography>
+          {selectedAppointment?.status === "pending" && (
+            <TextField
+              fullWidth
+              label="Rejection Reason"
+              variant="outlined"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              sx={{ mt: 2 }}
+            />
+          )}
+          <Button onClick={() => handleRespondAppointment("accepted")} variant="contained" color="primary">
+            Accept
+          </Button>
+          <Button onClick={() => handleRespondAppointment("rejected")} variant="outlined" color="error">
+            Reject
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setResponseDialogOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
 };
 
-export default VetHealthcarePage;
+export default VetHealthcarePage; 
+
