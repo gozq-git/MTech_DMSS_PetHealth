@@ -105,7 +105,7 @@ export const UserProfileForm = () => {
         };
 
         fetchUserData();
-    }, [userApi, showSnackbar]);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues({...formValues, [e.target.name]: e.target.value});
