@@ -17,6 +17,9 @@ const waitingRoom = {
     vets: []
 };
 
+// Map to track active consultations by channelName
+const activeConsultations = new Map();
+
 wss.on('connection', (ws) => {
     console.log('New client connected');
 
@@ -32,7 +35,7 @@ wss.on('connection', (ws) => {
                     connections.set(ws, {
                         id: data.userId,
                         role: data.role, // 'pet-owner' or 'vet'
-                        channelName: data.channelName
+                        channelName: null // Initialize with no channel
                     });
 
                     // Add to appropriate waiting list
@@ -84,18 +87,38 @@ wss.on('connection', (ws) => {
                 case 'accept_consultation':
                     // Vet accepting a consultation with pet owner
                     const petOwner = waitingRoom.petOwners.find(owner => owner.id === data.petOwnerId);
-                    if (petOwner) {
+                    const vetInfo = connections.get(ws);
+
+                    if (petOwner && vetInfo) {
                         // Remove from waiting room
                         waitingRoom.petOwners = waitingRoom.petOwners.filter(owner => owner.id !== data.petOwnerId);
 
                         // Create a channel for them
                         const channelName = `consult-${Date.now()}`;
 
+                        // Update channelName for both participants
+                        connections.set(ws, {
+                            ...vetInfo,
+                            channelName: channelName
+                        });
+
+                        connections.set(petOwner.ws, {
+                            ...connections.get(petOwner.ws),
+                            channelName: channelName
+                        });
+
+                        // Track the consultation
+                        activeConsultations.set(channelName, {
+                            vetId: vetInfo.id,
+                            petOwnerId: data.petOwnerId,
+                            started: new Date()
+                        });
+
                         // Notify both parties
                         petOwner.ws.send(JSON.stringify({
                             type: 'consultation_starting',
                             channelName,
-                            vetId: data.vetId
+                            vetId: vetInfo.id
                         }));
 
                         ws.send(JSON.stringify({
@@ -117,15 +140,25 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
-                // Handle WebRTC signaling messages
                 case 'join':
+                    // Update the user's channel when they join
+                    const joinUserInfo = connections.get(ws);
+                    if (joinUserInfo) {
+                        connections.set(ws, {
+                            ...joinUserInfo,
+                            channelName: data.channelName
+                        });
+
+                        console.log(`User ${joinUserInfo.id} joined channel ${data.channelName}`);
+                    }
+                    break;
+
+                // Handle WebRTC signaling messages
                 case 'send_offer':
                 case 'send_answer':
+                case 'ice_candidate':
                     // Forward to appropriate recipients based on channelName
-                    const userInfo = connections.get(ws);
-                    if (userInfo && data.channelName) {
-                        broadcastToChannel(data, data.channelName, ws);
-                    }
+                    broadcastToChannel(data, data.channelName, ws);
                     break;
             }
         } catch (error) {
@@ -142,6 +175,19 @@ wss.on('connection', (ws) => {
             } else if (userInfo.role === 'vet') {
                 waitingRoom.vets = waitingRoom.vets.filter(vet => vet.id !== userInfo.id);
             }
+
+            // Notify consultation partner if in active consultation
+            if (userInfo.channelName) {
+                broadcastToChannel({
+                    type: 'peer_disconnected',
+                    channelName: userInfo.channelName,
+                    userId: userInfo.id
+                }, userInfo.channelName, null);
+
+                // Clean up consultation if needed
+                activeConsultations.delete(userInfo.channelName);
+            }
+
             connections.delete(ws);
 
             // Notify others if needed
@@ -170,11 +216,17 @@ function broadcastToVets(message) {
 
 // Helper function to broadcast to specific channel
 function broadcastToChannel(message, channelName, sender) {
+    console.log(`Broadcasting to channel ${channelName}:`, message.type);
+    let recipients = 0;
+
     connections.forEach((userInfo, connection) => {
         if (connection !== sender && userInfo.channelName === channelName) {
             connection.send(JSON.stringify(message));
+            recipients++;
         }
     });
+
+    console.log(`Message sent to ${recipients} recipients`);
 }
 
 // Health check endpoint
@@ -182,7 +234,8 @@ app.get('/status', (req, res) => {
     res.status(200).json({
         status: 'ok',
         waitingPetOwners: waitingRoom.petOwners.length,
-        activeVets: waitingRoom.vets.length
+        activeVets: waitingRoom.vets.length,
+        activeConsultations: activeConsultations.size
     });
 });
 

@@ -21,7 +21,7 @@ import {
     Typography
 } from '@mui/material';
 import {LocalHospital, Pets, Refresh, Send} from "@mui/icons-material";
-import {VetTabPanelContent} from "./VetTabPanel.tsx";
+import {VetTabPanelContent} from "./WebSocketTesterVetTabPanel.tsx";
 
 // Define TypeScript interfaces for our data structures
 interface PetOwnerForm {
