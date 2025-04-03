@@ -155,8 +155,15 @@ wss.on('connection', (ws) => {
 
                 // Handle WebRTC signaling messages
                 case 'send_offer':
+                    console.log('send_offer data',data);
+                    broadcastToChannel(data, data.channelName, ws);
+                    break;
                 case 'send_answer':
+                    console.log('send_answer data',data);
+                    broadcastToChannel(data, data.channelName, ws);
+                    break;
                 case 'ice_candidate':
+                    console.log('ice_candidate data',data)
                     // Forward to appropriate recipients based on channelName
                     broadcastToChannel(data, data.channelName, ws);
                     break;
