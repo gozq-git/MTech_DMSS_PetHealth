@@ -21,6 +21,7 @@ import VetProfilePage from "../pages/vetportal/ProfilePage.tsx"; // If vet field
 
 // Public Pages
 import LandingPage from "../pages/landing/Landing.tsx";
+import WebSocketTester from "../pages/teleconsultation/websockettester/WebSocketTester.tsx";
 
 export const AuthenticatedRoutes = () => {
     const { accountType } = useContext(AccountTypeContext);
@@ -38,6 +39,7 @@ export const AuthenticatedRoutes = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/teleconsultation" element={<TeleconsultationPage />} />
+            <Route path="/wstest" element={<WebSocketTester />} />
 
             {/* Vet Portal Entry Point (Checks Vet Profile) */}
             <Route path="/vetportal" element={<VetPortalPage />} />
