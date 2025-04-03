@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { useContext } from "react";
-import { AccountTypeContext } from "../contexts/AccountTypeContext";
+import {Navigate, Route, Routes} from "react-router-dom";
+import {useContext} from "react";
+import {AccountTypeContext} from "../contexts/AccountTypeContext";
 
 // User Pages
 import HomePage from "../pages/home/HomePage.tsx";
@@ -9,18 +9,17 @@ import HealthcarePage from "../pages/healthcare/HealthcarePage.tsx";
 import ServicesPage from "../pages/services/ServicesPage.tsx";
 import ProfilePage from "../pages/profile/ProfilePage.tsx";
 import SettingsPage from "../pages/settings/SettingsPage.tsx";
-import TeleconsultationPage from "../pages/teleconsultation/TeleconsultationPage.tsx";
 import VetPortalPage from "../pages/vetportal/VetPortalPage.tsx"; // Vet Profile Check Happens Here
-
 // Vet Pages
 import VetHomePage from "../pages/vetportal/HomePage.tsx";
 import VetPetPage from "../pages/vetportal/PetPage.tsx";
 import VetHealthcarePage from "../pages/vetportal/HealthcarePage.tsx";
 import VetServicesPage from "../pages/vetportal/ServicesPage.tsx";
 import VetProfilePage from "../pages/vetportal/ProfilePage.tsx"; // If vet fields are incomplete
-
 // Public Pages
 import LandingPage from "../pages/landing/Landing.tsx";
+import WebSocketTester from "../pages/teleconsultation/websockettester/WebSocketTester.tsx";
+import {NewTeleconsultPage} from "../pages/teleconsultation/websockettester/NewTeleconsultPage.tsx";
 
 export const AuthenticatedRoutes = () => {
     const { accountType } = useContext(AccountTypeContext);
@@ -37,7 +36,9 @@ export const AuthenticatedRoutes = () => {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/teleconsultation" element={<TeleconsultationPage />} />
+            <Route path="/teleconsultation" element={<NewTeleconsultPage />} />
+            <Route path="/teleconsultvet" element={<NewTeleconsultPage />} />
+            <Route path="/wstest" element={<WebSocketTester />} />
 
             {/* Vet Portal Entry Point (Checks Vet Profile) */}
             <Route path="/vetportal" element={<VetPortalPage />} />
