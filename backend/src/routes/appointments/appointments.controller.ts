@@ -25,9 +25,9 @@ const AppointmentsController = {
   },
 
   // For a vet to fetch pending appointments for a specific day
-  getPendingAppointmentsForVet: async (vetId: string, date: string) => {
+  getAppointmentsForVet: async (vetId: string, date: string) => {
     try {
-      const result = await AppointmentsService.getPendingAppointmentsForVet(vetId, date);
+      const result = await AppointmentsService.getAppointmentsForVet(vetId, date);
       return result;
     } catch (error) {
       logger.error(error);

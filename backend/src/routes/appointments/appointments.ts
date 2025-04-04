@@ -66,12 +66,12 @@ appointments.get('/availableVets', async (req: Request, res: Response): Promise<
 
 /**
  * @swagger
- * /appointments/getPendingAppointmentsForVet:
+ * /appointments/getAppointmentsForVet:
  *   get:
- *     summary: Get pending appointments for a vet on a given date.
+ *     summary: Get all appointments for a vet on a given date.
  *     tags:
  *       - appointments
- *     description: Retrieve the list of pending appointments for a vet on a specific day.
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet on a specific day.
  *     parameters:
  *       - in: query
  *         name: vet_id
@@ -84,15 +84,16 @@ appointments.get('/availableVets', async (req: Request, res: Response): Promise<
  *         schema:
  *           type: string
  *         required: true
- *         description: The date to check for pending appointments (YYYY-MM-DD)
+ *         description: The date to check for appointments (YYYY-MM-DD)
  *     responses:
  *       200:
- *         description: List of pending appointments.
+ *         description: List of all appointments (pending, accepted, rejected).
  */
-appointments.get('/getPendingAppointmentsForVet', async (req: Request, res: Response): Promise<void> => {
+appointments.get('/getAppointmentsForVet', async (req: Request, res: Response): Promise<void> => {
   const { vet_id, date } = req.query;
   try {
-    const result = await AppointmentsController.getPendingAppointmentsForVet(vet_id as string, date as string);
+    // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
+    const result = await AppointmentsController.getAppointmentsForVet(vet_id as string, date as string);
     res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
     logger.error(error);

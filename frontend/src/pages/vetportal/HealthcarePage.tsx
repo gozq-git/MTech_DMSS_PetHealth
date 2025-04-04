@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react"; 
 import { 
   Container, Paper, Typography, Button, Dialog, DialogTitle, 
   DialogContent, DialogActions, CircularProgress, TextField 
@@ -56,7 +56,7 @@ export const VetHealthcarePage: React.FC = () => {
     if (!vetId) return;
     setLoading(true);
     try {
-      const response = await appointmentsApi.getPendingAppointmentsForVet({ query: { date, vet_id: vetId } });
+      const response = await appointmentsApi.getAppointmentsForVet({ query: { date, vet_id: vetId } });
       if (response.success) {
         setAppointments(response.data || []);
       } else {
@@ -109,23 +109,38 @@ export const VetHealthcarePage: React.FC = () => {
     }
   };
 
+  const getAppointmentsForCalendar = () => {
+    return appointments.map((appointment) => ({
+      title: `Appointment with user ${appointment.user_id}`,
+      date: appointment.appointment_date, 
+      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'yellow', 
+      borderColor: appointment.status === 'accepted' ? 'darkgreen' : appointment.status === 'rejected' ? 'darkred' : 'orange', 
+      textColor: 'white',
+      extendedProps: {
+        appointmentId: appointment.id,
+      },
+    }));
+  };
+
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
+    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}> {/* Increased width to 90% */}
       <Paper sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
           Vet Availability & Appointments
         </Typography>
-        <FullCalendar
-          key={appointments.length} // Forces re-render on update
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          selectable={true}
-          dateClick={(info) => setSelectedDate(info.dateStr)}
-          events={[] /* No events needed since we're not checking availability */}
-        />
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <div style={{ width: "100%", maxWidth: "100%" }}>
+          <FullCalendar
+            key={appointments.length} // Forces re-render on update
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            selectable={true}
+            dateClick={(info) => setSelectedDate(info.dateStr)}
+            events={getAppointmentsForCalendar()}
+          />
+        </div>
+        <Button
+          variant="contained"
+          color="primary"
           onClick={() => selectedDate && markAvailability(selectedDate)}
           disabled={availabilityLoading}
           sx={{ mt: 2 }}
@@ -134,12 +149,12 @@ export const VetHealthcarePage: React.FC = () => {
         </Button>
 
         <Typography variant="h6" sx={{ mt: 3 }}>
-          Pending Appointments on {selectedDate || ""}
+          Appointments on {selectedDate || ""}
         </Typography>
         {loading ? <CircularProgress sx={{ mt: 2 }} /> : (
           appointments.length === 0 ? (
             <Typography variant="body1" sx={{ color: "red" }}>
-              No pending appointments on this day.
+              No appointments on this day.
             </Typography>
           ) : (
             appointments.map((appointment) => (
@@ -147,7 +162,7 @@ export const VetHealthcarePage: React.FC = () => {
                 key={appointment.id}
                 onClick={() => { setSelectedAppointment(appointment); setResponseDialogOpen(true); }}
               >
-                Appointment with user {appointment.user_id}
+                Appointment with user {appointment.user_id} ({appointment.status})
               </Button>
             ))
           )

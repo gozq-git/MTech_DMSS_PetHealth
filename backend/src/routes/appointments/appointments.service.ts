@@ -80,14 +80,14 @@ const AppointmentsService = {
     }
   },
 
-  // Fetch pending appointments for a given vet on a specific date
-getPendingAppointmentsForVet: async (vetId: string, date: string) => {
+// Fetch all appointments for a given vet on a specific date (pending, accepted, and rejected)
+getAppointmentsForVet: async (vetId: string, date: string) => {
   try {
+    // Fetch all appointments for the given vet and date (including all statuses)
     const appointments = await models.APPOINTMENTS.findAll({
       where: {
         appointment_date: date,
         vet_id: vetId,  // Ensure only this vet's appointments are fetched
-        status: "pending",
       },
       include: [
         {
@@ -99,7 +99,7 @@ getPendingAppointmentsForVet: async (vetId: string, date: string) => {
     return appointments;
   } catch (error: any) {
     logger.error(error);
-    throw new Error("Error retrieving pending appointments");
+    throw new Error("Error retrieving appointments");
   }
 }
 

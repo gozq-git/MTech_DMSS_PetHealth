@@ -15,7 +15,7 @@ export interface AppointmentsApi {
     status: "accepted" | "rejected";
     rejection_reason?: string;
   }) => Promise<AppointmentApiResponse<Appointment>>;
-  getPendingAppointmentsForVet: (params: { query: { date: string; vet_id?: string;} }) => Promise<AppointmentApiResponse<Appointment[]>>;
+  getAppointmentsForVet: (params: { query: { date: string; vet_id?: string;} }) => Promise<AppointmentApiResponse<Appointment[]>>;
 }
 
 export const createAppointmentsApiClient = (baseClient: BaseApiClient): AppointmentsApi => {
@@ -57,13 +57,16 @@ export const createAppointmentsApiClient = (baseClient: BaseApiClient): Appointm
         message: response.status === 'success' ? 'Appointment updated successfully' : response.message,
       };
     },
-    getPendingAppointmentsForVet: async (params) => {
-      const response = await baseClient.get<{ status: 'success' | 'error'; message: any }>('/api/appointments/getPendingAppointments', { params: params.query });
+    getAppointmentsForVet: async (params) => {
+      const response = await baseClient.get<{ status: 'success' | 'error'; data: Appointment[]; message?: string }>(
+        '/api/appointments/getAppointmentsForVet',
+        { params: params.query }
+      );
       return {
         success: response.status === 'success',
-        data: response.message,
-        message: response.status === 'success' ? 'Pending appointments retrieved successfully' : response.message,
+        data: response.data,
+        message: response.status === 'success' ? 'Pending appointments retrieved successfully' : (response.message || ''),
       };
-    },
+    },    
   };
 };
