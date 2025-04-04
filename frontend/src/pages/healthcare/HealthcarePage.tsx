@@ -39,7 +39,7 @@ export const HealthcarePage: React.FC = () => {
       try {
         const result = await userApi.retrieveUser();
         if (result.success && result.data) {
-          setUserId(result.data.id); 
+          setUserId(result.data.id);
         } else {
           console.error("Failed to fetch user data:", result.message);
         }
@@ -82,7 +82,7 @@ export const HealthcarePage: React.FC = () => {
             return vetDate === selectedDay;
           })
           .map((item: any) => ({
-            id: item.id,
+            id: item.VET.id, 
             vet_center: item.VET.vet_center,
             vet_license: item.VET.vet_license,
             vet_phone: item.VET.vet_phone,
@@ -105,6 +105,12 @@ export const HealthcarePage: React.FC = () => {
       showSnackbar("Error: Missing user ID or appointment details", SNACKBAR_SEVERITY.ERROR);
       return;
     }
+
+    console.log("Booking appointment with the following details:");
+    console.log("User ID:", userId);
+    console.log("Selected Vet:", selectedVet);
+    console.log("Vet ID being sent:", selectedVet.id);
+    console.log("Appointment Date:", selectedDate);
 
     try {
       const appointmentData = {
@@ -153,6 +159,7 @@ export const HealthcarePage: React.FC = () => {
                 <Button
                   key={vet.id}
                   onClick={() => {
+                    console.log("Vet selected:", vet);
                     setSelectedVet(vet);
                     setBookingDialogOpen(true);
                   }}
