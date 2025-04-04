@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Paper, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from "@mui/material";
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import {
+  Container,
+  Paper,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from "@mui/material";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
 
@@ -14,7 +24,7 @@ interface Vet {
 }
 
 export const HealthcarePage: React.FC = () => {
-  const { appointmentsApi } = useContext(ApiClientContext);
+  const { appointmentsApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -22,6 +32,24 @@ export const HealthcarePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedVet, setSelectedVet] = useState<Vet | null>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const result = await userApi.retrieveUser();
+        if (result.success && result.data) {
+          setUserId(result.data.id); 
+        } else {
+          console.error("Failed to fetch user data:", result.message);
+        }
+      } catch (error) {
+        console.error("Error retrieving user:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [userApi]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -33,13 +61,39 @@ export const HealthcarePage: React.FC = () => {
     setLoading(true);
     try {
       const response = await appointmentsApi.getAvailableVets({ query: { date } });
-      if (response && response.data) {
-        setAvailableVets(response.data.vets || []);
+
+      console.log("Raw API Response:", response);
+
+      if (!response || !response.data) {
+        showSnackbar("Invalid API response format", SNACKBAR_SEVERITY.ERROR);
+        return;
+      }
+
+      const vetsData = response.data;
+
+      console.log("Extracted Vets Data:", vetsData);
+
+      if (Array.isArray(vetsData) && vetsData.length > 0) {
+        const selectedDay = new Date(date).toISOString().split("T")[0];
+
+        const vets = vetsData
+          .filter((item: any) => {
+            const vetDate = new Date(item.available_date).toISOString().split("T")[0];
+            return vetDate === selectedDay;
+          })
+          .map((item: any) => ({
+            id: item.id,
+            vet_center: item.VET.vet_center,
+            vet_license: item.VET.vet_license,
+            vet_phone: item.VET.vet_phone,
+          }));
+
+        setAvailableVets(vets);
       } else {
-        showSnackbar("Failed to fetch available vets", SNACKBAR_SEVERITY.ERROR);
+        showSnackbar("No vets available on this day.", SNACKBAR_SEVERITY.WARNING);
       }
     } catch (error) {
-      console.error("Error fetching available vets", error);
+      console.error("Error fetching available vets:", error);
       showSnackbar("Error fetching available vets", SNACKBAR_SEVERITY.ERROR);
     } finally {
       setLoading(false);
@@ -47,14 +101,19 @@ export const HealthcarePage: React.FC = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!selectedDate || !selectedVet) return;
+    if (!selectedDate || !selectedVet || !userId) {
+      showSnackbar("Error: Missing user ID or appointment details", SNACKBAR_SEVERITY.ERROR);
+      return;
+    }
+
     try {
       const appointmentData = {
-        user_id: "CURRENT_USER_UUID",
+        user_id: userId,
         vet_id: selectedVet.id,
         appointment_date: selectedDate,
-        appointment_time: null
+        appointment_time: null,
       };
+
       const response = await appointmentsApi.bookAppointment(appointmentData);
       if (response.success) {
         showSnackbar("Appointment booked successfully!", SNACKBAR_SEVERITY.SUCCESS);
@@ -91,7 +150,13 @@ export const HealthcarePage: React.FC = () => {
               <Typography variant="body1">No vets available on this day.</Typography>
             ) : (
               availableVets.map((vet) => (
-                <Button key={vet.id} onClick={() => { setSelectedVet(vet); setBookingDialogOpen(true); }}>
+                <Button
+                  key={vet.id}
+                  onClick={() => {
+                    setSelectedVet(vet);
+                    setBookingDialogOpen(true);
+                  }}
+                >
                   {vet.vet_center || "N/A"} (License: {vet.vet_license || "N/A"})
                 </Button>
               ))
@@ -104,7 +169,8 @@ export const HealthcarePage: React.FC = () => {
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
           <Typography>
-            {selectedVet && `Book an appointment with vet at ${selectedVet.vet_center || "N/A"} on ${selectedDate}.`}
+            {selectedVet &&
+              `Book an appointment with vet at ${selectedVet.vet_center || "N/A"} on ${selectedDate}.`}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -118,5 +184,4 @@ export const HealthcarePage: React.FC = () => {
   );
 };
 
-export default HealthcarePage; 
-
+export default HealthcarePage;

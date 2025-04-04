@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Paper, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, TextField } from "@mui/material";
+import { 
+  Container, Paper, Typography, Button, Dialog, DialogTitle, 
+  DialogContent, DialogActions, CircularProgress, TextField 
+} from "@mui/material";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -14,9 +17,10 @@ interface Appointment {
 }
 
 export const VetHealthcarePage: React.FC = () => {
-  const { appointmentsApi } = useContext(ApiClientContext);
+  const { appointmentsApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
 
+  const [vetId, setVetId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -26,15 +30,33 @@ export const VetHealthcarePage: React.FC = () => {
   const [rejectionReason, setRejectionReason] = useState<string>("");
 
   useEffect(() => {
-    if (selectedDate) {
+    const fetchVetId = async () => {
+      try {
+        const response = await userApi.retrieveUser();
+        if (response.success && response.data?.id) {
+          setVetId(response.data.id);
+        } else {
+          showSnackbar("Failed to retrieve vet ID", SNACKBAR_SEVERITY.ERROR);
+        }
+      } catch (error) {
+        console.error("Error retrieving vet ID", error);
+        showSnackbar("Error retrieving vet ID", SNACKBAR_SEVERITY.ERROR);
+      }
+    };
+    fetchVetId();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && vetId) {
       fetchAppointments(selectedDate);
     }
-  }, [selectedDate]);
+  }, [selectedDate, vetId]);
 
   const fetchAppointments = async (date: string) => {
+    if (!vetId) return;
     setLoading(true);
     try {
-      const response = await appointmentsApi.getPendingAppointmentsForVet({ query: { date, vet_id: "YOUR_VET_ID_HERE" } });
+      const response = await appointmentsApi.getPendingAppointmentsForVet({ query: { date, vet_id: vetId } });
       if (response.success) {
         setAppointments(response.data || []);
       } else {
@@ -49,9 +71,10 @@ export const VetHealthcarePage: React.FC = () => {
   };
 
   const markAvailability = async (date: string) => {
+    if (!vetId) return;
     setAvailabilityLoading(true);
     try {
-      const response = await appointmentsApi.markAvailability({ vet_id: "YOUR_VET_ID_HERE", available_date: date });
+      const response = await appointmentsApi.markAvailability({ vet_id: vetId, available_date: date });
       if (response.success) {
         showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
       } else {
@@ -75,9 +98,7 @@ export const VetHealthcarePage: React.FC = () => {
       });
       if (response.success) {
         showSnackbar("Appointment updated successfully", SNACKBAR_SEVERITY.SUCCESS);
-        if (selectedDate) {
-          fetchAppointments(selectedDate);
-        }
+        if (selectedDate) fetchAppointments(selectedDate);
         setResponseDialogOpen(false);
       } else {
         showSnackbar("Failed to update appointment", SNACKBAR_SEVERITY.ERROR);
@@ -95,10 +116,12 @@ export const VetHealthcarePage: React.FC = () => {
           Vet Availability & Appointments
         </Typography>
         <FullCalendar
+          key={appointments.length} // Forces re-render on update
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           selectable={true}
           dateClick={(info) => setSelectedDate(info.dateStr)}
+          events={[] /* No events needed since we're not checking availability */}
         />
         <Button 
           variant="contained" 
@@ -113,20 +136,21 @@ export const VetHealthcarePage: React.FC = () => {
         <Typography variant="h6" sx={{ mt: 3 }}>
           Pending Appointments on {selectedDate || ""}
         </Typography>
-        {loading ? (
-          <CircularProgress sx={{ mt: 2 }} />
-        ) : (
-          <>
-            {appointments.length === 0 ? (
-              <Typography variant="body1">No pending appointments on this day.</Typography>
-            ) : (
-              appointments.map((appointment) => (
-                <Button key={appointment.id} onClick={() => { setSelectedAppointment(appointment); setResponseDialogOpen(true); }}>
-                  Appointment with user {appointment.user_id}
-                </Button>
-              ))
-            )}
-          </>
+        {loading ? <CircularProgress sx={{ mt: 2 }} /> : (
+          appointments.length === 0 ? (
+            <Typography variant="body1" sx={{ color: "red" }}>
+              No pending appointments on this day.
+            </Typography>
+          ) : (
+            appointments.map((appointment) => (
+              <Button
+                key={appointment.id}
+                onClick={() => { setSelectedAppointment(appointment); setResponseDialogOpen(true); }}
+              >
+                Appointment with user {appointment.user_id}
+              </Button>
+            ))
+          )
         )}
       </Paper>
 
@@ -136,16 +160,14 @@ export const VetHealthcarePage: React.FC = () => {
           <Typography>
             {selectedAppointment && `Appointment from user ${selectedAppointment.user_id}`}
           </Typography>
-          {selectedAppointment?.status === "pending" && (
-            <TextField
-              fullWidth
-              label="Rejection Reason"
-              variant="outlined"
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-          )}
+          <TextField
+            fullWidth
+            label="Rejection Reason"
+            variant="outlined"
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            sx={{ mt: 2 }}
+          />
           <Button onClick={() => handleRespondAppointment("accepted")} variant="contained" color="primary">
             Accept
           </Button>
@@ -161,5 +183,4 @@ export const VetHealthcarePage: React.FC = () => {
   );
 };
 
-export default VetHealthcarePage; 
-
+export default VetHealthcarePage;

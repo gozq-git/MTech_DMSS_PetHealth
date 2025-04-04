@@ -29,13 +29,18 @@ export const createAppointmentsApiClient = (baseClient: BaseApiClient): Appointm
       };
     },
     getAvailableVets: async (params) => {
-      const response = await baseClient.get<{ status: 'success' | 'error'; message: any }>('/api/appointments/availableVets', { params: params.query });
+      const response = await baseClient.get<{ status: 'success' | 'error'; data?: any; message?: string }>(
+        '/api/appointments/availableVets',
+        { params: params.query }
+      );
+    
       return {
         success: response.status === 'success',
-        data: response.message,
-        message: response.status === 'success' ? 'Available vets retrieved successfully' : response.message,
+        data: response.data,  
+        message: response.message || '',
       };
     },
+    
     bookAppointment: async (data) => {
       const response = await baseClient.post<{ status: 'success' | 'error'; message: any }>('/api/appointments/bookAppointment', data);
       return {
