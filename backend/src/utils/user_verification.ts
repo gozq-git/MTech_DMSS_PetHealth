@@ -43,7 +43,7 @@ module.exports = {
       })
       .catch((error) => {
         console.error(error);
-        res.status(401).send('Unauthorized');
+        res.status(401).send(error);
       });
 }
 }
