@@ -23,3 +23,9 @@ services:
     ports:
       - 8001:8001
       - 8090:8090
+  websocket:
+    build:
+      context: ./websocket-server
+    ports:
+      - "8080:8080"
+    restart: always

@@ -25,7 +25,7 @@ const UsersServices = {
             const newUser = await models.USERS.create({
                 id: uuidv6(),
                 account_name: user.account_name,
-                email: user.preferred_username,
+                email: user.email,
                 last_active: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
                 account_created: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
                 bio: user.bio,

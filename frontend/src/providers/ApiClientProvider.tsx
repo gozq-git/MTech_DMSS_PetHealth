@@ -23,7 +23,7 @@ interface ApiClients {
 }
 
 let apiClients: ApiClients;
-if (USE_MOCK_API === undefined || USE_MOCK_API == "true") {
+if (USE_MOCK_API == "true") {
     // Using mock APIs
     console.log('Using mock API clients');
     // minimal base API client (might not be used in mock mode)
