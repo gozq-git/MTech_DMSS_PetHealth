@@ -89,17 +89,17 @@ export const createMockPetApiClient = (): PetApi => {
             };
         },
 
-        // getMedicationRecords: async (petId: string): Promise<MedicationRecord[]> => {
-        //     await delay(500); // Simulate network delay
-        //     if (petId.includes("error")) {
-        //         throw new Error("Error fetching medication records");
-        //     }
-        //     const records = mockMedicationRecords.filter(record => record.petId === petId);
-        //     if (!records || records.length === 0) {
-        //         throw new Error(`Medication record for pet ID ${petId} not found`);
-        //     }
-        //     return records;
-        // },
+        getMedicationRecords: async (petId: string): Promise<MedicationRecord[]> => {
+            await delay(500); // Simulate network delay
+            if (petId.includes("error")) {
+                throw new Error("Error fetching medication records");
+            }
+            const records = mockMedicationRecords.filter(record => record.petId === petId);
+            if (!records || records.length === 0) {
+                throw new Error(`Medication record for pet ID ${petId} not found`);
+            }
+            return records;
+        },
 
         createVaccinationRecord: async (petId: string, request: VaccinationRecordRequest) => {
             await delay(500); // Simulate network delay
@@ -151,7 +151,7 @@ export const createMockPetApiClient = (): PetApi => {
             };
 
             // Add to mock data array
-            // mockMedicationRecords.push(newRecord);
+            mockMedicationRecords.push(newRecord);
 
             return newRecord;
         }
