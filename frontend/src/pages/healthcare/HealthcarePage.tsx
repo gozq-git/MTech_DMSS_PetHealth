@@ -63,6 +63,8 @@ export const HealthcarePage: React.FC = () => {
   useEffect(() => {
     if (selectedDate) {
       fetchAvailableVets(selectedDate);
+    } else {
+      setAvailableVets([]); // Clear available vets when no date is selected
     }
   }, [selectedDate]);
 
@@ -82,6 +84,8 @@ export const HealthcarePage: React.FC = () => {
 
   const fetchAvailableVets = async (date: string) => {
     setLoading(true);
+    setAvailableVets([]); // Reset available vets before making the API call
+
     try {
       const response = await availabilitiesApi.getAvailableVets({ query: { date } });
 

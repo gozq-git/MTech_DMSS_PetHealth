@@ -1,5 +1,6 @@
 import express, {Request, Response} from 'express';
 import AvailabilitiesController from './availabilities.controller';
+const logger = require('../../utils/logger');
 
 export const availabilities = express.Router();
 
@@ -52,7 +53,7 @@ availabilities.post('/markAvailability', async (req: Request, res: Response): Pr
    *       200:
    *         description: List of available vets.
    */
-  availabilities.get('/availableVets', async (req: Request, res: Response): Promise<void> => {
+  availabilities.get('/getAvailableVets', async (req: Request, res: Response): Promise<void> => {
     const { date } = req.query;
     try {
       const result = await AvailabilitiesController.getAvailableVets(date as string);

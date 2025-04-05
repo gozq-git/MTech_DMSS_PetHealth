@@ -96,10 +96,12 @@ export const VetHealthcarePage: React.FC = () => {
   };
 
   const markAvailability = async (date: string) => {
+    console.log("markAvailability called with date:", date);
     if (!vetId) return;
     setAvailabilityLoading(true);
     try {
       const response = await availabilitiesApi.markAvailability({ vet_id: vetId, available_date: date });
+      console.log("API markAvailability response", response);
       if (response.success) {
         showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
         fetchAvailability();
@@ -139,8 +141,8 @@ export const VetHealthcarePage: React.FC = () => {
     return appointments.map((appointment) => ({
       title: `Appointment with user ${appointment.user_id}`,
       date: appointment.appointment_date,
-      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'yellow',
-      borderColor: appointment.status === 'accepted' ? 'darkgreen' : appointment.status === 'rejected' ? 'darkred' : 'orange',
+      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'orange',
+      borderColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'darkred' : 'orange',
       textColor: 'white',
       extendedProps: {
         appointmentId: appointment.id,
