@@ -2,9 +2,6 @@ import { BaseApiClient } from "./createApiClient.ts";
 import { Appointment, AppointmentApiResponse } from "../types/appointments.ts";
 
 export interface AppointmentsApi {
-  markAvailability: (data: { vet_id: string; available_date: string }) => Promise<AppointmentApiResponse<any>>;
-  getAvailableVets: (params: { query: { date: string } }) => Promise<AppointmentApiResponse<any>>;
-  getAvailabilityForVet: (params: { query: { vet_id: string; } }) => Promise<AppointmentApiResponse<any>>;
   bookAppointment: (data: {
     user_id: string;
     vet_id: string;
@@ -22,37 +19,6 @@ export interface AppointmentsApi {
 
 export const createAppointmentsApiClient = (baseClient: BaseApiClient): AppointmentsApi => {
   return {
-    markAvailability: async (data) => {
-      const response = await baseClient.post<{ status: 'success' | 'error'; message: any }>('/api/appointments/markAvailability', data);
-      return {
-        success: response.status === 'success',
-        data: response.message,
-        message: response.status === 'success' ? 'Availability marked successfully' : response.message,
-      };
-    },
-
-    getAvailableVets: async (params) => {
-      const response = await baseClient.get<{ status: 'success' | 'error'; data?: any; message?: string }>(
-        '/api/appointments/availableVets',
-        { params: params.query }
-      );
-    
-      return {
-        success: response.status === 'success',
-        data: response.data,  
-        message: response.message || '',
-      };
-    },
-
-    getAvailabilityForVet: async (data) => {
-      const response = await baseClient.post<{ status: 'success' | 'error'; message: any }>('/api/appointments/getAvailabilityForVet', data);
-      return {
-        success: response.status === 'success',
-        data: response.message,
-        message: response.status === 'success' ? 'Availability marked successfully' : response.message,
-      };
-    },
-    
     bookAppointment: async (data) => {
       const response = await baseClient.post<{ status: 'success' | 'error'; message: any }>('/api/appointments/bookAppointment', data);
       return {

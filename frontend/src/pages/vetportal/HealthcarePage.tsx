@@ -17,7 +17,7 @@ interface Appointment {
 }
 
 export const VetHealthcarePage: React.FC = () => {
-  const { appointmentsApi, userApi } = useContext(ApiClientContext);
+  const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
 
   const [vetId, setVetId] = useState<string | null>(null);
@@ -80,7 +80,7 @@ export const VetHealthcarePage: React.FC = () => {
   const fetchAvailability = async () => {
     if (!vetId) return;
     try {
-      const response = await appointmentsApi.getAvailabilityForVet({ query: { vet_id: vetId } });
+      const response = await availabilitiesApi.getAvailabilityForVet({ query: { vet_id: vetId } });
       if (response.success && response.data) {
         const dates = response.data.map((item: any) =>
           new Date(item.available_date).toISOString().split("T")[0]
@@ -99,7 +99,7 @@ export const VetHealthcarePage: React.FC = () => {
     if (!vetId) return;
     setAvailabilityLoading(true);
     try {
-      const response = await appointmentsApi.markAvailability({ vet_id: vetId, available_date: date });
+      const response = await availabilitiesApi.markAvailability({ vet_id: vetId, available_date: date });
       if (response.success) {
         showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
         fetchAvailability();

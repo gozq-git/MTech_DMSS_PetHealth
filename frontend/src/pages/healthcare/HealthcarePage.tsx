@@ -24,7 +24,7 @@ interface Vet {
 }
 
 export const HealthcarePage: React.FC = () => {
-  const { appointmentsApi, userApi } = useContext(ApiClientContext);
+  const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export const HealthcarePage: React.FC = () => {
   const fetchAvailableVets = async (date: string) => {
     setLoading(true);
     try {
-      const response = await appointmentsApi.getAvailableVets({ query: { date } });
+      const response = await availabilitiesApi.getAvailableVets({ query: { date } });
 
       if (!response || !response.data) {
         showSnackbar("Invalid API response format", SNACKBAR_SEVERITY.ERROR);
