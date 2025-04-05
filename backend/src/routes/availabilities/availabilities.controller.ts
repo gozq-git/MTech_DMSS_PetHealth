@@ -23,6 +23,15 @@ const AvailabilitiesController = {
     }
   },
 
+  getAvailabilityForVet: async (vetId: string) => {
+    try {
+      const result = await AvailabilitiesService.getAvailabilityForVet(vetId);
+      return result;
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Error retrieving vet availability");
+    }
+  }
 };
 
 export default AvailabilitiesController;

@@ -62,3 +62,33 @@ availabilities.post('/markAvailability', async (req: Request, res: Response): Pr
       res.status(500).json({ status: 'error', message: error.message });
     }
   });
+
+  /**
+ * @swagger
+ * /appointments/getAvailabilityForVet:
+ *   get:
+ *     summary: Get a vet's availability.
+ *     tags:
+ *       - appointments
+ *     description: Retrieve the list of dates a specific vet is available.
+ *     parameters:
+ *       - in: query
+ *         name: vet_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The vet's ID
+ *     responses:
+ *       200:
+ *         description: List of available dates for the vet.
+ */
+availabilities.get('/getAvailabilityForVet', async (req: Request, res: Response): Promise<void> => {
+  const { vet_id } = req.query;
+  try {
+    const result = await AvailabilitiesController.getAvailabilityForVet(vet_id as string);
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error: any) {
+    logger.error(error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});

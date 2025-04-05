@@ -64,7 +64,7 @@ const AppointmentsService = {
     try {
       const appointment = await models.APPOINTMENTS.findOne({
         where: { id: appointmentId }
-      }) as any; // Replace 'any' with the actual type of the APPOINTMENTS model if available
+      }) as any; 
       if (!appointment) {
         throw new Error("Appointment not found");
       }
@@ -83,15 +83,35 @@ const AppointmentsService = {
 // Fetch all appointments for a given vet on a specific date (pending, accepted, and rejected)
 getAppointmentsForVet: async (vetId: string, date: string) => {
   try {
-    // Fetch all appointments for the given vet and date (including all statuses)
     const appointments = await models.APPOINTMENTS.findAll({
       where: {
         appointment_date: date,
-        vet_id: vetId,  // Ensure only this vet's appointments are fetched
+        vet_id: vetId, 
       },
       include: [
         {
-          model: models.USERS, // Optional: include user details
+          model: models.USERS, 
+          required: true,
+        },
+      ],
+    });
+    return appointments;
+  } catch (error: any) {
+    logger.error(error);
+    throw new Error("Error retrieving appointments");
+  }
+},
+
+// Fetch all appointments for a given user(pending, accepted, and rejected)
+getAppointmentsForUser: async (userId: string) => {
+  try {
+    const appointments = await models.APPOINTMENTS.findAll({
+      where: {
+        user_id: userId, 
+      },
+      include: [
+        {
+          model: models.USERS,
           required: true,
         },
       ],
