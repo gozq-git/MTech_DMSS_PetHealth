@@ -67,12 +67,13 @@ const UsersServices = {
           const userId = updatedUser.get('id');
       
           // If vet-related fields are provided, update or create the vet record
-          if (user.vet_license || user.vet_center || user.vet_phone) {
+          if (user.vet_license || user.vet_center || user.vet_phone || user.display_name) {
             const vetData = {
               id: userId, // same as user id
               vet_license: user.vet_license,
               vet_center: user.vet_center,
               vet_phone: user.vet_phone,
+              vet_name: user.display_name,
             };
       
             // Check if a vet record already exists for this user

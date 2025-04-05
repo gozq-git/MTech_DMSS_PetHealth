@@ -11,6 +11,7 @@ export const vets = {
         vet_license: { type: DataTypes.INTEGER },
         vet_center: { type: DataTypes.STRING },
         vet_phone: { type: DataTypes.INTEGER },
+        vet_name: { type: DataTypes.STRING },
     },
     options: {
         freezeTableName: true,
