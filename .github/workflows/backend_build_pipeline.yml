@@ -95,8 +95,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags:
-            type=raw,value=latest
+          tags:
+              type=raw,value=latest
           
       - name: Build and Push Image
         uses: docker/build-push-action@v5
