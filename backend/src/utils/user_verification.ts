@@ -7,11 +7,8 @@ const client = jwksClient({
   jwksUri: `https://login.microsoftonline.com/${config.tennat_id}/discovery/keys` // Update with your JWKS URL
 });
 
-console.log('JWKS URI:', config.tennat_id);
-
 // Helper function to retrieve signing key from kid (key ID)
 function getKey(header: any, callback: any) {
-  console.log('Header:', header);
   client.getSigningKey(header.kid, (err: Error, key: any) => {
     if (err) {
       return callback(err);
