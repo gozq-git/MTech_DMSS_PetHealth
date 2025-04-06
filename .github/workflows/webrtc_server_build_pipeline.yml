@@ -106,19 +106,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: az-registry
-  #   steps:
-  #     - uses: azure/login@v2
-  #       with:
-  #         creds: ${{ secrets.AZ_SP_WEBRTC_DEV }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: az-registry
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZ_SP_WEBRTC_DEV }}
 
-  #     - name: 'Deploy to Azure Web App for Container'
-  #       uses: azure/webapps-deploy@v2
-  #       with: 
-  #         app-name: ${{ env.AZURE_WEBAPP_NAME }} 
-  #         images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: 'Deploy to Azure Web App for Container'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} 
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
 
 
 
