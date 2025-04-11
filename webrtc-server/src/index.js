@@ -1,4 +1,3 @@
-// websocket-server/src/index.js
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
 import cors from 'cors';
@@ -13,7 +12,7 @@ const wss = new WebSocketServer({ server });
 // Store for active connections and waiting room state
 const connections = new Map();
 const waitingRoom = {
-    petOwners: [],
+    petOwners: [], // This will track pet owners by their appointmentId
     vets: []
 };
 
@@ -31,41 +30,46 @@ wss.on('connection', (ws) => {
 
             switch (data.type) {
                 case 'register':
-                    // Register user with role and ID
+                    // Register user with role, ID, and appointmentId
                     connections.set(ws, {
                         id: data.userId,
                         role: data.role, // 'pet-owner' or 'vet'
+                        appointmentId: data.appointmentId, // Store the appointmentId
                         channelName: null // Initialize with no channel
                     });
 
-                    // Add to appropriate waiting list
                     if (data.role === 'pet-owner') {
+                        // Add pet owner to waiting room with appointmentId
                         waitingRoom.petOwners.push({
                             id: data.userId,
+                            appointmentId: data.appointmentId,
                             joinTime: new Date(),
                             ws: ws,
                             petInfo: data.petInfo || {},
                             reason: data.reason || 'No reason provided'
                         });
 
-                        // Send confirmation to pet owner
+                        // Send confirmation to pet owner with their waiting position
+                        const position = waitingRoom.petOwners.length;
                         ws.send(JSON.stringify({
                             type: 'waiting_room_joined',
-                            position: waitingRoom.petOwners.length,
-                            estimatedWaitMinutes: waitingRoom.petOwners.length * 10 // Simple estimation
+                            position: position,
+                            estimatedWaitMinutes: position * 10 // Simple wait time estimation
                         }));
 
-                        // Notify all vets of waiting pet owner
+                        // Notify all vets of the updated waiting list
                         broadcastToVets({
                             type: 'waiting_list_update',
                             waitingPetOwners: waitingRoom.petOwners.map(owner => ({
                                 id: owner.id,
+                                appointmentId: owner.appointmentId, // Include appointmentId
                                 waitingSince: owner.joinTime,
                                 petInfo: owner.petInfo,
                                 reason: owner.reason
                             }))
                         });
                     } else if (data.role === 'vet') {
+                        // Add vet to waiting room (no appointmentId here, just ID)
                         waitingRoom.vets.push({
                             id: data.userId,
                             ws: ws
@@ -76,6 +80,7 @@ wss.on('connection', (ws) => {
                             type: 'waiting_list_update',
                             waitingPetOwners: waitingRoom.petOwners.map(owner => ({
                                 id: owner.id,
+                                appointmentId: owner.appointmentId, // Include appointmentId
                                 waitingSince: owner.joinTime,
                                 petInfo: owner.petInfo,
                                 reason: owner.reason
@@ -85,18 +90,18 @@ wss.on('connection', (ws) => {
                     break;
 
                 case 'accept_consultation':
-                    // Vet accepting a consultation with pet owner
-                    const petOwner = waitingRoom.petOwners.find(owner => owner.id === data.petOwnerId);
+                    // Vet accepting a consultation with a pet owner based on appointmentId
+                    const petOwner = waitingRoom.petOwners.find(owner => owner.appointmentId === data.appointmentId);
                     const vetInfo = connections.get(ws);
 
                     if (petOwner && vetInfo) {
-                        // Remove from waiting room
-                        waitingRoom.petOwners = waitingRoom.petOwners.filter(owner => owner.id !== data.petOwnerId);
+                        // Remove pet owner from the waiting room
+                        waitingRoom.petOwners = waitingRoom.petOwners.filter(owner => owner.appointmentId !== data.appointmentId);
 
-                        // Create a channel for them
-                        const channelName = `consult-${Date.now()}`;
+                        // Create a channel for the consultation
+                        const channelName = `consult-${data.appointmentId}`;
 
-                        // Update channelName for both participants
+                        // Update the channelName for both participants
                         connections.set(ws, {
                             ...vetInfo,
                             channelName: channelName
@@ -110,11 +115,12 @@ wss.on('connection', (ws) => {
                         // Track the consultation
                         activeConsultations.set(channelName, {
                             vetId: vetInfo.id,
-                            petOwnerId: data.petOwnerId,
+                            petOwnerId: petOwner.id,
+                            appointmentId: petOwner.appointmentId,
                             started: new Date()
                         });
 
-                        // Notify both parties
+                        // Notify both participants about the consultation starting
                         petOwner.ws.send(JSON.stringify({
                             type: 'consultation_starting',
                             channelName,
@@ -124,14 +130,15 @@ wss.on('connection', (ws) => {
                         ws.send(JSON.stringify({
                             type: 'consultation_starting',
                             channelName,
-                            petOwnerId: data.petOwnerId
+                            petOwnerId: petOwner.id
                         }));
 
-                        // Update all vets with new waiting list
+                        // Update all vets with the new waiting list
                         broadcastToVets({
                             type: 'waiting_list_update',
                             waitingPetOwners: waitingRoom.petOwners.map(owner => ({
                                 id: owner.id,
+                                appointmentId: owner.appointmentId, // Include appointmentId
                                 waitingSince: owner.joinTime,
                                 petInfo: owner.petInfo,
                                 reason: owner.reason
@@ -155,16 +162,15 @@ wss.on('connection', (ws) => {
 
                 // Handle WebRTC signaling messages
                 case 'send_offer':
-                    console.log('send_offer data',data);
+                    console.log('send_offer data', data);
                     broadcastToChannel(data, data.channelName, ws);
                     break;
                 case 'send_answer':
-                    console.log('send_answer data',data);
+                    console.log('send_answer data', data);
                     broadcastToChannel(data, data.channelName, ws);
                     break;
                 case 'ice_candidate':
-                    console.log('ice_candidate data',data)
-                    // Forward to appropriate recipients based on channelName
+                    console.log('ice_candidate data', data)
                     broadcastToChannel(data, data.channelName, ws);
                     break;
             }
@@ -203,6 +209,7 @@ wss.on('connection', (ws) => {
                     type: 'waiting_list_update',
                     waitingPetOwners: waitingRoom.petOwners.map(owner => ({
                         id: owner.id,
+                        appointmentId: owner.appointmentId, // Include appointmentId
                         waitingSince: owner.joinTime,
                         petInfo: owner.petInfo,
                         reason: owner.reason

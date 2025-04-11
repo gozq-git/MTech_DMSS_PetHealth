@@ -9,12 +9,14 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  TextField,
 } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
+import { useNavigate } from "react-router-dom";
 
 interface Vet {
   id: string;
@@ -26,6 +28,7 @@ interface Vet {
 export const HealthcarePage: React.FC = () => {
   const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
+  const navigate = useNavigate();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableVets, setAvailableVets] = useState<Vet[]>([]);
@@ -33,9 +36,12 @@ export const HealthcarePage: React.FC = () => {
   const [selectedVet, setSelectedVet] = useState<Vet | null>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
   interface Appointment {
     id: string;
     appointment_date: string;
+    appointment_time: string;
     vet_id: string;
     status: string;
   }
@@ -64,7 +70,7 @@ export const HealthcarePage: React.FC = () => {
     if (selectedDate) {
       fetchAvailableVets(selectedDate);
     } else {
-      setAvailableVets([]); // Clear available vets when no date is selected
+      setAvailableVets([]);
     }
   }, [selectedDate]);
 
@@ -72,7 +78,12 @@ export const HealthcarePage: React.FC = () => {
     try {
       const response = await appointmentsApi.getAppointmentsForUser({ query: { user_id: id } });
       if (response.success && response.data) {
-        setUserAppointments(response.data);
+        setUserAppointments(
+          response.data.map((appointment: any) => ({
+            ...appointment,
+            appointment_time: appointment.appointment_time || "",
+          }))
+        );
       } else {
         showSnackbar("Failed to fetch appointments", SNACKBAR_SEVERITY.ERROR);
       }
@@ -84,7 +95,7 @@ export const HealthcarePage: React.FC = () => {
 
   const fetchAvailableVets = async (date: string) => {
     setLoading(true);
-    setAvailableVets([]); // Reset available vets before making the API call
+    setAvailableVets([]);
 
     try {
       const response = await availabilitiesApi.getAvailableVets({ query: { date } });
@@ -124,8 +135,8 @@ export const HealthcarePage: React.FC = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!selectedDate || !selectedVet || !userId) {
-      showSnackbar("Error: Missing user ID or appointment details", SNACKBAR_SEVERITY.ERROR);
+    if (!selectedDate || !selectedVet || !userId || !selectedTime) {
+      showSnackbar("Error: Missing user ID, appointment details, or time", SNACKBAR_SEVERITY.ERROR);
       return;
     }
 
@@ -134,14 +145,14 @@ export const HealthcarePage: React.FC = () => {
         user_id: userId,
         vet_id: selectedVet.id,
         appointment_date: selectedDate,
-        appointment_time: null,
+        appointment_time: selectedTime,
       };
 
       const response = await appointmentsApi.bookAppointment(appointmentData);
       if (response.success) {
         showSnackbar("Appointment booked successfully!", SNACKBAR_SEVERITY.SUCCESS);
         setBookingDialogOpen(false);
-        fetchUserAppointments(userId); // Refresh after booking
+        fetchUserAppointments(userId);
       } else {
         showSnackbar("Failed to book appointment", SNACKBAR_SEVERITY.ERROR);
       }
@@ -151,10 +162,32 @@ export const HealthcarePage: React.FC = () => {
     }
   };
 
+  const handleJoinCall = (appointmentId: string) => {
+    navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+  };
+
+  const formatTime = (time: string) => {
+    if (!time) return "Not specified";
+  
+    // Normalize to HH:mm if time includes seconds or Z
+    const timeMatch = time.match(/^(\d{2}:\d{2})(:\d{2})?/);
+    if (!timeMatch || !timeMatch[1]) return "Not specified";
+  
+    const normalizedTime = timeMatch[1]; // "14:30"
+    const date = new Date(`1970-01-01T${normalizedTime}`);
+    if (isNaN(date.getTime())) return "Not specified";
+  
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  
   return (
-    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}>
-      <Paper sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom>
+    <Container maxWidth="lg" sx={{ mt: 6 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+        <Typography variant="h4" gutterBottom fontWeight={600}>
           Book an Appointment
         </Typography>
 
@@ -163,46 +196,71 @@ export const HealthcarePage: React.FC = () => {
           initialView="dayGridMonth"
           selectable={true}
           dateClick={(info) => setSelectedDate(info.dateStr)}
+          height="auto"
         />
 
         {loading ? (
-          <CircularProgress sx={{ mt: 2 }} />
+          <CircularProgress sx={{ mt: 3 }} />
         ) : (
           <>
-            <Typography variant="h6" sx={{ mt: 3 }}>
-              Available Vets on {selectedDate || ""}
+            <Typography variant="h6" sx={{ mt: 4 }} fontWeight={500}>
+              Available Vets on {selectedDate || "—"}
             </Typography>
             {availableVets.length === 0 ? (
-              <Typography variant="body1">No vets available on this day.</Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                No vets available on this day.
+              </Typography>
             ) : (
-              availableVets.map((vet) => (
-                <Button
-                  key={vet.id}
-                  onClick={() => {
-                    setSelectedVet(vet);
-                    setBookingDialogOpen(true);
-                  }}
-                >
-                  {vet.vet_center || "N/A"} (License: {vet.vet_license || "N/A"})
-                </Button>
-              ))
+              <Paper elevation={1} sx={{ p: 2, mt: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}>
+                {availableVets.map((vet) => (
+                  <Button
+                    key={vet.id}
+                    variant="outlined"
+                    color="primary"
+                    sx={{ m: 1 }}
+                    onClick={() => {
+                      setSelectedVet(vet);
+                      setBookingDialogOpen(true);
+                    }}
+                  >
+                    {vet.vet_center || "N/A"} (License: {vet.vet_license || "N/A"})
+                  </Button>
+                ))}
+              </Paper>
             )}
           </>
         )}
       </Paper>
 
-      <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
+      <Paper elevation={3} sx={{ p: 4, mt: 6, borderRadius: 4 }}>
+        <Typography variant="h5" gutterBottom fontWeight={600}>
           Your Appointments
         </Typography>
+
         {userAppointments.length === 0 ? (
-          <Typography variant="body1">No appointments found.</Typography>
+          <Typography variant="body1" color="text.secondary">
+            No appointments found.
+          </Typography>
         ) : (
           userAppointments.map((appointment) => (
-            <Paper key={appointment.id} sx={{ p: 2, mt: 2 }}>
+            <Paper
+              key={appointment.id}
+              elevation={2}
+              sx={{
+                p: 3,
+                mt: 2,
+                borderLeft: 4,
+                borderColor: "primary.main",
+                borderRadius: 2,
+                backgroundColor: "#fcfcfc",
+              }}
+            >
               <Typography>
                 <strong>Date:</strong>{" "}
                 {new Date(appointment.appointment_date).toLocaleDateString()}
+              </Typography>
+              <Typography>
+              <strong>Time:</strong> {formatTime(appointment.appointment_time)}
               </Typography>
               <Typography>
                 <strong>Vet ID:</strong> {appointment.vet_id}
@@ -210,21 +268,49 @@ export const HealthcarePage: React.FC = () => {
               <Typography>
                 <strong>Status:</strong> {appointment.status}
               </Typography>
+              {appointment.status === "accepted" && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ mt: 2 }}
+                  onClick={() => handleJoinCall(appointment.id)}
+                >
+                  Join Call
+                </Button>
+              )}
             </Paper>
           ))
         )}
       </Paper>
 
-      <Dialog open={bookingDialogOpen} onClose={() => setBookingDialogOpen(false)}>
-        <DialogTitle>Confirm Appointment</DialogTitle>
+      <Dialog
+        open={bookingDialogOpen}
+        onClose={() => setBookingDialogOpen(false)}
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle fontWeight={600}>Confirm Appointment</DialogTitle>
         <DialogContent>
           <Typography>
             {selectedVet &&
               `Book an appointment with vet at ${selectedVet.vet_center || "N/A"} on ${selectedDate}.`}
           </Typography>
+
+          <TextField
+            type="time"
+            label="Appointment Time"
+            value={selectedTime}
+            onChange={(e) => setSelectedTime(e.target.value)}
+            fullWidth
+            sx={{ mt: 3 }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setBookingDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setBookingDialogOpen(false)} color="inherit">
+            Cancel
+          </Button>
           <Button onClick={handleBookAppointment} variant="contained" color="primary">
             Confirm Booking
           </Button>
@@ -232,6 +318,7 @@ export const HealthcarePage: React.FC = () => {
       </Dialog>
     </Container>
   );
+
 };
 
 export default HealthcarePage;
