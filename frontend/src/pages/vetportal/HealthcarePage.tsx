@@ -154,8 +154,8 @@ export const VetHealthcarePage: React.FC = () => {
     return appointments.map((appointment) => ({
       title: `Appointment with user ${appointment.user_id}`,
       date: appointment.appointment_date,
-      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'orange',
-      borderColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'darkred' : 'orange',
+      backgroundColor: appointment.status === 'accepted' ? '#4caf50' : appointment.status === 'rejected' ? '#f44336' : '#ff9800',
+      borderColor: appointment.status === 'accepted' ? '#388e3c' : appointment.status === 'rejected' ? '#d32f2f' : '#f57c00',
       textColor: 'white',
       extendedProps: {
         appointmentId: appointment.id,
@@ -167,7 +167,7 @@ export const VetHealthcarePage: React.FC = () => {
     return availabilityDates.map((date) => ({
       start: date,
       display: "background",
-      backgroundColor: "#a5d6a7",
+      backgroundColor: "#a5d6a7", // Green shade for availability days
       borderColor: "#a5d6a7",
       className: "vet-available-day"
     }));
@@ -222,10 +222,10 @@ export const VetHealthcarePage: React.FC = () => {
                   p: 2,
                   borderLeft: `6px solid ${
                     appointment.status === "accepted"
-                      ? "#4caf50"
+                      ? "#4caf50" // Green color for accepted appointments
                       : appointment.status === "rejected"
-                      ? "#f44336"
-                      : "#ff9800"
+                      ? "#f44336" // Red color for rejected appointments
+                      : "#ff9800" // Orange color for pending appointments
                   }`,
                 }}
               >

@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useNavigate } from 'react-router-dom';
 import { useMsal } from "@azure/msal-react";
-import { Button } from "@mui/material";
+import { Button, Box, Typography } from "@mui/material";
 import { loginRequest } from "../authConfig.ts";
 import { AutoAwesome, Home, MedicalServices } from "@mui/icons-material";
 import { SideBarButton } from "./SideBarButton.tsx";
@@ -58,25 +58,45 @@ const SideBar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             variant="temporary"
             open={isOpen}
             onClose={onClose}
-            sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
+            sx={{
+                '& .MuiDrawer-paper': { 
+                    width: drawerWidth, 
+                    backgroundColor: '#f4f4f9', 
+                    borderRight: '2px solid #ccc',
+                    boxShadow: '3px 0 10px rgba(0, 0, 0, 0.1)',
+                },
+            }}
         >
             <Toolbar>
                 <IconButton onClick={onClose}>
-                    <ChevronLeftIcon />
+                    <ChevronLeftIcon sx={{ color: '#2196F3' }} />
                 </IconButton>
             </Toolbar>
             <Divider />
-            {activeAccount ? (
-                <List>
-                    {computedItems.map((item) => (
-                        <ListItem key={item.id} disablePadding>
-                            <SideBarButton item={item} onClick={() => handleNavigation(item.endpoint)} />
-                        </ListItem>
-                    ))}
-                </List>
-            ) : (
-                <Button onClick={() => instance.loginRedirect(loginRequest)}>Login to Access Features</Button>
-            )}
+            <Box sx={{ padding: 2 }}>
+                {activeAccount ? (
+                    <List>
+                        {computedItems.map((item) => (
+                            <ListItem key={item.id} disablePadding>
+                                <SideBarButton item={item} onClick={() => handleNavigation(item.endpoint)} />
+                            </ListItem>
+                        ))}
+                    </List>
+                ) : (
+                    <Box sx={{ textAlign: 'center', marginTop: 2 }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+                            Please log in to access features
+                        </Typography>
+                        <Button
+                            onClick={() => instance.loginRedirect(loginRequest)}
+                            variant="contained"
+                            sx={{ width: '100%', backgroundColor: '#00897B', color: 'white' }}
+                        >
+                            Login
+                        </Button>
+                    </Box>
+                )}
+            </Box>
         </Drawer>
     );
 };

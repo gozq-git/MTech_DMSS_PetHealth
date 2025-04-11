@@ -46,13 +46,11 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
 
     const handleToggleVetMode = () => {
         if (accountType === "vet") {
-            // Switch to User mode, show user pages
             setAccountType("user");
             navigate("/home");  // Redirect to user home
         } else {
-            // Switch to Vet mode, check profile
             setAccountType("vet");
-            navigate("/vetportal");  // Redirect to vet portal for profile check
+            navigate("/vetportal");  // Redirect to vet portal
         }
         handleClose();
     };
@@ -70,17 +68,17 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
     };
 
     return (
-        <AppBar position="fixed" sx={{ backgroundColor: '#795548' }}>
+        <AppBar position="fixed" sx={{ backgroundColor: '#00897B', boxShadow: 3 }}>
             <Toolbar>
                 <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{ mr: 2 }}>
                     <MenuIcon />
                 </IconButton>
-                <PetsIcon sx={{ mr: 1 }} />
-                <Typography variant="h6" noWrap>
+                <PetsIcon sx={{ color: 'white', mr: 1 }} />
+                <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }} noWrap>
                     Pet Health Platform
                 </Typography>
                 <div style={{ marginLeft: 'auto' }}>
-                    <IconButton color="inherit" onClick={handleMenu}>
+                    <IconButton color="inherit" onClick={handleMenu} sx={{ '&:hover': { transform: 'scale(1.1)', transition: 'transform 0.2s' } }}>
                         <AccountCircle />
                     </IconButton>
                     <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
@@ -91,7 +89,7 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                         <Avatar sx={{ width: 40, height: 40, mr: 2 }} />
                                         <Box>
-                                            <Typography variant="subtitle1">
+                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                                 {activeAccount.name || 'User'}
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
@@ -104,7 +102,7 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
                                 {/* Show access token in DEV mode */}
                                 {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent /></MenuItem>}
 
-                                <Divider />
+                                <Divider sx={{ my: 1 }} />
 
                                 {/* Profile & Settings */}
                                 <MenuItem onClick={() => handleNavigation(ROUTES.PROFILE.path)}>
@@ -114,14 +112,14 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
                                     Settings
                                 </MenuItem>
 
-                                <Divider />
+                                <Divider sx={{ my: 1 }} />
 
                                 {/* Vet Mode Toggle */}
                                 <MenuItem onClick={handleToggleVetMode}>
                                     {accountType === "vet" ? "Switch to User Mode" : "Go to Vet Portal"}
                                 </MenuItem>
 
-                                <Divider />
+                                <Divider sx={{ my: 1 }} />
 
                                 {/* Logout */}
                                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
