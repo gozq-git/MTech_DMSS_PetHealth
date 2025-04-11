@@ -1,10 +1,14 @@
+import {Container} from "@mui/material";
+import Box from "@mui/material/Box";
+import HomePageContent from "../home/HomePageContent.tsx";
+
 const VetHomePage = () => {
-    return (
-        <div style={{ padding: "20px", textAlign: "center" }}>
-            <h1>Vet Portal</h1>
-            <p>This is a vet page.</p>
-        </div>
-    );
-};
+    return (<Container maxWidth="lg">
+        <Box sx={{display: 'flex', flexDirection: 'column'}}>
+            <HomePageContent/>
+        </Box>
+    </Container>)
+
+}
 
 export default VetHomePage;

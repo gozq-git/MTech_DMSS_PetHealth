@@ -169,11 +169,10 @@ export const HealthcarePage: React.FC = () => {
   const formatTime = (time: string) => {
     if (!time) return "Not specified";
   
-    // Normalize to HH:mm if time includes seconds or Z
     const timeMatch = time.match(/^(\d{2}:\d{2})(:\d{2})?/);
     if (!timeMatch || !timeMatch[1]) return "Not specified";
   
-    const normalizedTime = timeMatch[1]; // "14:30"
+    const normalizedTime = timeMatch[1];
     const date = new Date(`1970-01-01T${normalizedTime}`);
     if (isNaN(date.getTime())) return "Not specified";
   
@@ -183,11 +182,11 @@ export const HealthcarePage: React.FC = () => {
       hour12: true,
     });
   };
-  
+
   return (
     <Container maxWidth="lg" sx={{ mt: 6 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
-        <Typography variant="h4" gutterBottom fontWeight={600}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: '#ffffff' }}>
+        <Typography variant="h4" gutterBottom fontWeight={600} color="primary.main">
           Book an Appointment
         </Typography>
 
@@ -211,7 +210,7 @@ export const HealthcarePage: React.FC = () => {
                 No vets available on this day.
               </Typography>
             ) : (
-              <Paper elevation={1} sx={{ p: 2, mt: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}>
+              <Paper elevation={1} sx={{ p: 2, mt: 2, borderRadius: 2, backgroundColor: "#ffffff" }}>
                 {availableVets.map((vet) => (
                   <Button
                     key={vet.id}
@@ -232,8 +231,8 @@ export const HealthcarePage: React.FC = () => {
         )}
       </Paper>
 
-      <Paper elevation={3} sx={{ p: 4, mt: 6, borderRadius: 4 }}>
-        <Typography variant="h5" gutterBottom fontWeight={600}>
+      <Paper elevation={3} sx={{ p: 4, mt: 6, borderRadius: 4, backgroundColor: '#ffffff' }}>
+        <Typography variant="h5" gutterBottom fontWeight={600} color="primary.main">
           Your Appointments
         </Typography>
 
@@ -252,7 +251,7 @@ export const HealthcarePage: React.FC = () => {
                 borderLeft: 4,
                 borderColor: "primary.main",
                 borderRadius: 2,
-                backgroundColor: "#fcfcfc",
+                backgroundColor: "#ffffff",
               }}
             >
               <Typography>
@@ -260,7 +259,7 @@ export const HealthcarePage: React.FC = () => {
                 {new Date(appointment.appointment_date).toLocaleDateString()}
               </Typography>
               <Typography>
-              <strong>Time:</strong> {formatTime(appointment.appointment_time)}
+                <strong>Time:</strong> {formatTime(appointment.appointment_time)}
               </Typography>
               <Typography>
                 <strong>Vet ID:</strong> {appointment.vet_id}
@@ -271,7 +270,7 @@ export const HealthcarePage: React.FC = () => {
               {appointment.status === "accepted" && (
                 <Button
                   variant="contained"
-                  color="success"
+                  color="primary"
                   sx={{ mt: 2 }}
                   onClick={() => handleJoinCall(appointment.id)}
                 >
@@ -286,7 +285,7 @@ export const HealthcarePage: React.FC = () => {
       <Dialog
         open={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3 } }}
+        PaperProps={{ sx: { borderRadius: 3, backgroundColor: "#ffffff" } }}
       >
         <DialogTitle fontWeight={600}>Confirm Appointment</DialogTitle>
         <DialogContent>
@@ -318,7 +317,6 @@ export const HealthcarePage: React.FC = () => {
       </Dialog>
     </Container>
   );
-
 };
 
 export default HealthcarePage;
