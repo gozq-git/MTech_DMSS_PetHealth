@@ -106,6 +106,12 @@ export const VetHealthcarePage: React.FC = () => {
 
   const markAvailability = async (date: string) => {
     if (!vetId) return;
+
+    if (availabilityDates.includes(date)) {
+      showSnackbar("This day is already marked as available", SNACKBAR_SEVERITY.INFO);
+      return;
+    }
+
     setAvailabilityLoading(true);
     try {
       const response = await availabilitiesApi.markAvailability({ vet_id: vetId, available_date: date });
@@ -161,7 +167,9 @@ export const VetHealthcarePage: React.FC = () => {
     return availabilityDates.map((date) => ({
       start: date,
       display: "background",
-      backgroundColor: "#d0f0c0",
+      backgroundColor: "#a5d6a7",
+      borderColor: "#a5d6a7",
+      className: "vet-available-day"
     }));
   };
 
@@ -182,14 +190,17 @@ export const VetHealthcarePage: React.FC = () => {
           height="auto"
         />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 3 }}>
           <Button
             variant="contained"
             onClick={() => selectedDate && markAvailability(selectedDate)}
-            disabled={availabilityLoading}
+            disabled={availabilityLoading || (selectedDate ? availabilityDates.includes(selectedDate) : false)}
           >
             {availabilityLoading ? "Marking..." : "Mark Availability for Selected Date"}
           </Button>
+          <Typography variant="body2" color="text.secondary">
+            * Available days are highlighted in green on the calendar.
+          </Typography>
         </Box>
 
         <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>

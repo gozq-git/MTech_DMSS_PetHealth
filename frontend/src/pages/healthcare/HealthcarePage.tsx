@@ -166,13 +166,31 @@ export const HealthcarePage: React.FC = () => {
     navigate(`/teleconsultation?appointmentId=${appointmentId}`);
   };
 
+  const formatTime = (time: string) => {
+    if (!time) return "Not specified";
+  
+    // Normalize to HH:mm if time includes seconds or Z
+    const timeMatch = time.match(/^(\d{2}:\d{2})(:\d{2})?/);
+    if (!timeMatch || !timeMatch[1]) return "Not specified";
+  
+    const normalizedTime = timeMatch[1]; // "14:30"
+    const date = new Date(`1970-01-01T${normalizedTime}`);
+    if (isNaN(date.getTime())) return "Not specified";
+  
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  
   return (
     <Container maxWidth="lg" sx={{ mt: 6 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight={600}>
           Book an Appointment
         </Typography>
-  
+
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -180,7 +198,7 @@ export const HealthcarePage: React.FC = () => {
           dateClick={(info) => setSelectedDate(info.dateStr)}
           height="auto"
         />
-  
+
         {loading ? (
           <CircularProgress sx={{ mt: 3 }} />
         ) : (
@@ -213,12 +231,12 @@ export const HealthcarePage: React.FC = () => {
           </>
         )}
       </Paper>
-  
+
       <Paper elevation={3} sx={{ p: 4, mt: 6, borderRadius: 4 }}>
         <Typography variant="h5" gutterBottom fontWeight={600}>
           Your Appointments
         </Typography>
-  
+
         {userAppointments.length === 0 ? (
           <Typography variant="body1" color="text.secondary">
             No appointments found.
@@ -242,14 +260,7 @@ export const HealthcarePage: React.FC = () => {
                 {new Date(appointment.appointment_date).toLocaleDateString()}
               </Typography>
               <Typography>
-                <strong>Time:</strong>{" "}
-                {appointment.appointment_time
-                  ? new Date(`1970-01-01T${appointment.appointment_time}`).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                  : "Not specified"}
+              <strong>Time:</strong> {formatTime(appointment.appointment_time)}
               </Typography>
               <Typography>
                 <strong>Vet ID:</strong> {appointment.vet_id}
@@ -271,7 +282,7 @@ export const HealthcarePage: React.FC = () => {
           ))
         )}
       </Paper>
-  
+
       <Dialog
         open={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
@@ -283,7 +294,7 @@ export const HealthcarePage: React.FC = () => {
             {selectedVet &&
               `Book an appointment with vet at ${selectedVet.vet_center || "N/A"} on ${selectedDate}.`}
           </Typography>
-  
+
           <TextField
             type="time"
             label="Appointment Time"
@@ -307,7 +318,7 @@ export const HealthcarePage: React.FC = () => {
       </Dialog>
     </Container>
   );
-  
+
 };
 
 export default HealthcarePage;
