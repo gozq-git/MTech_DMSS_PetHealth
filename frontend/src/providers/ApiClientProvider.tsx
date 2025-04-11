@@ -4,6 +4,7 @@ import {createPetApiClient, PetApi} from "../api/client/petApi.ts";
 import {createUserApiClient, UserApi} from "../api/client/userApi.ts";
 import {createMockPetApiClient} from "../api/client/mockPetApi.ts";
 import { createAppointmentsApiClient, AppointmentsApi } from "../api/client/appointmentsApi.ts";
+import { createAvailabilitiesApiClient, AvailabilitiesApi } from "../api/client/availabilitiesApi.ts";
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API
 console.debug(`USE_MOCK_API: ${USE_MOCK_API}`);
@@ -20,6 +21,7 @@ interface ApiClients {
     userApi: UserApi;
     petApi: PetApi;
     appointmentsApi: AppointmentsApi;
+    availabilitiesApi: AvailabilitiesApi;
 }
 
 let apiClients: ApiClients;
@@ -32,7 +34,8 @@ if (USE_MOCK_API == "true") {
         baseApi: mockBaseClient,
         userApi: createUserApiClient(baseApiClient),
         petApi: createMockPetApiClient(),
-        appointmentsApi: createAppointmentsApiClient(baseApiClient)
+        appointmentsApi: createAppointmentsApiClient(baseApiClient),
+        availabilitiesApi: createAvailabilitiesApiClient(baseApiClient)
     };
 } else {
     // Using real APIs
@@ -43,7 +46,8 @@ if (USE_MOCK_API == "true") {
         baseApi: baseApiClient,
         userApi: createUserApiClient(baseApiClient),
         petApi: createPetApiClient(baseApiClient),
-        appointmentsApi: createAppointmentsApiClient(baseApiClient)
+        appointmentsApi: createAppointmentsApiClient(baseApiClient),
+        availabilitiesApi: createAvailabilitiesApiClient(baseApiClient)
     };
 }
 

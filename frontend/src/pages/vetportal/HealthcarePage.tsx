@@ -17,12 +17,13 @@ interface Appointment {
 }
 
 export const VetHealthcarePage: React.FC = () => {
-  const { appointmentsApi, userApi } = useContext(ApiClientContext);
+  const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
 
   const [vetId, setVetId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [availabilityLoading, setAvailabilityLoading] = useState<boolean>(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -45,6 +46,12 @@ export const VetHealthcarePage: React.FC = () => {
     };
     fetchVetId();
   }, []);
+
+  useEffect(() => {
+    if (vetId) {
+      fetchAvailability();
+    }
+  }, [vetId]);
 
   useEffect(() => {
     if (selectedDate && vetId) {
@@ -70,13 +77,34 @@ export const VetHealthcarePage: React.FC = () => {
     }
   };
 
+  const fetchAvailability = async () => {
+    if (!vetId) return;
+    try {
+      const response = await availabilitiesApi.getAvailabilityForVet({ query: { vet_id: vetId } });
+      if (response.success && response.data) {
+        const dates = response.data.map((item: any) =>
+          new Date(item.available_date).toISOString().split("T")[0]
+        );
+        setAvailabilityDates(dates);
+      } else {
+        showSnackbar("Failed to fetch availability", SNACKBAR_SEVERITY.ERROR);
+      }
+    } catch (error) {
+      console.error("Error fetching availability", error);
+      showSnackbar("Error fetching availability", SNACKBAR_SEVERITY.ERROR);
+    }
+  };
+
   const markAvailability = async (date: string) => {
+    console.log("markAvailability called with date:", date);
     if (!vetId) return;
     setAvailabilityLoading(true);
     try {
-      const response = await appointmentsApi.markAvailability({ vet_id: vetId, available_date: date });
+      const response = await availabilitiesApi.markAvailability({ vet_id: vetId, available_date: date });
+      console.log("API markAvailability response", response);
       if (response.success) {
         showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
+        fetchAvailability();
       } else {
         showSnackbar("Failed to mark availability", SNACKBAR_SEVERITY.ERROR);
       }
@@ -112,9 +140,9 @@ export const VetHealthcarePage: React.FC = () => {
   const getAppointmentsForCalendar = () => {
     return appointments.map((appointment) => ({
       title: `Appointment with user ${appointment.user_id}`,
-      date: appointment.appointment_date, 
-      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'yellow', 
-      borderColor: appointment.status === 'accepted' ? 'darkgreen' : appointment.status === 'rejected' ? 'darkred' : 'orange', 
+      date: appointment.appointment_date,
+      backgroundColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'red' : 'orange',
+      borderColor: appointment.status === 'accepted' ? 'green' : appointment.status === 'rejected' ? 'darkred' : 'orange',
       textColor: 'white',
       extendedProps: {
         appointmentId: appointment.id,
@@ -122,20 +150,31 @@ export const VetHealthcarePage: React.FC = () => {
     }));
   };
 
+  const getAvailabilityEvents = () => {
+    return availabilityDates.map((date) => ({
+      start: date,
+      display: "background",
+      backgroundColor: "#d0f0c0",
+    }));
+  };
+
   return (
-    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}> {/* Increased width to 90% */}
+    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}> 
       <Paper sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
           Vet Availability & Appointments
         </Typography>
         <div style={{ width: "100%", maxWidth: "100%" }}>
           <FullCalendar
-            key={appointments.length} // Forces re-render on update
+            key={appointments.length + availabilityDates.length}
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             selectable={true}
             dateClick={(info) => setSelectedDate(info.dateStr)}
-            events={getAppointmentsForCalendar()}
+            events={[
+              ...getAppointmentsForCalendar(),
+              ...getAvailabilityEvents(),
+            ]}
           />
         </div>
         <Button

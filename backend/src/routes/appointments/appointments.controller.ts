@@ -24,7 +24,7 @@ const AppointmentsController = {
     }
   },
 
-  // For a vet to fetch pending appointments for a specific day
+  // For a vet to fetch all appointments for a specific day
   getAppointmentsForVet: async (vetId: string, date: string) => {
     try {
       const result = await AppointmentsService.getAppointmentsForVet(vetId, date);
@@ -32,6 +32,18 @@ const AppointmentsController = {
     } catch (error) {
       logger.error(error);
       throw new Error("Error retrieving pending appointments for vet");
+    }
+  },
+
+  
+  // For a user to fetch all appointments
+  getAppointmentsForUser: async (userId: string) => {
+    try {
+      const result = await AppointmentsService.getAppointmentsForUser(userId);
+      return result;
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Error retrieving pending appointments for user");
     }
   },
 

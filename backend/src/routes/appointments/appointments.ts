@@ -103,6 +103,37 @@ appointments.get('/getAppointmentsForVet', async (req: Request, res: Response): 
 
 /**
  * @swagger
+ * /appointments/getAppointmentsForUser:
+ *   get:
+ *     summary: Get all appointments for a user on a given date.
+ *     tags:
+ *       - appointments
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet on a specific day.
+ *     parameters:
+ *       - in: query
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of all appointments (pending, accepted, rejected).
+ */
+appointments.get('/getAppointmentsForUser', async (req: Request, res: Response): Promise<void> => {
+  const { user_id } = req.query;
+  try {
+    // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
+    const result = await AppointmentsController.getAppointmentsForUser(user_id as string);
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error: any) {
+    logger.error(error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+/**
+ * @swagger
  * /appointments/bookAppointment:
  *   post:
  *     summary: Book an appointment with a vet.

@@ -40,6 +40,20 @@ markAvailability: async (vetId: string, availableDate: string) => {
       throw new Error("Error retrieving available vets");
     }
   },
+
+  getAvailabilityForVet: async (vetId: string) => {
+    try {
+      const availabilities = await models.AVAILABILITIES.findAll({
+        where: { vet_id: vetId },
+        attributes: ['available_date'],
+        order: [['available_date', 'ASC']]
+      });
+      return availabilities;
+    } catch (error: any) {
+      logger.error(error);
+      throw new Error("Error retrieving vet availability");
+    }
+  },
 }
 
 export default AvailabilitiesService;
