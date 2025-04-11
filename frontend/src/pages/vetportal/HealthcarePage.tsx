@@ -1,7 +1,16 @@
-import React, { useState, useEffect, useContext } from "react"; 
-import { 
-  Container, Paper, Typography, Button, Dialog, DialogTitle, 
-  DialogContent, DialogActions, CircularProgress, TextField 
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Container,
+  Paper,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  TextField,
+  Box,
 } from "@mui/material";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -96,12 +105,10 @@ export const VetHealthcarePage: React.FC = () => {
   };
 
   const markAvailability = async (date: string) => {
-    console.log("markAvailability called with date:", date);
     if (!vetId) return;
     setAvailabilityLoading(true);
     try {
       const response = await availabilitiesApi.markAvailability({ vet_id: vetId, available_date: date });
-      console.log("API markAvailability response", response);
       if (response.success) {
         showSnackbar("Availability marked successfully", SNACKBAR_SEVERITY.SUCCESS);
         fetchAvailability();
@@ -159,59 +166,84 @@ export const VetHealthcarePage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}> 
-      <Paper sx={{ p: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Typography variant="h4" gutterBottom>
           Vet Availability & Appointments
         </Typography>
-        <div style={{ width: "100%", maxWidth: "100%" }}>
-          <FullCalendar
-            key={appointments.length + availabilityDates.length}
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            selectable={true}
-            dateClick={(info) => setSelectedDate(info.dateStr)}
-            events={[
-              ...getAppointmentsForCalendar(),
-              ...getAvailabilityEvents(),
-            ]}
-          />
-        </div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => selectedDate && markAvailability(selectedDate)}
-          disabled={availabilityLoading}
-          sx={{ mt: 2 }}
-        >
-          {availabilityLoading ? "Marking..." : "Mark Availability for Selected Date"}
-        </Button>
 
-        <Typography variant="h6" sx={{ mt: 3 }}>
-          Appointments on {selectedDate || ""}
+        <FullCalendar
+          key={appointments.length + availabilityDates.length}
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          selectable
+          dateClick={(info) => setSelectedDate(info.dateStr)}
+          events={[...getAppointmentsForCalendar(), ...getAvailabilityEvents()]}
+          height="auto"
+        />
+
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 3 }}>
+          <Button
+            variant="contained"
+            onClick={() => selectedDate && markAvailability(selectedDate)}
+            disabled={availabilityLoading}
+          >
+            {availabilityLoading ? "Marking..." : "Mark Availability for Selected Date"}
+          </Button>
+        </Box>
+
+        <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+          Appointments on {selectedDate || "select a date"}
         </Typography>
-        {loading ? <CircularProgress sx={{ mt: 2 }} /> : (
-          appointments.length === 0 ? (
-            <Typography variant="body1" sx={{ color: "red" }}>
-              No appointments on this day.
-            </Typography>
-          ) : (
-            appointments.map((appointment) => (
-              <Button
+
+        {loading ? (
+          <CircularProgress />
+        ) : appointments.length === 0 ? (
+          <Typography variant="body1" color="text.secondary">
+            No appointments on this day.
+          </Typography>
+        ) : (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {appointments.map((appointment) => (
+              <Paper
                 key={appointment.id}
-                onClick={() => { setSelectedAppointment(appointment); setResponseDialogOpen(true); }}
+                sx={{
+                  p: 2,
+                  borderLeft: `6px solid ${
+                    appointment.status === "accepted"
+                      ? "#4caf50"
+                      : appointment.status === "rejected"
+                      ? "#f44336"
+                      : "#ff9800"
+                  }`,
+                }}
               >
-                Appointment with user {appointment.user_id} ({appointment.status})
-              </Button>
-            ))
-          )
+                <Typography>
+                  <strong>User ID:</strong> {appointment.user_id}
+                </Typography>
+                <Typography>
+                  <strong>Status:</strong> {appointment.status}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 1 }}
+                  onClick={() => {
+                    setSelectedAppointment(appointment);
+                    setResponseDialogOpen(true);
+                  }}
+                >
+                  Respond
+                </Button>
+              </Paper>
+            ))}
+          </Box>
         )}
       </Paper>
 
-      <Dialog open={responseDialogOpen} onClose={() => setResponseDialogOpen(false)}>
+      <Dialog open={responseDialogOpen} onClose={() => setResponseDialogOpen(false)} fullWidth>
         <DialogTitle>Respond to Appointment</DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography gutterBottom>
             {selectedAppointment && `Appointment from user ${selectedAppointment.user_id}`}
           </Typography>
           <TextField
@@ -222,15 +254,26 @@ export const VetHealthcarePage: React.FC = () => {
             onChange={(e) => setRejectionReason(e.target.value)}
             sx={{ mt: 2 }}
           />
-          <Button onClick={() => handleRespondAppointment("accepted")} variant="contained" color="primary">
-            Accept
-          </Button>
-          <Button onClick={() => handleRespondAppointment("rejected")} variant="outlined" color="error">
-            Reject
-          </Button>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ justifyContent: "space-between", p: 2 }}>
           <Button onClick={() => setResponseDialogOpen(false)}>Cancel</Button>
+          <Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleRespondAppointment("accepted")}
+              sx={{ mr: 1 }}
+            >
+              Accept
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => handleRespondAppointment("rejected")}
+            >
+              Reject
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </Container>
