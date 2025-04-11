@@ -15,6 +15,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
+import { useNavigate } from "react-router-dom";  // Add useNavigate for routing
 
 interface Vet {
   id: string;
@@ -26,6 +27,7 @@ interface Vet {
 export const HealthcarePage: React.FC = () => {
   const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
+  const navigate = useNavigate();  // Initialize useNavigate hook
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableVets, setAvailableVets] = useState<Vet[]>([]);
@@ -33,6 +35,7 @@ export const HealthcarePage: React.FC = () => {
   const [selectedVet, setSelectedVet] = useState<Vet | null>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
+  
   interface Appointment {
     id: string;
     appointment_date: string;
@@ -151,6 +154,11 @@ export const HealthcarePage: React.FC = () => {
     }
   };
 
+  const handleJoinCall = (appointmentId: string) => {
+    // Navigate to the teleconsultation page with appointmentId
+    navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+  };
+
   return (
     <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}>
       <Paper sx={{ p: 4 }}>
@@ -210,6 +218,15 @@ export const HealthcarePage: React.FC = () => {
               <Typography>
                 <strong>Status:</strong> {appointment.status}
               </Typography>
+              {appointment.status === "accepted" && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleJoinCall(appointment.id)}
+                >
+                  Join Call
+                </Button>
+              )}
             </Paper>
           ))
         )}
