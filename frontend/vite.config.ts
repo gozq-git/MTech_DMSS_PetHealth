@@ -1,16 +1,19 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  server: {
-    host: true,
-    strictPort: true,
-    port: 5173,
-    watch:{
-      usePolling: true,
+    server: {
+        host: true,
+        strictPort: true,
+        port: 5173,
+        watch: {
+            usePolling: true,
+        },
+        allowedHosts: ['pethealthplatform-dev.azurewebsites.net']
     },
-    allowedHosts: ['pethealthplatform-dev.azurewebsites.net']
-  },
-  plugins: [react()],
+    define: {
+        'import.meta.env': process.env
+    },
+    plugins: [react()],
 })

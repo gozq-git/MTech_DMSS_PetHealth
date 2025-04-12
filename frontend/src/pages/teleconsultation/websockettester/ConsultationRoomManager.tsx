@@ -76,7 +76,9 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
     const [estimatedWaitMinutes, setEstimatedWaitMinutes] = useState<number | null>(null);
 
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8080');
+        const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+        console.info(WEBSOCKET_URL);
+        const ws = new WebSocket(WEBSOCKET_URL);
 
         ws.onopen = () => {
             setIsConnected(true);
