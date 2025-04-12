@@ -1,8 +1,8 @@
 /**
  * src/api/createApiClient.ts
  */
-import {acquireAccessToken} from "../../auth/msalService.ts";
-import {msalInstance} from "../../main.tsx";
+import { acquireAccessToken } from "../../auth/msalService.ts";
+import { msalInstance } from "../../main.tsx";
 
 export interface ApiError {
     message: string;
@@ -39,6 +39,11 @@ export const createApiClient = (baseUrl: string): BaseApiClient => {
         };
 
         try {
+            console.log("=== REQUEST DETAILS ===");
+            console.log("URL:", `${baseUrl}${endpoint}${queryString}`);
+            console.log("Method:", config.method);
+            console.log("Headers:", headers);
+            console.log("Body:", config.body);
             const response = await fetch(`${baseUrl}${endpoint}${queryString}`, {
                 ...config,
                 headers,
