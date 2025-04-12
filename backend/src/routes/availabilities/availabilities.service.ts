@@ -17,7 +17,7 @@ markAvailability: async (vetId: string, availableDate: string) => {
       });
       return availability;
     } catch (error: any) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error marking availability");
     }
   },
@@ -36,7 +36,7 @@ markAvailability: async (vetId: string, availableDate: string) => {
       });
       return availabilities;
     } catch (error: any) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error retrieving available vets");
     }
   },
@@ -50,7 +50,7 @@ markAvailability: async (vetId: string, availableDate: string) => {
       });
       return availabilities;
     } catch (error: any) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error retrieving vet availability");
     }
   },

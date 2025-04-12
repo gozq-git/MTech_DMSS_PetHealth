@@ -167,7 +167,7 @@ export const VetHealthcarePage: React.FC = () => {
     return availabilityDates.map((date) => ({
       start: date,
       display: "background",
-      backgroundColor: "#a5d6a7", // Green shade for availability days
+      backgroundColor: "#a5d6a7",
       borderColor: "#a5d6a7",
       className: "vet-available-day"
     }));
@@ -222,10 +222,10 @@ export const VetHealthcarePage: React.FC = () => {
                   p: 2,
                   borderLeft: `6px solid ${
                     appointment.status === "accepted"
-                      ? "#4caf50" // Green color for accepted appointments
+                      ? "#4caf50"
                       : appointment.status === "rejected"
-                      ? "#f44336" // Red color for rejected appointments
-                      : "#ff9800" // Orange color for pending appointments
+                      ? "#f44336"
+                      : "#ff9800"
                   }`,
                 }}
               >
@@ -237,7 +237,7 @@ export const VetHealthcarePage: React.FC = () => {
                 </Typography>
                 <Button
                   variant="outlined"
-                  sx={{ mt: 1 }}
+                  sx={{ mt: 1, mr: 1 }}
                   onClick={() => {
                     setSelectedAppointment(appointment);
                     setResponseDialogOpen(true);
@@ -245,6 +245,18 @@ export const VetHealthcarePage: React.FC = () => {
                 >
                   Respond
                 </Button>
+
+                {appointment.status === "accepted" && (
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 1 }}
+                    onClick={() =>
+                      window.location.href = `/teleconsultation?appointmentId=${appointment.id}`
+                    }
+                  >
+                    Join Call
+                  </Button>
+                )}
               </Paper>
             ))}
           </Box>

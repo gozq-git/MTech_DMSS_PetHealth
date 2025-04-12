@@ -1,6 +1,6 @@
 import express, {Request, Response} from 'express';
 import AvailabilitiesController from './availabilities.controller';
-const logger = require('../../utils/logger');
+// const logger = require('../../utils/logger');
 
 export const availabilities = express.Router();
 
@@ -29,7 +29,6 @@ availabilities.post('/markAvailability', async (req: Request, res: Response): Pr
       const result = await AvailabilitiesController.markAvailability(vet_id, available_date);
       res.status(200).json({ status: 'success', data: result });
     } catch (error: any) {
-      logger.error(error);
       res.status(500).json({ status: 'error', message: error.message });
     }
   });
@@ -59,7 +58,6 @@ availabilities.post('/markAvailability', async (req: Request, res: Response): Pr
       const result = await AvailabilitiesController.getAvailableVets(date as string);
       res.status(200).json({ status: 'success', data: result });
     } catch (error: any) {
-      logger.error(error);
       res.status(500).json({ status: 'error', message: error.message });
     }
   });
@@ -89,7 +87,6 @@ availabilities.get('/getAvailabilityForVet', async (req: Request, res: Response)
     const result = await AvailabilitiesController.getAvailabilityForVet(vet_id as string);
     res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
-    logger.error(error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
