@@ -16,7 +16,6 @@ export const createAvailabilitiesApiClient = (baseClient: BaseApiClient): Availa
         data: response.message,
         message: response.status === 'success' ? 'Availability marked successfully' : response.message,
       };
-      console.log("markAvailability response", response);
     },
 
     getAvailableVets: async (params) => {

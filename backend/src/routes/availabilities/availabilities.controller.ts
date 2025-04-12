@@ -7,7 +7,7 @@ const AvailabilitiesController = {
       const result = await AvailabilitiesService.markAvailability(vetId, availableDate);
       return result;
     } catch (error) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error marking availability");
     }
   },
@@ -18,7 +18,7 @@ const AvailabilitiesController = {
       const result = await AvailabilitiesService.getAvailableVets(date);
       return result;
     } catch (error) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error retrieving available vets");
     }
   },
@@ -28,7 +28,7 @@ const AvailabilitiesController = {
       const result = await AvailabilitiesService.getAvailabilityForVet(vetId);
       return result;
     } catch (error) {
-      logger.error(error);
+      // logger.error(error);
       throw new Error("Error retrieving vet availability");
     }
   }
