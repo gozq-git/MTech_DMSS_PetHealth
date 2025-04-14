@@ -1,10 +1,13 @@
 import UsersService from "./users.service";
 const logger = require('../../utils/logger');
+import { ZohomailNotification } from "../../models/notification/zohomail_notification";
+import { emailTemplates } from "../../models/email_template/templates";
+const notification = new ZohomailNotification();
 
 const UsersController = {
   retrieveUser: async (preferred_username: string) => {
     try {
-      const user = await UsersService.retrieveUser(preferred_username);
+      const user: any = await UsersService.retrieveUser(preferred_username);
       return user;
     } catch (error) {
       logger.error(error);
@@ -13,7 +16,9 @@ const UsersController = {
   },
   registerUser: async (body: Object) => {
     try {
-      const user = await UsersService.registerUser(body);
+      const user: any = await UsersService.registerUser(body);
+      const emailTemplate = emailTemplates.welcomeEmailTemplate(user.email, user.display_name);
+      notification.sendEmail(user.email, emailTemplate.subject, emailTemplate.body);
       return user;
     } catch (error) {
       logger.error(error);
