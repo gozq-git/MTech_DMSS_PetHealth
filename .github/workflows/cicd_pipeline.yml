@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  sonarqube-scan (unit test & code quality):
-    name: SonarQube
+  sonarqube-scan:
+    name: SonarQube Scan (unit test & code_quality)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +25,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  snyk-scan-FE (SCA & SAST):
-    needs: sonarqube-scan (unit test & code quality)
+  snyk-scan-FE:
+    name: Snyk Scan FE (SCA & SAST)
+    needs: sonarqube-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -58,8 +59,9 @@ jobs:
         with:
             command: code test
 
-  snyk-scan-BE (SCA & SAST):
-    needs: sonarqube-scan (unit test & code quality)
+  snyk-scan-BE:
+    name: Snyk Scan BE (SCA & SAST)
+    needs: sonarqube-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
