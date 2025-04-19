@@ -1,4 +1,3 @@
-// filepath: /Users/venkatkrishna/Documents/TEST/MTech_DMSS_PetHealth/backend/test/routes/pets/pets.controller.test.ts
 import PetsController from '../../../src/routes/pets/pets.controller';
 import PetsService from '../../../src/routes/pets/pets.service';
 import { sequelize } from "../../../src/db";
