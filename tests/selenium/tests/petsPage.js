@@ -5,7 +5,7 @@ const assert = require("assert");
 
 const chrome = require('selenium-webdriver/chrome');
 
-describe('Check Pet Test', function () {
+describe('Pets Page Test', function () {
   let driver;
 
   before(async function () {
