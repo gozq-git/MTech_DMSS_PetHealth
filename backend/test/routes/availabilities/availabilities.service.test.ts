@@ -2,7 +2,7 @@
 const create = jest.fn();
 const findAll = jest.fn();
 
-jest.mock('../../db', () => ({
+jest.mock('../../../src/db', () => ({
   sequelize: {
     models: {
       AVAILABILITIES: {
