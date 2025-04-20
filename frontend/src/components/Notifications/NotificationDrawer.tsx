@@ -15,6 +15,7 @@ import {useContext, useEffect} from "react";
 import {NotificationCreateModal} from "./CreateNotificationModal.tsx";
 import {NotificationsListModal} from "./NotificationsListModal.tsx";
 import {ApiClientContext} from "../../providers/ApiClientProvider.tsx";
+import {useMsal} from "@azure/msal-react";
 
 type NotificationDrawerProps = {
     isOpen: boolean;
@@ -23,6 +24,8 @@ type NotificationDrawerProps = {
 
 export const NotificationDrawer = ({isOpen, toggleDrawer}: NotificationDrawerProps) => {
     const theme = useTheme();
+    const { instance } = useMsal();
+    const activeAccount = instance.getActiveAccount();
     const { userApi } = useContext(ApiClientContext);
     const [isVet, setIsVet] = React.useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
@@ -36,22 +39,24 @@ export const NotificationDrawer = ({isOpen, toggleDrawer}: NotificationDrawerPro
     const closeNotificationSettings = () => setIsSettingsOpen(false);
 
     useEffect(() => {
-
-        const fetchUserProfile = async () => {
-            try {
-                const result = await userApi.retrieveUser();
-                if (result?.success && result.data) {
-                    console.info(result.data);
-                    setIsVet(!!result.data.VET)
-                } else {
-                    console.error(result.message);
+        console.info(`activeAccount: ${activeAccount}`);
+        if(activeAccount) {
+            const fetchUserProfile = async () => {
+                try {
+                    const result = await userApi.retrieveUser();
+                    if (result?.success && result.data) {
+                        console.info(result.data);
+                        setIsVet(!!result.data.VET)
+                    } else {
+                        console.error(result.message);
+                    }
+                } catch (err) {
+                    console.error(err);
                 }
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchUserProfile();
-    }, []);
+            };
+            fetchUserProfile();
+        }
+    }, [activeAccount]);
 
     const listItems = [
         {

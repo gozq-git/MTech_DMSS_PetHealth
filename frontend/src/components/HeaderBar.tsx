@@ -81,10 +81,12 @@ const HeaderBar = ({onMenuClick, onNotificationDrawerClick}: HeaderBarProps) => 
                         Pet Health Platform
                     </Typography>
                     <div style={{marginLeft: 'auto'}}>
-                        <IconButton color="inherit" onClick={onNotificationDrawerClick}
-                                    sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
-                            <Mail/>
-                        </IconButton>
+                        {activeAccount &&
+                            <IconButton color="inherit" onClick={onNotificationDrawerClick}
+                                        sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
+                                <Mail/>
+                            </IconButton>
+                        }
                         <IconButton color="inherit" onClick={handleMenu}
                                     sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
                             <AccountCircle/>
