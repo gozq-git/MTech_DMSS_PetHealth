@@ -1,108 +1,64 @@
-// ✅ Declare these before mocking sequelize
-const findAll = jest.fn();
-const findOne = jest.fn();
-const create = jest.fn();
+import MedicationRecordsController from "../../../src/routes/medication_records/medication_records.controller";
+import MedicationRecordsService from "../../../src/routes/medication_records/medication_records.service";
 
-// ✅ Mock Sequelize models
-jest.mock('../../../src/db', () => ({
-  sequelize: {
-    models: {
-      MEDICATION_RECORD: {
-        findAll,
-        findOne,
-        create,
-      },
-    },
-  },
-}));
+// 🧪 Mock the service
+jest.mock("../../../src/routes/medication_records/medication_records.service");
 
-import MedicationRecordsService from '../../../src/routes/medication_records/medication_records.service';
-import { v6 as uuidv6 } from 'uuid';
-import { format } from 'date-fns';
-
-// ✅ Mock UUID + Date
-jest.mock('uuid', () => ({
-  v6: jest.fn(() => 'mock-uuid'),
-}));
-
-jest.mock('date-fns', () => {
-  const actual = jest.requireActual('date-fns');
-  return {
-    ...actual,
-    format: jest.fn(() => '2025-04-20 13:00:00'),
-  };
-});
-
-describe('MedicationRecordsService', () => {
-  beforeEach(() => {
+describe("MedicationRecordsController", () => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('getMedicationRecords', () => {
-    it('should return all medication records', async () => {
-      const mockData = [{ id: '1' }, { id: '2' }];
-      findAll.mockResolvedValue(mockData);
+  describe("getMedicationRecords", () => {
+    it("should return medication records", async () => {
+      const mockData = [{ id: "m1", pet_id: "p1", medication: "X" }];
+      (MedicationRecordsService.getMedicationRecords as jest.Mock).mockResolvedValue(mockData);
 
-      const result = await MedicationRecordsService.getMedicationRecords();
-
+      const result = await MedicationRecordsController.getMedicationRecords();
       expect(result).toEqual(mockData);
-      expect(findAll).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw error on failure", async () => {
+      (MedicationRecordsService.getMedicationRecords as jest.Mock).mockRejectedValue(new Error("fail"));
+      await expect(MedicationRecordsController.getMedicationRecords()).rejects.toThrow(
+        "Error retrieving medication records"
+      );
     });
   });
 
-  describe('retrieveMedicationRecord', () => {
-    it('should return a medication record by ID', async () => {
-      const mockRecord = { id: '123', pet_id: 'p1' };
-      findOne.mockResolvedValue(mockRecord);
+  describe("retrieveMedicationRecord", () => {
+    it("should return a single medication record", async () => {
+      const mockData = { id: "m1", medication: "X" };
+      (MedicationRecordsService.retrieveMedicationRecord as jest.Mock).mockResolvedValue(mockData);
 
-      const result = await MedicationRecordsService.retrieveMedicationRecord('123');
+      const result = await MedicationRecordsController.retrieveMedicationRecord("m1");
+      expect(result).toEqual(mockData);
+    });
 
-      expect(result).toEqual(mockRecord);
-      expect(findOne).toHaveBeenCalledWith({ where: { id: '123' } });
+    it("should throw error on failure", async () => {
+      (MedicationRecordsService.retrieveMedicationRecord as jest.Mock).mockRejectedValue(new Error("fail"));
+      await expect(MedicationRecordsController.retrieveMedicationRecord("m1")).rejects.toThrow(
+        "Error retrieving medication record"
+      );
     });
   });
 
-  it('should insert a new medication record with parsed dates', async () => {
-    const input = {
-      pet_id: 'pet1',
-      medication_id: 'med1',
-      dosage: '5mg',
-      frequency: 'daily',
-      start_date: '2025-04-20',
-      end_date: '2025-05-01',
-      prescribed_by: 'Dr. A',
-      notes: 'After food',
-      is_active: true,
-    };
-  
-    const insertedRecord = {
-      id: 'mock-uuid',
-      ...input,
-      start_date: new Date('2025-04-20'),
-      end_date: new Date('2025-05-01'),
-      created_at: '2025-04-20 13:00:00',
-    };
-  
-    create.mockResolvedValue(insertedRecord);
-  
-    const result = await MedicationRecordsService.insertMedicationRecord(input);
-  
-    expect(result).toEqual(insertedRecord);
-    expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'mock-uuid',
-        pet_id: 'pet1',
-        medication_id: 'med1',
-        dosage: '5mg',
-        frequency: 'daily',
-        prescribed_by: 'Dr. A',
-        notes: 'After food',
-        is_active: true,
-        created_at: '2025-04-20 13:00:00',
-        start_date: expect.any(Date),
-        end_date: expect.any(Date),
-      })
-    );
+  describe("insertMedicationRecord", () => {
+    it("should insert and return new medication record", async () => {
+      const input = { pet_id: "p1", medication: "Y" };
+      const mockResult = { id: "m2", ...input };
+      (MedicationRecordsService.insertMedicationRecord as jest.Mock).mockResolvedValue(mockResult);
+
+      const result = await MedicationRecordsController.insertMedicationRecord(input);
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should throw error on failure", async () => {
+      (MedicationRecordsService.insertMedicationRecord as jest.Mock).mockRejectedValue(new Error("fail"));
+
+      await expect(MedicationRecordsController.insertMedicationRecord({})).rejects.toThrow(
+        "Error inserting medication record"
+      );
+    });
   });
-  
 });
