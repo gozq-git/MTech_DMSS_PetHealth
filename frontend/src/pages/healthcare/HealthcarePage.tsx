@@ -163,25 +163,29 @@ export const HealthcarePage: React.FC = () => {
   };
 
   const handleJoinCall = (appointmentId: string) => {
-    navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+    if (appointmentId) {
+      navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+    } else {
+      showSnackbar("Cannot Join Call without Appointment", SNACKBAR_SEVERITY.ERROR);
+    }
   };
-
+  
   const formatTime = (time: string) => {
     if (!time) return "Not specified";
   
-    const timeMatch = time.match(/^(\d{2}:\d{2})(:\d{2})?/);
-    if (!timeMatch || !timeMatch[1]) return "Not specified";
+    const match = time.match(/T(\d{2}):(\d{2})/);
+    if (!match) return "Not specified";
   
-    const normalizedTime = timeMatch[1];
-    const date = new Date(`1970-01-01T${normalizedTime}`);
-    if (isNaN(date.getTime())) return "Not specified";
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = hours >= 12 ? "PM" : "AM";
   
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+  
+    return `${hours}:${minutes} ${ampm}`;
   };
+
 
   return (
     <Container maxWidth="lg" sx={{ mt: 6 }}>
@@ -261,6 +265,8 @@ export const HealthcarePage: React.FC = () => {
               <Typography>
                 <strong>Time:</strong> {formatTime(appointment.appointment_time)}
               </Typography>
+
+
               <Typography>
                 <strong>Vet ID:</strong> {appointment.vet_id}
               </Typography>
