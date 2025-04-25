@@ -272,6 +272,9 @@ export const HealthcarePage: React.FC = () => {
                   <strong>Vet Name:</strong> {vet?.vet_name || "N/A"}
                 </Typography>
                 <Typography>
+                  <strong>Vet Center:</strong> {vet?.vet_center || "N/A"}
+                </Typography>
+                <Typography>
                   <strong>Status:</strong> {appointment.status}
                 </Typography>
                 {appointment.status === "accepted" && (
