@@ -1,7 +1,6 @@
 import {sequelize} from "../../db";
-import {v6 as uuidv6} from "uuid";
+import {v4 as uuidv4} from "uuid";
 import {format} from "date-fns";
-import {UUIDV4} from "sequelize";
 
 const models = sequelize.models;
 
@@ -11,12 +10,13 @@ markAvailability: async (vetId: string, availableDate: string) => {
     try {
       // Create a new availability record
       const availability = await models.AVAILABILITIES.create({
-        id: UUIDV4(),
+        id: uuidv4(),
         vet_id: vetId,
         available_date: availableDate,
       });
       return availability;
     } catch (error: any) {
+      console.log(error);
       // logger.error(error);
       throw new Error("Error marking availability");
     }
