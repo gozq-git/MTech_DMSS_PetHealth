@@ -23,6 +23,7 @@ interface Vet {
   vet_license?: string;
   vet_center?: string;
   vet_phone?: string;
+  vet_name?: string;
 }
 
 export const HealthcarePage: React.FC = () => {
@@ -120,6 +121,7 @@ export const HealthcarePage: React.FC = () => {
             vet_center: item.VET.vet_center,
             vet_license: item.VET.vet_license,
             vet_phone: item.VET.vet_phone,
+            vet_name: item.VET.vet_name
           }));
 
         setAvailableVets(vets);
@@ -163,24 +165,27 @@ export const HealthcarePage: React.FC = () => {
   };
 
   const handleJoinCall = (appointmentId: string) => {
-    navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+    if (appointmentId) {
+      navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+    } else {
+      showSnackbar("Cannot Join Call without Appointment", SNACKBAR_SEVERITY.ERROR);
+    }
   };
 
   const formatTime = (time: string) => {
     if (!time) return "Not specified";
-  
-    const timeMatch = time.match(/^(\d{2}:\d{2})(:\d{2})?/);
-    if (!timeMatch || !timeMatch[1]) return "Not specified";
-  
-    const normalizedTime = timeMatch[1];
-    const date = new Date(`1970-01-01T${normalizedTime}`);
-    if (isNaN(date.getTime())) return "Not specified";
-  
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+
+    const match = time.match(/T(\d{2}):(\d{2})/);
+    if (!match) return "Not specified";
+
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+
+    return `${hours}:${minutes} ${ampm}`;
   };
 
   return (
@@ -222,7 +227,7 @@ export const HealthcarePage: React.FC = () => {
                       setBookingDialogOpen(true);
                     }}
                   >
-                    {vet.vet_center || "N/A"} (License: {vet.vet_license || "N/A"})
+                    {vet.vet_name || "Unknown Vet"} ({vet.vet_center || "N/A"})
                   </Button>
                 ))}
               </Paper>
@@ -241,44 +246,50 @@ export const HealthcarePage: React.FC = () => {
             No appointments found.
           </Typography>
         ) : (
-          userAppointments.map((appointment) => (
-            <Paper
-              key={appointment.id}
-              elevation={2}
-              sx={{
-                p: 3,
-                mt: 2,
-                borderLeft: 4,
-                borderColor: "primary.main",
-                borderRadius: 2,
-                backgroundColor: "#ffffff",
-              }}
-            >
-              <Typography>
-                <strong>Date:</strong>{" "}
-                {new Date(appointment.appointment_date).toLocaleDateString()}
-              </Typography>
-              <Typography>
-                <strong>Time:</strong> {formatTime(appointment.appointment_time)}
-              </Typography>
-              <Typography>
-                <strong>Vet ID:</strong> {appointment.vet_id}
-              </Typography>
-              <Typography>
-                <strong>Status:</strong> {appointment.status}
-              </Typography>
-              {appointment.status === "accepted" && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{ mt: 2 }}
-                  onClick={() => handleJoinCall(appointment.id)}
-                >
-                  Join Call
-                </Button>
-              )}
-            </Paper>
-          ))
+          userAppointments.map((appointment) => {
+            const vet = availableVets.find(vet => vet.id === appointment.vet_id);
+            return (
+              <Paper
+                key={appointment.id}
+                elevation={2}
+                sx={{
+                  p: 3,
+                  mt: 2,
+                  borderLeft: 4,
+                  borderColor: "primary.main",
+                  borderRadius: 2,
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <Typography>
+                  <strong>Date:</strong>{" "}
+                  {new Date(appointment.appointment_date).toLocaleDateString()}
+                </Typography>
+                <Typography>
+                  <strong>Time:</strong> {formatTime(appointment.appointment_time)}
+                </Typography>
+                <Typography>
+                  <strong>Vet Name:</strong> {vet?.vet_name || "N/A"}
+                </Typography>
+                <Typography>
+                  <strong>Vet Center:</strong> {vet?.vet_center || "N/A"}
+                </Typography>
+                <Typography>
+                  <strong>Status:</strong> {appointment.status}
+                </Typography>
+                {appointment.status === "accepted" && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 2 }}
+                    onClick={() => handleJoinCall(appointment.id)}
+                  >
+                    Join Call
+                  </Button>
+                )}
+              </Paper>
+            );
+          })
         )}
       </Paper>
 
