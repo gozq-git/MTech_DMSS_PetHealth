@@ -23,7 +23,7 @@ interface ApiClients {
     petApi: PetApi;
     appointmentsApi: AppointmentsApi;
     availabilitiesApi: AvailabilitiesApi;
-    FeesApi: FeesApi;
+    feesApi: FeesApi;
 }
 
 let apiClients: ApiClients;
@@ -38,7 +38,7 @@ if (USE_MOCK_API == "true") {
         petApi: createMockPetApiClient(),
         appointmentsApi: createAppointmentsApiClient(baseApiClient),
         availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
-        FeesApi: createFeesApiClient(baseApiClient)
+        feesApi: createFeesApiClient(baseApiClient)
     };
 } else {
     // Using real APIs
@@ -51,7 +51,7 @@ if (USE_MOCK_API == "true") {
         petApi: createPetApiClient(baseApiClient),
         appointmentsApi: createAppointmentsApiClient(baseApiClient),
         availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
-        FeesApi: createFeesApiClient(baseApiClient)
+        feesApi: createFeesApiClient(baseApiClient)
        };
 }
 
