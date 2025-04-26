@@ -3,6 +3,7 @@ import express from 'express';
 import { pets } from '../../../src/routes/pets/pets';
 import PetsController from '../../../src/routes/pets/pets.controller';
 import { sequelize } from "../../../src/db";
+import { describe, beforeEach, it } from 'node:test';
 
 jest.mock('../../../src/routes/pets/pets.controller');
 jest.mock('../../../src/db', () => ({
@@ -125,3 +126,4 @@ describe('Pets Routes', () => {
     });
   });
 });
+

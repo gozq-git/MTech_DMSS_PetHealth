@@ -16,5 +16,14 @@ exports.config = {
     db_user: env.DB_USER,
     db_password: env.DB_PASSWORD,
     db_name: env.DB_NAME,
+    // Zoho Mail API credentials
+    zoho_email: env.ZOHO_EMAIL,
+    zoho_client_id: env.ZOHO_CLIENT_ID,
+    zoho_client_secret: env.ZOHO_CLIENT_SECRET,
+    zoho_refresh_token: env.ZOHO_REFRESH_TOKEN,
+    zoho_account_id: env.ZOHO_ACCOUNT_ID,
+    telegram_bot_token: env.TELEGRAM_BOT_TOKEN,
+    ntfy_url: 'https://ntfy.sh',
     port: 8001,
+    wssport: 8090,
 };

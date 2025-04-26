@@ -20,7 +20,13 @@ exports.allergies = {
             onDelete: 'CASCADE'
         },
         allergy_name: { type: DataTypes.STRING, allowNull: false },
-        severity: { type: DataTypes.ENUM('Mild', 'Moderate', 'Severe'), allowNull: false },
+        severity: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                isIn: [['Mild', 'Moderate', 'Severe']]
+            }
+        },
         first_observed: { type: DataTypes.DATE },
         last_updated: { type: DataTypes.DATE },
         notes: { type: DataTypes.STRING },

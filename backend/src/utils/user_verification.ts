@@ -9,13 +9,18 @@ const client = jwksClient({
 
 // Helper function to retrieve signing key from kid (key ID)
 function getKey(header: any, callback: any) {
-  client.getSigningKey(header.kid, (err: Error, key: any) => {
-    if (err) {
-      return callback(err);
-    }
-    const signingKey = key.getPublicKey();
-    callback(null, signingKey);
-  });
+  try {
+    client.getSigningKey(header.kid, (err: Error, key: any) => {
+      if (err) {
+        return callback(err);
+      }
+      const signingKey = key.getPublicKey();
+      callback(null, signingKey);
+    });
+  } catch (error) {
+    console.error('Error retrieving signing key:', error);
+    callback(error, null);
+  }
 }
 
 // Function to verify token

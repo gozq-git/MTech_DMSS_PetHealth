@@ -1,20 +1,34 @@
-export abstract class EmailNotification  {
+export abstract class EmailNotification implements PhPNotification {
 
-  private emailSender: EmailSender | null = null;
+  public to: string;
+  public subject: string;
+  public body: string;
 
-  async sendEmail(to: string, subject: string, body: string): Promise<void> {
+  constructor(to: string, subject: string, body: string) {
+    this.to = to;
+    this.subject = subject;
+    this.body = body;
+  }
+
+  private emailSender: Sender | null = null;
+
+  async sendNotification(): Promise<void> {
+    await this.sendEmail();
+  }
+
+  async sendEmail(): Promise<void> {
     if (!this.emailSender) {
-      this.emailSender = await this.initEmailNotificationSender();
+      this.emailSender = await this.initSender();
     }
     try {
-      await this.emailSender.sendEmail(to, subject, body);
+      await this.emailSender.send(this.to, this.subject, this.body);
       console.log('Email sent successfully');
     } catch (error) {
       console.error('Error sending email:', error);
       throw error;
     }
   }
-  
-  abstract initEmailNotificationSender(): Promise<EmailSender>;
+
+  abstract initSender(): Promise<Sender>;
 
 }

@@ -2,17 +2,17 @@ import { config } from "../../config/config";
 import axios from 'axios';
 
 /**
- * Class implementing the EmailSender interface for Zoho Mail
+ * Class implementing the Sender interface for Zoho Mail
 */
-export class ZohoMailSender {
+export class ZohoMailSender implements Sender {
 
   private cachedToken: string | null = null;
   private tokenExpiryTime: number | null = null;
 
-  constructor() {
+  constructor(cachedToken: string | null = null, tokenExpiryTime: number | null = null) {
     // Initialize the cached token and expiry time
-    this.cachedToken = null;
-    this.tokenExpiryTime = null;
+    this.cachedToken = cachedToken;
+    this.tokenExpiryTime = tokenExpiryTime;
     this.getZohoMailToken(); // Fetch the token on initialization
     console.log('ZohoMailSender initialized and token fetched.');
   }
@@ -25,8 +25,8 @@ export class ZohoMailSender {
   * @returns A promise resolving to the access token
   */
   private async getZohoMailToken(): Promise<string> {
-    const currentTime = Date.now();
-
+    const currentTime = Date.now() + 0;
+    
     // Check if the token is cached and still valid
     if (this.cachedToken && this.tokenExpiryTime && currentTime < this.tokenExpiryTime) {
       console.log('Returning cached token.');
@@ -76,7 +76,7 @@ export class ZohoMailSender {
    * @param subject - The subject of the email.
    * @param body - The body content of the email.
    */
-  async sendEmail(to: string, subject: string, body: string): Promise<void> {
+  async send(to: string, subject: string, body: string): Promise<void> {
     const token = await this.getZohoMailToken(); // Retrieve the token using the existing function
 
     const url = `https://mail.zoho.com/api/accounts/${config.zoho_account_id}/messages`;

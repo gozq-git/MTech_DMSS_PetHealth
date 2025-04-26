@@ -1,7 +1,12 @@
-abstract class NotificationSender {
+// This file defines an abstract class for sending notifications.
+interface PhPNotification {
   
-  abstract sendNotification(): Promise<void>;
+  to: string;
+  subject: string;
+  body: string;
+
+  sendNotification(): Promise<void>;
   
-  abstract initNotificationSender(): Promise<string>;
+  initSender(): Promise<Sender>;
 
 }

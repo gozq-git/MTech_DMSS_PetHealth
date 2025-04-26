@@ -21,12 +21,23 @@ function appointmentReminderTemplate(
   return new TableEmailTemplate({
     subject: 'Appointment Reminder',
     header: `Hello ${userName},`,
-    body: [
-      { key: 'Date', value: appointmentDetails.date },
-      { key: 'Time', value: appointmentDetails.time },
-      { key: 'Location', value: appointmentDetails.location },
-    ],
+    body: {
+      'Date': appointmentDetails.date,
+      'Time': appointmentDetails.time,
+      'Location': appointmentDetails.location,
+    },
     footer: 'Please contact us if you have any questions.<br><br>Best regards, PetHealth Team',
+    recipient,
+  }).build();
+}
+
+// Welcome Email Template
+function defaultEmailTemplate(recipient: string, userName: string, subject: string, message: string): {subject: string; body: string} {
+  return new EmailTemplate({
+    subject: `[PHP Notification] ${subject}`,
+    header: `Hello ${userName}!`,
+    body: message,
+    footer: 'Best regards, PetHealth Team',
     recipient,
   }).build();
 }
@@ -34,4 +45,5 @@ function appointmentReminderTemplate(
 export const emailTemplates = {
   welcomeEmailTemplate,
   appointmentReminderTemplate,
+  defaultEmailTemplate,
 };

@@ -21,6 +21,7 @@ export const config = {
   zoho_account_id: env.ZOHO_ACCOUNT_ID as string,
 
   telegram_bot_token: env.TELEGRAM_BOT_TOKEN as string,
+  ntfy_url: 'https://ntfy.sh' as string,
 
   port: 8001,
   wssport: 8090,

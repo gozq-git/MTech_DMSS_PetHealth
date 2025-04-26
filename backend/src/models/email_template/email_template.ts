@@ -15,7 +15,7 @@ class EmailTemplate {
   }
 
   setSubject(subject: string): this {
-    this.subject = `[PHP] ${subject}`;
+    this.subject = `${subject}`;
     return this;
   }
 

@@ -104,7 +104,7 @@ exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, voi
  *         required: true
  *         description: Numeric ID of the owner.
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: A list of pets.
@@ -159,7 +159,17 @@ exports.pets.get('/retrievePet/:id', (req, res) => __awaiter(void 0, void 0, voi
 exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield pets_controller_1.default.getPetsByOwner(req.params.ownerId);
-        res.status(200).send(result);
+        // res.status(200).send(result);
+        if (result === null || result === undefined || result.length === 0) {
+            res.status(200).type('json').send({ status: 'error', message: 'No pets found!' });
+        }
+        else {
+            res.status(200).type('json').send({
+                status: 'success',
+                data: result,
+                message: "Pets retrieved successfully"
+            });
+        }
     }
     catch (error) {
         console.error(error);
@@ -256,8 +266,9 @@ exports.pets.get('/getPetsByOwner/:ownerId', (req, res) => __awaiter(void 0, voi
  */
 exports.pets.post('/insertPet', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(req.body);
         const result = yield pets_controller_1.default.insertPet(req.body);
-        res.status(201).send(result);
+        res.status(201).type('json').send({ status: 'success', data: result, message: "Pet added successfully" });
     }
     catch (error) {
         console.error(error);
