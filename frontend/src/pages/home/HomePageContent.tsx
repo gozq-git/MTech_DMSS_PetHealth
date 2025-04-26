@@ -79,7 +79,7 @@ const HomePageContent = () => {
         );
     };
 
-    const sanitizeUrl = async (url: string) => {
+    const sanitizeUrl = (url: string): string => {
         try {
           const parsedUrl = new URL(url, window.location.origin);
           if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {

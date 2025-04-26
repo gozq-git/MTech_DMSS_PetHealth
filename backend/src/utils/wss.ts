@@ -38,7 +38,7 @@ function clearClient(wss: WebSocketServer, socket: WebSocketClient): void {
 const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
 
 function isSafeKey(key: string): boolean {
-  return !dangerousKeys.includes(key);
+    return typeof key === 'string' && !dangerousKeys.includes(key);
 }
 
 function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: string): void {
@@ -52,18 +52,21 @@ function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: strin
     
     switch (type) {
         case 'join': {
-            // join channel
-            if (isSafeKey(channelName)) {
-                if (channels[channelName]) {
-                    channels[channelName][userId] = socket
-                } else {
-                    channels[channelName] = {}
-                    channels[channelName][userId] = socket
-                }
-                const userIds = Object.keys(channels[channelName])
-                send(socket, 'joined', userIds)
-                break;
+            if (!isSafeKey(channelName) || !isSafeKey(userId)) {
+                console.warn(`Blocked unsafe channelName or userId:`, { channelName, userId });
+                return;
             }
+            // join channel
+            if (channels[channelName]) {
+                channels[channelName][userId] = socket
+            } else {
+                channels[channelName] = Object.create(null);
+                channels[channelName][userId] = socket
+            }
+            const userIds = Object.keys(channels[channelName])
+            send(socket, 'joined', userIds)
+            break;
+            
         }
         case 'quit': {
             // quit channel
