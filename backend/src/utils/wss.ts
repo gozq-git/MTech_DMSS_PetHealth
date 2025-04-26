@@ -47,8 +47,8 @@ function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: strin
     switch (type) {
         case 'join': {
             // join channel
-            if (channels[channelName]) {
-                channels[channelName][userId] = socket
+            if (channels[String(channelName)]) {
+                channels[String(channelName)][userId] = socket
             } else {
                 channels[channelName] = {}
                 channels[channelName][userId] = socket

@@ -77,7 +77,19 @@ const HomePageContent = () => {
                 </Box>
             </Container>
         );
-    }
+    };
+
+    const sanitizeUrl = async (url: string) => {
+        try {
+          const parsedUrl = new URL(url, window.location.origin);
+          if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+            return parsedUrl.href;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        return '/';
+      }
 
     return (
         <Container>
@@ -189,7 +201,7 @@ const HomePageContent = () => {
                                                 {article.description || 'No summary available.'}
                                             </Typography>
                                             <Link
-                                                href={article.url.text}
+                                                href={sanitizeUrl(article.url)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 underline="hover"

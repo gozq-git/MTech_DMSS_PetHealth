@@ -43,7 +43,7 @@ export const medications = express.Router();
 medications.get('/retrieveMedication/:id', async (req: Request, res: Response): Promise<void> => {
     try {
         const result = await MedicationsController.retrieveMedication(req.params.id);
-        res.status(200).type('json').send(result);
+        res.status(200).type('text').send(result);
     } catch (error) {
         console.error(error);
         res.status(500).type('json').send({ error: 'Error retrieving medication' });
