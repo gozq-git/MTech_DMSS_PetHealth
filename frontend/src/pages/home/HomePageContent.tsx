@@ -170,7 +170,7 @@ const HomePageContent = () => {
                         </Typography>
                     ) : (
                         <Grid container spacing={2}>
-                            {news.map((article, index) => (
+                            {news.map((article: any, index: any) => (
                                 <Grid item xs={12} sm={6} md={4} key={index}>
                                     <Card
                                         sx={{
