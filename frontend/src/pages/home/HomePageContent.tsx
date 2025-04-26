@@ -79,16 +79,16 @@ const HomePageContent = () => {
         );
     };
 
-    const sanitizeUrl = (url: string): string => {
+    const sanitizeUrl = (url: string): boolean => {
         try {
           const parsedUrl = new URL(url, window.location.origin);
           if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-            return parsedUrl.href;
+            return true;
           }
         } catch (e) {
           console.log(e);
         }
-        return '/';
+        return false;
       }
 
     return (
@@ -200,14 +200,16 @@ const HomePageContent = () => {
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} noWrap>
                                                 {article.description || 'No summary available.'}
                                             </Typography>
+                                            {sanitizeUrl(article.url) && 
                                             <Link
-                                                href={article.url.text()}
+                                                href={article.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 underline="hover"
                                             >
                                                 Read more →
                                             </Link>
+                                            }
                                         </CardContent>
                                     </Card>
                                 </Grid>
