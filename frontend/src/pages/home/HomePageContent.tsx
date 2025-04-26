@@ -201,7 +201,7 @@ const HomePageContent = () => {
                                                 {article.description || 'No summary available.'}
                                             </Typography>
                                             <Link
-                                                href={sanitizeUrl(article.url)}
+                                                href={article.url.text()}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 underline="hover"

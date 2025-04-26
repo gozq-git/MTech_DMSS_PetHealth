@@ -52,10 +52,8 @@ function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: strin
     
     switch (type) {
         case 'join': {
-            if (!isSafeKey(channelName) || !isSafeKey(userId)) {
-                console.warn(`Blocked unsafe channelName or userId:`, { channelName, userId });
-                return;
-            }
+            if (!channels.hasOwnProperty(channelName)) { 
+                if (!channels[channelName].hasOwnProperty(userId)) {break; }}
             // join channel
             if (channels[channelName]) {
                 channels[channelName][userId] = socket
