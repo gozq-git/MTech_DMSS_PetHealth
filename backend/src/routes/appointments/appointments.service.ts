@@ -1,6 +1,5 @@
 import { sequelize } from "../../db";
 import { v4 as uuidv4 } from "uuid";
-import { format } from 'date-fns';
 
 const logger = require('../../utils/logger');
 const models = sequelize.models;
@@ -80,48 +79,48 @@ const AppointmentsService = {
     }
   },
 
-// Fetch all appointments for a given vet on a specific date (pending, accepted, and rejected)
-getAppointmentsForVet: async (vetId: string, date: string) => {
-  try {
-    const appointments = await models.APPOINTMENTS.findAll({
-      where: {
-        appointment_date: date,
-        vet_id: vetId, 
-      },
-      include: [
-        {
-          model: models.USERS, 
-          required: true,
+  // Fetch all appointments for a given vet on a specific date (pending, accepted, and rejected)
+  getAppointmentsForVet: async (vetId: string, date: string) => {
+    try {
+      const appointments = await models.APPOINTMENTS.findAll({
+        where: {
+          appointment_date: date,
+          vet_id: vetId, 
         },
-      ],
-    });
-    return appointments;
-  } catch (error: any) {
-    logger.error(error);
-    throw new Error("Error retrieving appointments");
-  }
-},
+        include: [
+          {
+            model: models.USERS, 
+            required: true,
+          },
+        ],
+      });
+      return appointments;
+    } catch (error: any) {
+      logger.error(error);
+      throw new Error("Error retrieving appointments");
+    }
+  },
 
-// Fetch all appointments for a given user(pending, accepted, and rejected)
-getAppointmentsForUser: async (userId: string) => {
-  try {
-    const appointments = await models.APPOINTMENTS.findAll({
-      where: {
-        user_id: userId, 
-      },
-      include: [
-        {
-          model: models.USERS,
-          required: true,
+  // Fetch all appointments for a given user(pending, accepted, and rejected)
+  getAppointmentsForUser: async (userId: string) => {
+    try {
+      const appointments = await models.APPOINTMENTS.findAll({
+        where: {
+          user_id: userId, 
         },
-      ],
-    });
-    return appointments;
-  } catch (error: any) {
-    logger.error(error);
-    throw new Error("Error retrieving appointments");
+        include: [
+          {
+            model: models.USERS,
+            required: true,
+          },
+        ],
+      });
+      return appointments;
+    } catch (error: any) {
+      logger.error(error);
+      throw new Error("Error retrieving appointments");
+    }
   }
-}
 
 };
 

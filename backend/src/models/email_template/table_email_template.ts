@@ -5,7 +5,7 @@ class TableEmailTemplate  extends EmailTemplate {
   setBody(body: any): this {
     // Convert the JSON object into an HTML table
     const tableRows = Object.entries(body)
-      .map(([key, value]) => `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>`)
+      .map(([key, value]) => `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>\n`)
       .join('');
 
     this.body = `
