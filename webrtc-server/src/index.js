@@ -2,12 +2,13 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
 import cors from 'cors';
-import http from "http";
+import https from "http";
 
-const app = express()
+const app = express();
+app.disable('x-powered-by');
 app.use(cors());
 
-const server = http.createServer(app);
+const server = https.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // Store for active connections and waiting room state

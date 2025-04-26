@@ -43,7 +43,7 @@ module.exports = {
       })
       .catch((error) => {
         console.error(error);
-        res.status(401).send(error);
+        res.status(401).type('text').send('Error');
       });
 }
 }

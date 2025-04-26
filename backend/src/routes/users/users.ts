@@ -78,13 +78,13 @@ users.get('/retrieveUser', async (req: Request, res: Response): Promise<void> =>
     try {
         const result: any = await UsersController.retrieveUser(userInfo?.preferred_username);
         if (result === null || result === undefined || result.length === 0) {
-            res.status(200).type('text').send({status: 'error', message: 'User not found'});
+            res.status(200).type('json').send({status: 'error', message: 'User not found'});
         } else {
             res.status(200).type('json').send({status: 'success', message: result});
         }
     } catch (error) {
         logger.error(error);
-        res.status(200).type('text').send({status: 'error', message: error});
+        res.status(200).type('json').send({status: 'error', message: 'error'});
     }
 });
 
@@ -263,7 +263,7 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
         }
     } catch (error: any) {
         logger.error(error);
-        res.status(200).send(error.message);
+        res.status(200).type('text').send('error');
     }
 });
 
