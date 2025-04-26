@@ -77,7 +77,19 @@ const HomePageContent = () => {
                 </Box>
             </Container>
         );
-    }
+    };
+
+    const sanitizeUrl = (url: string): boolean => {
+        try {
+          const parsedUrl = new URL(url, window.location.origin);
+          if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+            return true;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        return false;
+      }
 
     return (
         <Container>
@@ -158,7 +170,7 @@ const HomePageContent = () => {
                         </Typography>
                     ) : (
                         <Grid container spacing={2}>
-                            {news.map((article, index) => (
+                            {news.map((article: any, index: any) => (
                                 <Grid item xs={12} sm={6} md={4} key={index}>
                                     <Card
                                         sx={{
@@ -188,6 +200,7 @@ const HomePageContent = () => {
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} noWrap>
                                                 {article.description || 'No summary available.'}
                                             </Typography>
+                                            {sanitizeUrl(article.url) && 
                                             <Link
                                                 href={article.url}
                                                 target="_blank"
@@ -196,6 +209,7 @@ const HomePageContent = () => {
                                             >
                                                 Read more →
                                             </Link>
+                                            }
                                         </CardContent>
                                     </Card>
                                 </Grid>

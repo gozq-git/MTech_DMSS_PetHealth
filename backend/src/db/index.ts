@@ -15,7 +15,8 @@ const sequelize = new Sequelize(config.db_name, config.db_user, config.db_passwo
     dialectOptions: {
         encrypt: true,
         acquireTimeout: 60000
-    }
+    },
+    logging: false
 });
 
 // import models
