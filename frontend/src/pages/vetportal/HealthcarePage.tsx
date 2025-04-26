@@ -17,6 +17,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
+import { useNavigate } from "react-router-dom";
 
 interface Appointment {
   id: string;
@@ -28,6 +29,7 @@ interface Appointment {
 export const VetHealthcarePage: React.FC = () => {
   const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
+  const navigate = useNavigate();
 
   const [vetId, setVetId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -150,6 +152,14 @@ export const VetHealthcarePage: React.FC = () => {
     }
   };
 
+  const handleJoinCall = (appointmentId: string) => {
+    if (appointmentId) {
+      navigate(`/teleconsultation?appointmentId=${appointmentId}`);
+    } else {
+      showSnackbar("Cannot Join Call without Appointment", SNACKBAR_SEVERITY.ERROR);
+    }
+  };
+
   const getAppointmentsForCalendar = () => {
     return appointments.map((appointment) => ({
       title: `Appointment with user ${appointment.user_id}`,
@@ -220,13 +230,12 @@ export const VetHealthcarePage: React.FC = () => {
                 key={appointment.id}
                 sx={{
                   p: 2,
-                  borderLeft: `6px solid ${
-                    appointment.status === "accepted"
-                      ? "#4caf50"
-                      : appointment.status === "rejected"
+                  borderLeft: `6px solid ${appointment.status === "accepted"
+                    ? "#4caf50"
+                    : appointment.status === "rejected"
                       ? "#f44336"
                       : "#ff9800"
-                  }`,
+                    }`,
                 }}
               >
                 <Typography>
@@ -246,17 +255,14 @@ export const VetHealthcarePage: React.FC = () => {
                   Respond
                 </Button>
 
-                {appointment.status === "accepted" && (
-                  <Button
-                    variant="contained"
-                    sx={{ mt: 1 }}
-                    onClick={() =>
-                      window.location.href = `/teleconsultation?appointmentId=${appointment.id}`
-                    }
-                  >
-                    Join Call
-                  </Button>
-                )}
+                <Button
+                  variant="contained"
+                  sx={{ mt: 1 }}
+                  onClick={() => handleJoinCall(appointment.id)}
+                >
+                  Join Call
+                </Button>
+
               </Paper>
             ))}
           </Box>

@@ -8,11 +8,10 @@ import { describe, beforeEach, it } from 'node:test';
 jest.mock('../../../src/routes/pets/pets.controller');
 jest.mock('../../../src/db', () => ({
   sequelize: {
-    close: jest.fn().mockResolvedValue(undefined), // Mock DB closing
-    authenticate: jest.fn().mockResolvedValue(undefined), // Prevents actual DB auth
+    close: jest.fn().mockResolvedValue(undefined),
+    authenticate: jest.fn().mockResolvedValue(undefined),
   }
 }));
-
 
 const app = express();
 app.use(express.json());
@@ -24,7 +23,7 @@ describe('Pets Routes', () => {
   });
 
   afterAll(async () => {
-    await sequelize.close(); // Ensures all DB connections are closed
+    await sequelize.close();
     jest.restoreAllMocks();
   });
 
@@ -45,7 +44,7 @@ describe('Pets Routes', () => {
       const res = await request(app).get('/pets/retrievePet/1');
 
       expect(res.status).toBe(500);
-      //expect(res.body).toEqual({ error: 'Error retrieving pet' });
+      expect(res.body).toEqual({});
     });
   });
 
@@ -60,7 +59,11 @@ describe('Pets Routes', () => {
       const res = await request(app).get('/pets/getPetsByOwner/1');
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(mockPets);
+      expect(res.body).toEqual({
+        status: 'success',
+        message: 'Pets retrieved successfully',
+        data: mockPets
+      });
     });
 
     it('should handle errors when retrieving pets by owner ID', async () => {
@@ -69,7 +72,7 @@ describe('Pets Routes', () => {
       const res = await request(app).get('/pets/getPetsByOwner/1');
 
       expect(res.status).toBe(500);
-      //expect(res.body).toEqual({ error: 'Error retrieving pets by owner ID' });
+      expect(res.body).toEqual({});
     });
   });
 
@@ -82,7 +85,11 @@ describe('Pets Routes', () => {
       const res = await request(app).post('/pets/insertPet').send(newPet);
 
       expect(res.status).toBe(201);
-      expect(res.body).toEqual(createdPet);
+      expect(res.body).toEqual({
+        status: 'success',
+        message: 'Pet added successfully',
+        data: createdPet
+      });
     });
 
     it('should handle errors when creating a new pet', async () => {
@@ -91,7 +98,7 @@ describe('Pets Routes', () => {
       const res = await request(app).post('/pets/insertPet').send({ name: 'Max' });
 
       expect(res.status).toBe(500);
-      //expect(res.body).toEqual({ error: 'Error inserting pet' });
+      expect(res.body).toEqual({});
     });
   });
 
@@ -115,15 +122,8 @@ describe('Pets Routes', () => {
       const res = await request(app).get('/pets/getPets');
 
       expect(res.status).toBe(500);
-      //expect(res.body).toEqual({ error: 'Error retrieving pets' });
+      expect(res.body).toEqual({});
     });
   });
 });
-
-function afterAll(arg0: () => Promise<void>) {
-  throw new Error('Function not implemented.');
-}
-function expect(body: any) {
-  throw new Error('Function not implemented.');
-}
 

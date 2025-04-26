@@ -27,4 +27,5 @@ export interface UserUpdateInput {
     vet_license?: string;
     vet_center?: string;
     vet_phone?: string;
-  }
+    vet_name?: string; 
+}

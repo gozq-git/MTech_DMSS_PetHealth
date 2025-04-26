@@ -35,6 +35,12 @@ function clearClient(wss: WebSocketServer, socket: WebSocketClient): void {
     })
 }
 
+const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+
+function isSafeKey(key: string): boolean {
+    return typeof key === 'string' && !dangerousKeys.includes(key);
+}
+
 function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: string): void {
     console.log(`onMessage ${message}`);
 
@@ -46,16 +52,19 @@ function onMessage(wss: WebSocketServer, socket: WebSocketClient, message: strin
     
     switch (type) {
         case 'join': {
+            if (!channels.hasOwnProperty(channelName)) { 
+                if (!channels[channelName].hasOwnProperty(userId)) {break; }}
             // join channel
             if (channels[channelName]) {
                 channels[channelName][userId] = socket
             } else {
-                channels[channelName] = {}
+                channels[channelName] = Object.create(null);
                 channels[channelName][userId] = socket
             }
             const userIds = Object.keys(channels[channelName])
             send(socket, 'joined', userIds)
             break;
+            
         }
         case 'quit': {
             // quit channel

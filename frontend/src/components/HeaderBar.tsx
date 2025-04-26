@@ -11,22 +11,24 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../authConfig";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../routes/routes.ts";
-import { AccountTypeContext } from "../contexts/AccountTypeContext";
-import { CopyAccessTokenComponent } from "./CopyAccessTokenComponent.tsx";
+import {useMsal} from "@azure/msal-react";
+import {loginRequest} from "../authConfig";
+import {useNavigate} from "react-router-dom";
+import {ROUTES} from "../routes/routes.ts";
+import {AccountTypeContext} from "../contexts/AccountTypeContext";
+import {CopyAccessTokenComponent} from "./CopyAccessTokenComponent.tsx";
+import {Mail} from "@mui/icons-material";
 
 interface HeaderBarProps {
     onMenuClick: () => void;
+    onNotificationDrawerClick: () => void;
 }
 
-const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
-    const { instance } = useMsal();
+const HeaderBar = ({onMenuClick, onNotificationDrawerClick}: HeaderBarProps) => {
+    const {instance} = useMsal();
     const activeAccount = instance.getActiveAccount();
     const navigate = useNavigate();
-    const { accountType, setAccountType } = React.useContext(AccountTypeContext);
+    const {accountType, setAccountType} = React.useContext(AccountTypeContext);
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -60,7 +62,7 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
     };
 
     const handleSignUp = () => {
-        instance.loginRedirect({ ...loginRequest, prompt: 'create' }).catch(console.error);
+        instance.loginRedirect({...loginRequest, prompt: 'create'}).catch(console.error);
     };
 
     const handleLogout = () => {
@@ -68,72 +70,81 @@ const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
     };
 
     return (
-        <AppBar position="fixed" sx={{ backgroundColor: '#00897B', boxShadow: 3 }}>
-            <Toolbar>
-                <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{ mr: 2 }}>
-                    <MenuIcon />
-                </IconButton>
-                <PetsIcon sx={{ color: 'white', mr: 1 }} />
-                <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }} noWrap>
-                    Pet Health Platform
-                </Typography>
-                <div style={{ marginLeft: 'auto' }}>
-                    <IconButton color="inherit" onClick={handleMenu} sx={{ '&:hover': { transform: 'scale(1.1)', transition: 'transform 0.2s' } }}>
-                        <AccountCircle />
+        <>
+            <AppBar position="fixed" sx={{backgroundColor: '#00897B', boxShadow: 3}}>
+                <Toolbar>
+                    <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{mr: 2}}>
+                        <MenuIcon/>
                     </IconButton>
-                    <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                        {activeAccount ? (
-                            <>
-                                {/* User Avatar and Info */}
-                                <Box sx={{ px: 2, py: 1 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Avatar sx={{ width: 40, height: 40, mr: 2 }} />
-                                        <Box>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                {activeAccount.name || 'User'}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {activeAccount.username || activeAccount.localAccountId}
-                                            </Typography>
+                    <PetsIcon sx={{color: 'white', mr: 1}}/>
+                    <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}} noWrap>
+                        Pet Health Platform
+                    </Typography>
+                    <div style={{marginLeft: 'auto'}}>
+                        {activeAccount &&
+                            <IconButton color="inherit" onClick={onNotificationDrawerClick}
+                                        sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
+                                <Mail/>
+                            </IconButton>
+                        }
+                        <IconButton color="inherit" onClick={handleMenu}
+                                    sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
+                            <AccountCircle/>
+                        </IconButton>
+                        <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                            {activeAccount ? (
+                                <>
+                                    {/* User Avatar and Info */}
+                                    <Box sx={{px: 2, py: 1}}>
+                                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                            <Avatar sx={{width: 40, height: 40, mr: 2}}/>
+                                            <Box>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                    {activeAccount.name || 'User'}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {activeAccount.username || activeAccount.localAccountId}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                     </Box>
-                                </Box>
 
-                                {/* Show access token in DEV mode */}
-                                {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent /></MenuItem>}
+                                    {/* Show access token in DEV mode */}
+                                    {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent/></MenuItem>}
 
-                                <Divider sx={{ my: 1 }} />
+                                    <Divider sx={{my: 1}}/>
 
-                                {/* Profile & Settings */}
-                                <MenuItem onClick={() => handleNavigation(ROUTES.PROFILE.path)}>
-                                    Profile
-                                </MenuItem>
-                                <MenuItem onClick={() => handleNavigation(ROUTES.SETTINGS.path)}>
-                                    Settings
-                                </MenuItem>
+                                    {/* Profile & Settings */}
+                                    <MenuItem onClick={() => handleNavigation(ROUTES.PROFILE.path)}>
+                                        Profile
+                                    </MenuItem>
+                                    <MenuItem onClick={() => handleNavigation(ROUTES.SETTINGS.path)}>
+                                        Settings
+                                    </MenuItem>
 
-                                <Divider sx={{ my: 1 }} />
+                                    <Divider sx={{my: 1}}/>
 
-                                {/* Vet Mode Toggle */}
-                                <MenuItem onClick={handleToggleVetMode}>
-                                    {accountType === "vet" ? "Switch to User Mode" : "Go to Vet Portal"}
-                                </MenuItem>
+                                    {/* Vet Mode Toggle */}
+                                    <MenuItem onClick={handleToggleVetMode}>
+                                        {accountType === "vet" ? "Switch to User Mode" : "Go to Vet Portal"}
+                                    </MenuItem>
 
-                                <Divider sx={{ my: 1 }} />
+                                    <Divider sx={{my: 1}}/>
 
-                                {/* Logout */}
-                                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                            </>
-                        ) : (
-                            <>
-                                <MenuItem onClick={handleLogin}>Sign In</MenuItem>
-                                <MenuItem onClick={handleSignUp}>Sign Up</MenuItem>
-                            </>
-                        )}
-                    </Menu>
-                </div>
-            </Toolbar>
-        </AppBar>
+                                    {/* Logout */}
+                                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                </>
+                            ) : (
+                                <>
+                                    <MenuItem onClick={handleLogin}>Sign In</MenuItem>
+                                    <MenuItem onClick={handleSignUp}>Sign Up</MenuItem>
+                                </>
+                            )}
+                        </Menu>
+                    </div>
+                </Toolbar>
+            </AppBar>
+        </>
     );
 };
 
