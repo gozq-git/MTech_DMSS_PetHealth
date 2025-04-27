@@ -91,7 +91,7 @@ exports.users.get('/retrieveUser', (req, res) => __awaiter(void 0, void 0, void 
     try {
         const result = yield users_controller_1.default.retrieveUser(userInfo === null || userInfo === void 0 ? void 0 : userInfo.preferred_username);
         if (result === null || result === undefined || result.length === 0) {
-            res.status(200).type('text').send({ status: 'error', message: 'User not found' });
+            res.status(200).type('json').send({ status: 'error', message: 'User not found' });
         }
         else {
             res.status(200).type('json').send({ status: 'success', message: result });
@@ -99,7 +99,7 @@ exports.users.get('/retrieveUser', (req, res) => __awaiter(void 0, void 0, void 
     }
     catch (error) {
         logger.error(error);
-        res.status(200).type('text').send({ status: 'error', message: error });
+        res.status(200).type('json').send({ status: 'error', message: 'error' });
     }
 }));
 /**
@@ -275,7 +275,7 @@ exports.users.post('/updateUser', (req, res) => __awaiter(void 0, void 0, void 0
     }
     catch (error) {
         logger.error(error);
-        res.status(200).send(error.message);
+        res.status(200).type('text').send('error');
     }
 }));
 /**

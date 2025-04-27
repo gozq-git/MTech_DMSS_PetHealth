@@ -34,6 +34,10 @@ function clearClient(wss, socket) {
         });
     });
 }
+const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+function isSafeKey(key) {
+    return typeof key === 'string' && !dangerousKeys.includes(key);
+}
 function onMessage(wss, socket, message) {
     console.log(`onMessage ${message}`);
     const parsedMessage = JSON.parse(message);
@@ -43,12 +47,17 @@ function onMessage(wss, socket, message) {
     const userId = body.userId;
     switch (type) {
         case 'join': {
+            if (!channels.hasOwnProperty(channelName)) {
+                if (!channels[channelName].hasOwnProperty(userId)) {
+                    break;
+                }
+            }
             // join channel
             if (channels[channelName]) {
                 channels[channelName][userId] = socket;
             }
             else {
-                channels[channelName] = {};
+                channels[channelName] = Object.create(null);
                 channels[channelName][userId] = socket;
             }
             const userIds = Object.keys(channels[channelName]);

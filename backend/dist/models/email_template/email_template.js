@@ -15,7 +15,7 @@ class EmailTemplate {
         this.setFooter(footer);
     }
     setSubject(subject) {
-        this.subject = `[PHP] ${subject}`;
+        this.subject = `${subject}`;
         return this;
     }
     setHeader(header) {

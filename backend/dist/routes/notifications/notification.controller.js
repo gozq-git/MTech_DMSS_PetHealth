@@ -38,7 +38,7 @@ function sendCustomNotification(engine, notification) {
         }
     });
 }
-const UsersController = {
+const NotificationController = {
     sendNotification: (to_1, subject_1, message_1, ...args_1) => __awaiter(void 0, [to_1, subject_1, message_1, ...args_1], void 0, function* (to, subject, message, engines = []) {
         try {
             // Default zohoMail notification
@@ -75,4 +75,4 @@ const UsersController = {
         }
     }),
 };
-exports.default = UsersController;
+exports.default = NotificationController;

@@ -24,6 +24,10 @@ exports.config = {
     zoho_account_id: env.ZOHO_ACCOUNT_ID,
     telegram_bot_token: env.TELEGRAM_BOT_TOKEN,
     ntfy_url: 'https://ntfy.sh',
+    stripe_api_key: env.STRIPE_API_KEY,
+    stripe_secret_key: env.STRIPE_SECRET_KEY,
+    paypal_client_id: env.PAYPAL_CLIENT_ID,
+    paypal_client_secret: env.PAYPAL_CLIENT_SECRET,
     port: 8001,
     wssport: 8090,
 };
