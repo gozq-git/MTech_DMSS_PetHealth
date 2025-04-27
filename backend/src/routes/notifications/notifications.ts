@@ -137,7 +137,7 @@ notifications.post('/broadcast', async (req: Request, res: Response) => {
             return;
         }
         for (const recipient of recipients) {
-            await NotificationController.sendBroadcast(recipient, subject, message, engines);
+            await NotificationController.sendNotification(recipient, subject, message, engines);
             logger.info(`Notification sent to ${recipient}`);
         }
         res.status(200).json({ success: true, message: "Broadcast message sent successfully." });
