@@ -5,4 +5,4 @@ COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 EXPOSE 5173
-CMD ["INLINE_RUNTIME_CHUNK=false", "npm", "run", "dev"]
+CMD ["npm", "run", "dev"]
