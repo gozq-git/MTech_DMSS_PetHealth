@@ -24,7 +24,7 @@ async function sendCustomNotification(engine: string, notification: PhPNotificat
     }
 }
 
-const UsersController = {
+const NotificationController = {
     sendNotification: async (to: string, subject: string, message: string, engines: Array<string> = []) => {
         try {
             // Default zohoMail notification
@@ -66,4 +66,4 @@ const UsersController = {
     },
 }
 
-export default UsersController;
+export default NotificationController;

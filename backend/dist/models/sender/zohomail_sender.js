@@ -19,12 +19,12 @@ const axios_1 = __importDefault(require("axios"));
  * Class implementing the Sender interface for Zoho Mail
 */
 class ZohoMailSender {
-    constructor() {
+    constructor(cachedToken = null, tokenExpiryTime = null) {
         this.cachedToken = null;
         this.tokenExpiryTime = null;
         // Initialize the cached token and expiry time
-        this.cachedToken = null;
-        this.tokenExpiryTime = null;
+        this.cachedToken = cachedToken;
+        this.tokenExpiryTime = tokenExpiryTime;
         this.getZohoMailToken(); // Fetch the token on initialization
         console.log('ZohoMailSender initialized and token fetched.');
     }
@@ -37,7 +37,7 @@ class ZohoMailSender {
     */
     getZohoMailToken() {
         return __awaiter(this, void 0, void 0, function* () {
-            const currentTime = Date.now();
+            const currentTime = Date.now() + 0;
             // Check if the token is cached and still valid
             if (this.cachedToken && this.tokenExpiryTime && currentTime < this.tokenExpiryTime) {
                 console.log('Returning cached token.');

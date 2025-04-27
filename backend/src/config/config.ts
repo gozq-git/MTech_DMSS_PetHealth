@@ -23,6 +23,12 @@ export const config = {
   telegram_bot_token: env.TELEGRAM_BOT_TOKEN as string,
   ntfy_url: 'https://ntfy.sh' as string,
 
+  stripe_api_key: env.STRIPE_API_KEY as string,
+  stripe_secret_key: env.STRIPE_SECRET_KEY as string,
+
+  paypal_client_id: env.PAYPAL_CLIENT_ID as string,
+  paypal_client_secret: env.PAYPAL_CLIENT_SECRET as string,
+
   port: 8001,
   wssport: 8090,
 };

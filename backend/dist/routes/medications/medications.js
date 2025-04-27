@@ -56,7 +56,7 @@ exports.medications = express_1.default.Router();
 exports.medications.get('/retrieveMedication/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield medications_controller_1.default.retrieveMedication(req.params.id);
-        res.status(200).send(result);
+        res.status(200).type('text').send(result);
     }
     catch (error) {
         console.error(error);

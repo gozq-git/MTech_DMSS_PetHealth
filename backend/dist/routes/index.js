@@ -10,7 +10,6 @@ const { verifyJWT } = require('../utils/user_verification');
 exports.routes = express_1.default.Router();
 // routes.use(verifyJWT);
 ((0, fs_1.readdirSync)(__dirname)).forEach(routeName => {
-    console.log(__dirname, routeName);
     if (routeName === 'index.js')
         return;
     const route = require(`./${routeName}/${routeName}`)[routeName];

@@ -74,11 +74,13 @@ exports.notifications.post('/sendNotification', (req, res) => __awaiter(void 0, 
         const { to, subject, message, engines } = req.body;
         if (!to || !subject || !message || !engines) {
             logger.error("Missing required fields in request body");
-            res.status(400).json({ success: false, message: "Missing required fields: to, subject, or message" });
+            res.status(400).json({ success: false, message: "Missing or invalid required fields in request body." });
+            return;
         }
         yield notification_controller_1.default.sendNotification(to, subject, message, engines);
         logger.info(`Notification sent to ${to}`);
         res.status(200).json({ success: true, message: "Notification sent successfully." });
+        return;
     }
     catch (error) {
         logger.error("Error sending notification:", error);
@@ -142,15 +144,17 @@ exports.notifications.post('/sendNotification', (req, res) => __awaiter(void 0, 
 exports.notifications.post('/broadcast', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { recipients, subject, message, engines } = req.body;
-        if (!recipients || !Array.isArray(recipients) || recipients.length === 0 || !subject || !message || !!engines || !Array.isArray(engines) || engines.length === 0) {
+        if (!recipients || !Array.isArray(recipients) || recipients.length === 0 || !subject || !message || !engines || !Array.isArray(engines)) {
             logger.error("Missing or invalid required fields in request body");
             res.status(400).json({ success: false, message: "Missing or invalid required fields in request body." });
+            return;
         }
         for (const recipient of recipients) {
             yield notification_controller_1.default.sendBroadcast(recipient, subject, message, engines);
             logger.info(`Notification sent to ${recipient}`);
         }
         res.status(200).json({ success: true, message: "Broadcast message sent successfully." });
+        return;
     }
     catch (error) {
         logger.error("Error sending broadcast message:", error);
