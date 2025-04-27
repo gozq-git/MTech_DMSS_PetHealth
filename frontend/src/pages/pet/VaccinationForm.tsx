@@ -17,8 +17,8 @@ import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs'
 import {Pet} from '../../api/types/pet.ts';
-import dayjs, {Dayjs} from 'dayjs' // Changed from: import * as dayjs from 'dayjs'
-import 'dayjs/locale/en-sg.js'
+import dayjs, {Dayjs} from 'dayjs'; // Changed from: import * as dayjs from 'dayjs'
+import 'dayjs/locale/en-sg.js';
 import {ApiClientContext} from "../../providers/ApiClientProvider.tsx";
 import {SNACKBAR_SEVERITY, SnackbarContext} from "../../providers/SnackbarProvider.tsx";
 import {VaccinationRecord, VaccinationRecordRequest} from "../../api/types/vaccinationRecord.ts"; // import locale
