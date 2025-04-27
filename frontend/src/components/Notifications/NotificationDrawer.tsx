@@ -111,19 +111,11 @@ export const NotificationDrawer = ({isOpen, toggleDrawer}: NotificationDrawerPro
             <NotificationCreateModal
                 open={isCreateNotificationOpen}
                 onClose={closeCreateNotificationModal}
-                onSubmit={() => console.info("TODO")}
-                availableUsers={mockUsers}
             />
             <NotificationSettingsModal open={isSettingsOpen} handleClose={closeNotificationSettings} handleOpen={openNotificationSettings} />
         </div>
     );
 }
-const mockUsers = [
-    { id: '1', name: 'Vivienne Balakrishnan', email: 'v.bala@example.com', isPetOwner: true },
-    { id: '2', name: 'Law Ren Wong', email: 'callmepm@example.com', isPetOwner: true },
-    { id: '3', name: 'Gracey Foo', email: 'graciously@vetclinic.com', isPetOwner: false },
-    // ... more users
-]
 
 const DrawerHeader = styled('div')(({ theme }) => ({
     display: 'flex',
