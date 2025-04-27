@@ -10,7 +10,11 @@ export default defineConfig({
         watch: {
             usePolling: true,
         },
-        allowedHosts: ['pethealthplatform-dev.azurewebsites.net']
+        allowedHosts: ['pethealthplatform-dev.azurewebsites.net'],
+        headers: {
+            "Strict-Transport-Security": "max-age=86400; includeSubDomains",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",}   
     },
     define: {
         'import.meta.env': process.env
