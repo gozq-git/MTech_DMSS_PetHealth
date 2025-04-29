@@ -14,7 +14,7 @@ export const FeesPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await feesApi.getConsultationFee();
-      if (response.success) {
+      if (response.status === "success") {
         setFeeDetails(response.data);
       } else {
         showSnackbar(response.message, SNACKBAR_SEVERITY.ERROR);
