@@ -26,18 +26,15 @@ export interface SideBarItem {
 }
 
 const userSideBarItems: SideBarItem[] = [
-    { id: 'home', text: 'Home', icon: Home, description: 'abc', endpoint: '/home' },
-    { id: 'pets', text: 'My Pets', icon: PetsIcon, description: 'abc', endpoint: '/pets' },
-    { id: 'healthcare', text: 'Healthcare', icon: MedicalServices, description: 'abc', endpoint: '/healthcare' },
-    { id: 'teleconsultation', text: 'Teleconsultation', icon: MedicalServices, description: 'abc', endpoint: '/teleconsultation' },
-    { id: 'services', text: 'Other Services', icon: AutoAwesome, description: 'abc', endpoint: '/services' }
+    { id: 'home', text: 'Home', icon: Home, description: 'Home', endpoint: '/home' },
+    { id: 'pets', text: 'My Pets', icon: PetsIcon, description: 'My Pets', endpoint: '/pets' },
+    { id: 'healthcare', text: 'Teleconsultation', icon: MedicalServices, description: 'Teleconsultation', endpoint: '/healthcare' }
 ];
 
 const vetSideBarItems: SideBarItem[] = [
-    { id: 'vet-home', text: 'Vet Dashboard', icon: Home, description: 'abc', endpoint: '/vet/home' },
-    { id: 'vet-pets', text: 'Patient Records', icon: PetsIcon, description: 'abc', endpoint: '/vet/pets' },
-    { id: 'vet-healthcare', text: 'Vet Healthcare', icon: MedicalServices, description: 'abc', endpoint: '/vet/healthcare' },
-    { id: 'vet-services', text: 'Vet Services', icon: AutoAwesome, description: 'abc', endpoint: '/vet/services' }
+    { id: 'vet-home', text: 'Vet Home', icon: Home, description: 'Vet Home', endpoint: '/vet/home' },
+    { id: 'vet-pets', text: 'Patient Records', icon: PetsIcon, description: 'Patient Records', endpoint: '/vet/pets' },
+    { id: 'vet-healthcare', text: 'Teleconsultation', icon: MedicalServices, description: 'Teleconsultation', endpoint: '/vet/healthcare' }
 ];
 
 const SideBar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
