@@ -1,3 +1,5 @@
+import path from "path";
+
 export const ROUTES = {
     LANDINGS: {
         path: '/',
@@ -26,6 +28,10 @@ export const ROUTES = {
     SETTINGS: {
         path: '/settings',
         label: 'Settings'
+    },
+    FEES: {
+        path: '/vet/fees',
+        label: 'Fees'        
     },
     VET_PORTAL: {
         path: '/vetportal',
@@ -56,6 +62,6 @@ export const ROUTES = {
         SETTINGS: {
             path: '/vet/settings',
             label: 'Settings'
-        }
+        },
     }
 } as const;

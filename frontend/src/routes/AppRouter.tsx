@@ -9,6 +9,7 @@ import HealthcarePage from "../pages/healthcare/HealthcarePage.tsx";
 import ServicesPage from "../pages/services/ServicesPage.tsx";
 import ProfilePage from "../pages/profile/ProfilePage.tsx";
 import SettingsPage from "../pages/settings/SettingsPage.tsx";
+import FeesPage from "../pages/payment/FeesPage.tsx";
 import VetPortalPage from "../pages/vetportal/VetPortalPage.tsx"; // Vet Profile Check Happens Here
 // Vet Pages
 import VetHomePage from "../pages/vetportal/HomePage.tsx";
@@ -39,6 +40,9 @@ export const AuthenticatedRoutes = () => {
             <Route path="/teleconsultation" element={<NewTeleconsultPage />} />
             <Route path="/teleconsultvet" element={<NewTeleconsultPage />} />
             <Route path="/wstest" element={<WebSocketTester />} />
+            <Route path="/fees" element={<FeesPage />} />
+
+            {/* Vet Portal (Checks Vet Profile) */}
 
             {/* Vet Portal Entry Point (Checks Vet Profile) */}
             <Route path="/vetportal" element={<VetPortalPage />} />

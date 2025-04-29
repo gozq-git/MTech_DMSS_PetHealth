@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { VideoConsultationUI } from './VideoConsultationUI.tsx';
 import { Check } from '@mui/icons-material';
+import { FeesPage } from '../../payment/FeesPage'; // updated the path to the correct location
 
 // Define interfaces for our component props and state
 interface ConsultationRoomManagerProps {
@@ -165,12 +166,15 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
         };
     }, [userId, userRole, appointmentId]);
 
+    const [showFeeModal, setShowFeeModal] = useState(false);
+
     const handleConsultationEnd = (): void => {
         setInConsultation(false);
         setConsultationInfo({
             channelName: null,
             partnerId: null
         });
+        setShowFeeModal(true); // Show the price popup
 
         if (webSocket && webSocket.readyState !== WebSocket.OPEN) {
             const newSocket = new WebSocket('ws://localhost:8080');
@@ -300,6 +304,7 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                     )}
                 </Grid2>
             </Paper>
+            <FeesPage open={showFeeModal} onClose={() => setShowFeeModal(false)} />
         </Container>
     );
 };
