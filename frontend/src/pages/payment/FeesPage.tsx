@@ -14,10 +14,12 @@ export const FeesPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await feesApi.getConsultationFee();
-      if (response.status === "success") {
+      console.log('Response:', response);
+
+      if (response.status === 'success' && response.data) {
         setFeeDetails(response.data);
       } else {
-        showSnackbar(response.message, SNACKBAR_SEVERITY.ERROR);
+        showSnackbar(response.message || 'Failed to fetch fee details', SNACKBAR_SEVERITY.ERROR);
       }
     } catch (error) {
       console.error("Error fetching fees:", error);
