@@ -10,6 +10,10 @@ import {
   DialogActions,
   CircularProgress,
   TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl
 } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -17,6 +21,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
 import { useNavigate } from "react-router-dom";
+import { Pet } from "../../api/types/pet"; // adjust path if needed
 
 interface Vet {
   id: string;
@@ -26,11 +31,21 @@ interface Vet {
   vet_name?: string;
 }
 
+interface Appointment {
+  id: string;
+  appointment_date: string;
+  appointment_time: string;
+  vet_id: string;
+  status: string;
+}
+
 export const HealthcarePage: React.FC = () => {
-  const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
+  const { appointmentsApi, availabilitiesApi, userApi, petApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
   const navigate = useNavigate();
 
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [selectedPetId, setSelectedPetId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableVets, setAvailableVets] = useState<Vet[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,24 +53,30 @@ export const HealthcarePage: React.FC = () => {
   const [bookingDialogOpen, setBookingDialogOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
-
-  interface Appointment {
-    id: string;
-    appointment_date: string;
-    appointment_time: string;
-    vet_id: string;
-    status: string;
-  }
-
   const [userAppointments, setUserAppointments] = useState<Appointment[]>([]);
+
+  console.log("Inside HealthcarePage. userApi:", userApi);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        if (!userApi || !userApi.retrieveUser) {
+          console.error("userApi is not defined or improperly injected");
+          return;
+        }
+  
+        console.log("Calling retrieveUser...");
         const result = await userApi.retrieveUser();
+        console.log("User result:", result);
+  
         if (result.success && result.data) {
-          setUserId(result.data.id);
-          fetchUserAppointments(result.data.id);
+          const id = result.data.id;
+          console.log("result.data.id:", id);
+  
+          setUserId(id);
+          fetchUserAppointments(id);
+          console.log("Calling fetchUserPets with ID:", id);
+          fetchUserPets(id);
         } else {
           console.error("Failed to fetch user data:", result.message);
         }
@@ -63,9 +84,10 @@ export const HealthcarePage: React.FC = () => {
         console.error("Error retrieving user:", error);
       }
     };
-
+  
     fetchUserData();
   }, [userApi]);
+  
 
   useEffect(() => {
     if (selectedDate) {
@@ -91,6 +113,20 @@ export const HealthcarePage: React.FC = () => {
     } catch (error) {
       console.error("Error fetching user appointments:", error);
       showSnackbar("Error fetching appointments", SNACKBAR_SEVERITY.ERROR);
+    }
+  };
+
+  const fetchUserPets = async (ownerId: string) => {
+    try {
+      const result = await petApi.getPetsByOwnerId(ownerId);
+      if (result.success && result.data) {
+        setPets(result.data as Pet[]);
+      } else {
+        showSnackbar("Failed to fetch pets", SNACKBAR_SEVERITY.ERROR);
+      }
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+      showSnackbar("Error fetching pets", SNACKBAR_SEVERITY.ERROR);
     }
   };
 
@@ -142,14 +178,18 @@ export const HealthcarePage: React.FC = () => {
       return;
     }
 
-    try {
-      const appointmentData = {
-        user_id: userId,
-        vet_id: selectedVet.id,
-        appointment_date: selectedDate,
-        appointment_time: selectedTime,
-      };
+    const selectedPet = pets.find((pet) => pet.id === selectedPetId);
 
+    const appointmentData = {
+      user_id: userId,
+      vet_id: selectedVet.id,
+      pet_id: selectedPet?.id || "",
+      pet_name: selectedPet?.name || "",
+      appointment_date: selectedDate,
+      appointment_time: selectedTime,
+    };
+
+    try {
       const response = await appointmentsApi.bookAppointment(appointmentData);
       if (response.success) {
         showSnackbar("Appointment booked successfully!", SNACKBAR_SEVERITY.SUCCESS);
@@ -316,6 +356,23 @@ export const HealthcarePage: React.FC = () => {
               shrink: true,
             }}
           />
+
+<FormControl fullWidth sx={{ mt: 3 }}>
+  <InputLabel id="select-pet-label">Select Pet</InputLabel>
+  <Select
+    labelId="select-pet-label"
+    value={selectedPetId}
+    label="Select Pet"
+    onChange={(e) => setSelectedPetId(e.target.value)}
+  >
+    {pets.map((pet) => (
+      <MenuItem key={pet.id} value={pet.id}>
+        {pet.name}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setBookingDialogOpen(false)} color="inherit">

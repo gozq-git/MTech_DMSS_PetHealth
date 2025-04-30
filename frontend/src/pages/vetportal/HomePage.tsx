@@ -70,7 +70,7 @@ import {
                   <Button
                     variant="contained"
                     color="success"
-                    onClick={() => navigate('/consultations')}
+                    onClick={() => navigate('/vet/healthcare')}
                   >
                     Go to Consultations
                   </Button>
@@ -97,7 +97,7 @@ import {
                   <Button
                     variant="outlined"
                     color="success"
-                    onClick={() => navigate('/records')}
+                    onClick={() => navigate('/vet/pets')}
                   >
                     View Records
                   </Button>

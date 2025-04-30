@@ -47,6 +47,8 @@ const AppointmentsService = {
         id: uuidv4(),
         user_id: appointmentData.user_id,
         vet_id: appointmentData.vet_id,
+        pet_id: appointmentData.pet_id,
+        pet_name: appointmentData.pet_name,
         appointment_date: appointmentData.appointment_date,
         appointment_time: appointmentData.appointment_time || null,
         status: 'pending'
@@ -63,7 +65,7 @@ const AppointmentsService = {
     try {
       const appointment = await models.APPOINTMENTS.findOne({
         where: { id: appointmentId }
-      }) as any; 
+      }) as any;
       if (!appointment) {
         throw new Error("Appointment not found");
       }
@@ -85,11 +87,11 @@ const AppointmentsService = {
       const appointments = await models.APPOINTMENTS.findAll({
         where: {
           appointment_date: date,
-          vet_id: vetId, 
+          vet_id: vetId,
         },
         include: [
           {
-            model: models.USERS, 
+            model: models.USERS,
             required: true,
           },
         ],
@@ -101,12 +103,33 @@ const AppointmentsService = {
     }
   },
 
-  // Fetch all appointments for a given user(pending, accepted, and rejected)
+  // Fetch all appointments for a given vet, across all dates (pending, accepted, and rejected)
+  getAllAppointmentsForVet: async (vetId: string) => {
+    try {
+      const appointments = await models.APPOINTMENTS.findAll({
+        where: {
+          vet_id: vetId, // Only filter by vetId
+        },
+        include: [
+          {
+            model: models.USERS,
+            required: true,
+          },
+        ],
+      });
+      return appointments;
+    } catch (error: any) {
+      logger.error(error);
+      throw new Error("Error retrieving all appointments for vet");
+    }
+  },
+
+  // Fetch all appointments for a given user (pending, accepted, and rejected)
   getAppointmentsForUser: async (userId: string) => {
     try {
       const appointments = await models.APPOINTMENTS.findAll({
         where: {
-          user_id: userId, 
+          user_id: userId,
         },
         include: [
           {
@@ -121,10 +144,6 @@ const AppointmentsService = {
       throw new Error("Error retrieving appointments");
     }
   }
-
 };
-
-
-
 
 export default AppointmentsService;

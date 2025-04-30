@@ -5,16 +5,24 @@ export interface AppointmentsApi {
   bookAppointment: (data: {
     user_id: string;
     vet_id: string;
+    pet_id: string;
+    pet_name: string;
     appointment_date: string;
     appointment_time?: string | null;
   }) => Promise<AppointmentApiResponse<Appointment>>;
+
   respondAppointment: (data: {
     appointment_id: string;
     status: "accepted" | "rejected";
     rejection_reason?: string;
   }) => Promise<AppointmentApiResponse<Appointment>>;
-  getAppointmentsForVet: (params: { query: { date: string; vet_id?: string;} }) => Promise<AppointmentApiResponse<Appointment[]>>;
-  getAppointmentsForUser: (params: { query: { user_id?: string;} }) => Promise<AppointmentApiResponse<Appointment[]>>;
+
+  getAppointmentsForVet: (params: { query: { date: string; vet_id?: string; } }) => Promise<AppointmentApiResponse<Appointment[]>>;
+
+  getAppointmentsForUser: (params: { query: { user_id?: string; } }) => Promise<AppointmentApiResponse<Appointment[]>>;
+
+  // New method to fetch all appointments for a vet across all dates
+  getAllAppointmentsForVet: (params: { query: { vet_id: string; } }) => Promise<AppointmentApiResponse<Appointment[]>>;
 }
 
 export const createAppointmentsApiClient = (baseClient: BaseApiClient): AppointmentsApi => {
@@ -47,7 +55,7 @@ export const createAppointmentsApiClient = (baseClient: BaseApiClient): Appointm
         data: response.data,
         message: response.status === 'success' ? 'Pending appointments retrieved successfully' : (response.message || ''),
       };
-    },    
+    },
 
     getAppointmentsForUser: async (params) => {
       const response = await baseClient.get<{ status: 'success' | 'error'; data: Appointment[]; message?: string }>(
@@ -58,6 +66,19 @@ export const createAppointmentsApiClient = (baseClient: BaseApiClient): Appointm
         success: response.status === 'success',
         data: response.data,
         message: response.status === 'success' ? 'Pending appointments retrieved successfully' : (response.message || ''),
+      };
+    },
+
+    // New method to fetch all appointments for a vet across all dates
+    getAllAppointmentsForVet: async (params) => {
+      const response = await baseClient.get<{ status: 'success' | 'error'; data: Appointment[]; message?: string }>(
+        '/api/appointments/getAllAppointmentsForVet',
+        { params: params.query }
+      );
+      return {
+        success: response.status === 'success',
+        data: response.data,
+        message: response.status === 'success' ? 'All appointments retrieved successfully' : (response.message || ''),
       };
     }
   };

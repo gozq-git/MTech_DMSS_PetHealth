@@ -21,7 +21,7 @@ export interface PetApi {
 
 export const createPetApiClient = (baseClient: BaseApiClient): PetApi => {
     return {
-        retrievePet: (petId) => baseClient.get<Pet>(`/api/pets/retrieve/${petId}`),
+        retrievePet: (petId) => baseClient.get<Pet>(`/api/pets/retrievePet/${petId}`),
         getPetsByOwnerId: async (ownerId): Promise<DefaultApiResponse> => {
             try {
                 const response = await baseClient.get<{
@@ -118,7 +118,7 @@ export const createPetApiClient = (baseClient: BaseApiClient): PetApi => {
             }
 
         },
-        getMedicationRecords: (petId) => baseClient.get<MedicationRecord[]>(`/api/pets/medications/${petId}`),
+        getMedicationRecords: (petId) => baseClient.get<MedicationRecord[]>(`/api/medication_records/retrieve/${petId}`),
         createMedicationRecord: (medicationData) => baseClient.post<MedicationRecord>(`/api/pets/medications/${medicationData.id}`, medicationData),
         createVaccinationRecord: async (petId: string, request: VaccinationRecordRequest) => {
             try {

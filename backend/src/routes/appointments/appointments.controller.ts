@@ -31,11 +31,21 @@ const AppointmentsController = {
       return result;
     } catch (error) {
       logger.error(error);
-      throw new Error("Error retrieving pending appointments for vet");
+      throw new Error("Error retrieving appointments for vet on the specified date");
     }
   },
 
-  
+  // For a vet to fetch all appointments across all dates
+  getAllAppointmentsForVet: async (vetId: string) => {
+    try {
+      const result = await AppointmentsService.getAllAppointmentsForVet(vetId);
+      return result;
+    } catch (error) {
+      logger.error(error);
+      throw new Error("Error retrieving all appointments for vet");
+    }
+  },
+
   // For a user to fetch all appointments
   getAppointmentsForUser: async (userId: string) => {
     try {
@@ -43,7 +53,7 @@ const AppointmentsController = {
       return result;
     } catch (error) {
       logger.error(error);
-      throw new Error("Error retrieving pending appointments for user");
+      throw new Error("Error retrieving appointments for user");
     }
   },
 

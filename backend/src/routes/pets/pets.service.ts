@@ -29,7 +29,7 @@ const PetsService = {
     insertPet: async (petData: any) => {
         const preparedPetData = {
             id: uuidv6(),
-            owner_id: petData.ownerId || '',
+            owner_id: petData.owner_id || '',
             name: petData.name || '',
             gender: petData.gender || '',
             species: petData.species || '',

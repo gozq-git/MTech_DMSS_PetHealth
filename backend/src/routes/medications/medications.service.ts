@@ -6,12 +6,12 @@ const models = sequelize.models;
 
 const MedicationsService = {
     getMedications: async () => {
-        const medications = await models.MEDICATION.findAll({});
+        const medications = await models.MEDICATIONS.findAll({});
         return medications;
     },
 
     retrieveMedication: async (id: string) => {
-        const medication = await models.MEDICATION.findOne({
+        const medication = await models.MEDICATIONS.findOne({
             where: { id }
         });
         return medication;
@@ -29,7 +29,7 @@ const MedicationsService = {
 
         try {
             console.log('Prepared Medication Data:', preparedMedicationData);
-            const newMedication = await models.MEDICATION.create(preparedMedicationData);
+            const newMedication = await models.MEDICATIONS.create(preparedMedicationData);
             return newMedication;
         } catch (error) {
             console.error('Error inserting medication:', error);
