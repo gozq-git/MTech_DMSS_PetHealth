@@ -6,11 +6,11 @@ const models = sequelize.models;
 
 const MedicationRecordsService = {
     getMedicationRecords: async () => {
-        return await models.MEDICATION_RECORD.findAll({});
+        return await models.MEDICATION_RECORDS.findAll({});
     },
 
     retrieveMedicationRecord: async (id: string) => {
-        return await models.MEDICATION_RECORD.findOne({
+        return await models.MEDICATION_RECORDS.findOne({
             where: { id }
         });
     },
@@ -31,7 +31,7 @@ const MedicationRecordsService = {
         };
 
         try {
-            const newRecord = await models.MEDICATION_RECORD.create(preparedRecord);
+            const newRecord = await models.MEDICATION_RECORDS.create(preparedRecord);
             return newRecord;
         } catch (error) {
             console.error('Error inserting medication record:', error);

@@ -4,6 +4,8 @@ export interface Appointment {
     id: string;
     user_id: string;
     vet_id: string;
+    pet_id: string;
+    pet_name: string;
     appointment_date: string;
     appointment_time?: string;
     status: 'pending' | 'accepted' | 'rejected';

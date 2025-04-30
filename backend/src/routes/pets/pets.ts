@@ -17,7 +17,7 @@ export const pets = express.Router();
  *         required: true
  *         description: Numeric ID of the pet to retrieve.
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: A single pet.

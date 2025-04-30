@@ -14,7 +14,13 @@ export const pets = {
         bio: { type: DataTypes.STRING },
         profile_picture: { type: DataTypes.STRING },
         display_name: { type: DataTypes.STRING },
-        owner_id: { type: DataTypes.STRING },
+        owner_id: { type: DataTypes.UUID,
+            allowNull: false,
+            references: {
+                model: 'USERS',
+                key: 'id'
+            },
+        },
         name: { type: DataTypes.STRING },
         gender: { type: DataTypes.STRING },
         species: { type: DataTypes.STRING },

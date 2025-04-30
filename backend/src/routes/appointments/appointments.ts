@@ -92,8 +92,37 @@ appointments.get('/availableVets', async (req: Request, res: Response): Promise<
 appointments.get('/getAppointmentsForVet', async (req: Request, res: Response): Promise<void> => {
   const { vet_id, date } = req.query;
   try {
-    // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
     const result = await AppointmentsController.getAppointmentsForVet(vet_id as string, date as string);
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error: any) {
+    logger.error(error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /appointments/getAllAppointmentsForVet:
+ *   get:
+ *     summary: Get all appointments for a vet (across all dates).
+ *     tags:
+ *       - appointments
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet, regardless of the date.
+ *     parameters:
+ *       - in: query
+ *         name: vet_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vet ID
+ *     responses:
+ *       200:
+ *         description: List of all appointments (pending, accepted, rejected) across all dates.
+ */
+appointments.get('/getAllAppointmentsForVet', async (req: Request, res: Response): Promise<void> => {
+  const { vet_id } = req.query;
+  try {
+    const result = await AppointmentsController.getAllAppointmentsForVet(vet_id as string);
     res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
     logger.error(error);
@@ -105,10 +134,10 @@ appointments.get('/getAppointmentsForVet', async (req: Request, res: Response): 
  * @swagger
  * /appointments/getAppointmentsForUser:
  *   get:
- *     summary: Get all appointments for a user on a given date.
+ *     summary: Get all appointments for a user.
  *     tags:
  *       - appointments
- *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet on a specific day.
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a user.
  *     parameters:
  *       - in: query
  *         name: user_id
@@ -123,7 +152,6 @@ appointments.get('/getAppointmentsForVet', async (req: Request, res: Response): 
 appointments.get('/getAppointmentsForUser', async (req: Request, res: Response): Promise<void> => {
   const { user_id } = req.query;
   try {
-    // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
     const result = await AppointmentsController.getAppointmentsForUser(user_id as string);
     res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
@@ -147,6 +175,8 @@ appointments.get('/getAppointmentsForUser', async (req: Request, res: Response):
  *           example:
  *             user_id: "user-uuid-here"
  *             vet_id: "vet-uuid-here"
+ *             pet_id: "pet-uuid-here"
+ *             pet_name: "Buddy"
  *             appointment_date: "2025-04-01"
  *             appointment_time: "14:00:00"
  *     responses:

@@ -43,7 +43,7 @@ export const AuthenticatedRoutes = () => {
             <Route path="/fees" element={<FeesPage open={true} onClose={() => {}} />} />
 
             {/* Vet Portal (Checks Vet Profile) */}
-
+            
             {/* Vet Portal Entry Point (Checks Vet Profile) */}
             <Route path="/vetportal" element={<VetPortalPage />} />
 

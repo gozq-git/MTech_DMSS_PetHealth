@@ -24,10 +24,11 @@ interface Appointment {
   user_id: string;
   appointment_date: string;
   status: "pending" | "accepted" | "rejected";
+  pet_name?: string; // Added pet_name field
 }
 
 export const VetHealthcarePage: React.FC = () => {
-  const { appointmentsApi, availabilitiesApi, userApi } = useContext(ApiClientContext);
+  const { appointmentsApi, availabilitiesApi, userApi, petApi } = useContext(ApiClientContext);
   const { showSnackbar } = useContext(SnackbarContext);
   const navigate = useNavigate();
 
@@ -76,7 +77,19 @@ export const VetHealthcarePage: React.FC = () => {
     try {
       const response = await appointmentsApi.getAppointmentsForVet({ query: { date, vet_id: vetId } });
       if (response.success) {
-        setAppointments(response.data || []);
+        // Fetch pet name for each appointment
+        const appointmentsWithPets = await Promise.all(
+          (response.data || []).map(async (appointment: Appointment) => {
+            try {
+              const petResponse = await petApi.getPetsByOwnerId(appointment.user_id);
+              const petName = petResponse.success && Array.isArray(petResponse.data) && petResponse.data[0]?.name;
+              return { ...appointment, pet_name: petName || "Unknown Pet" };
+            } catch {
+              return { ...appointment, pet_name: "Unknown Pet" };
+            }
+          })
+        );
+        setAppointments(appointmentsWithPets);
       } else {
         showSnackbar("Failed to fetch appointments", SNACKBAR_SEVERITY.ERROR);
       }
@@ -162,7 +175,7 @@ export const VetHealthcarePage: React.FC = () => {
 
   const getAppointmentsForCalendar = () => {
     return appointments.map((appointment) => ({
-      title: `Appointment with user ${appointment.user_id}`,
+      title: `Appointment with ${appointment.pet_name || `user ${appointment.user_id}`}`,
       date: appointment.appointment_date,
       backgroundColor: appointment.status === 'accepted' ? '#4caf50' : appointment.status === 'rejected' ? '#f44336' : '#ff9800',
       borderColor: appointment.status === 'accepted' ? '#388e3c' : appointment.status === 'rejected' ? '#d32f2f' : '#f57c00',
@@ -239,7 +252,7 @@ export const VetHealthcarePage: React.FC = () => {
                 }}
               >
                 <Typography>
-                  <strong>User ID:</strong> {appointment.user_id}
+                  <strong>Pet:</strong> {appointment.pet_name || `User ID: ${appointment.user_id}`}
                 </Typography>
                 <Typography>
                   <strong>Status:</strong> {appointment.status}
@@ -273,7 +286,7 @@ export const VetHealthcarePage: React.FC = () => {
         <DialogTitle>Respond to Appointment</DialogTitle>
         <DialogContent>
           <Typography gutterBottom>
-            {selectedAppointment && `Appointment from user ${selectedAppointment.user_id}`}
+            {selectedAppointment && `Appointment for ${selectedAppointment.pet_name || `user ${selectedAppointment.user_id}`}`}
           </Typography>
           <TextField
             fullWidth
