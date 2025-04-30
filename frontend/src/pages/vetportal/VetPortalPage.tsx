@@ -3,6 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { VetProfileForm } from "./VetProfileForm";
 import VetPortalPageContent from "./VetPortalPageContent";
 import { Button } from "@mui/material";
+import HomePage from "./HomePage"; // Adjust the path as needed
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { AccountTypeContext } from "../../contexts/AccountTypeContext";
 
@@ -44,7 +45,7 @@ const VetPortalPage = () => {
       <Button onClick={() => {}}>
         Account Type: {accountTypeState}
       </Button>
-      {accountTypeState === "vet" ? <VetPortalPageContent /> : <VetProfileForm />}
+      {accountTypeState === "vet" ? <HomePage /> : <VetProfileForm />}
     </>
   );
 };
