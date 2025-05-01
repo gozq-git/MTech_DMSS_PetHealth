@@ -9,6 +9,8 @@ import {
   List,
   ListItem,
   ListItemText,
+  Grid,
+  Card,
 } from "@mui/material";
 import { ApiClientContext } from "../../providers/ApiClientProvider";
 import { SnackbarContext, SNACKBAR_SEVERITY } from "../../providers/SnackbarProvider";
@@ -57,10 +59,8 @@ const VetPetPage = () => {
             return;
           }
 
-          // Extract unique pet_ids
           const uniquePetIds = Array.from(new Set(appointments.map((appt: any) => appt.pet_id)));
 
-          // Fetch full pet records
           const petData = await Promise.all(
             uniquePetIds.map(async (petId: string) => {
               const pet = await petApi.retrievePet(petId);
@@ -102,50 +102,50 @@ const VetPetPage = () => {
         ) : petRecords.length === 0 ? (
           <Typography>No pet records found.</Typography>
         ) : (
-          <Box>
+          <Grid container spacing={4}>
             {petRecords.map(({ pet, vaccinations, medications }, index) => (
-              <Box key={index} sx={{ mb: 4 }}>
-                <Typography variant="h6">{pet.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Breed: {pet.breed} | Age: {pet.age} years
-                </Typography>
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ p: 3, borderRadius: 3 }}>
+                  <Typography variant="h6">{pet.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Breed: {pet.breed} | Age: {pet.age} years
+                  </Typography>
 
-                <Divider sx={{ my: 2 }} />
+                  <Divider sx={{ my: 2 }} />
 
-                <Typography variant="subtitle1">Vaccinations</Typography>
-                <List dense>
-                  {vaccinations.length > 0 ? (
-                    vaccinations.map((v: { name: string }, idx: number) => (
-                      <ListItem key={idx}>
-                        <ListItemText primary={v.name} />
+                  <Typography variant="subtitle1">Vaccinations</Typography>
+                  <List dense>
+                    {vaccinations.length > 0 ? (
+                      vaccinations.map((v: { name: string }, idx: number) => (
+                        <ListItem key={idx}>
+                          <ListItemText primary={v.name} />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <ListItem>
+                        <ListItemText primary="No vaccination records." />
                       </ListItem>
-                    ))
-                  ) : (
-                    <ListItem>
-                      <ListItemText primary="No vaccination records." />
-                    </ListItem>
-                  )}
-                </List>
+                    )}
+                  </List>
 
-                <Typography variant="subtitle1">Medications</Typography>
-                <List dense>
-                  {medications.length > 0 ? (
-                    medications.map((m: { name: string; dosage: string }, idx: number) => (
-                      <ListItem key={idx}>
-                        <ListItemText primary={m.name} secondary={`Dosage: ${m.dosage}`} />
+                  <Typography variant="subtitle1">Medications</Typography>
+                  <List dense>
+                    {medications.length > 0 ? (
+                      medications.map((m: { name: string; dosage: string }, idx: number) => (
+                        <ListItem key={idx}>
+                          <ListItemText primary={m.name} secondary={`Dosage: ${m.dosage}`} />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <ListItem>
+                        <ListItemText primary="No medication records." />
                       </ListItem>
-                    ))
-                  ) : (
-                    <ListItem>
-                      <ListItemText primary="No medication records." />
-                    </ListItem>
-                  )}
-                </List>
-
-                <Divider sx={{ my: 3 }} />
-              </Box>
+                    )}
+                  </List>
+                </Card>
+              </Grid>
             ))}
-          </Box>
+          </Grid>
         )}
       </Paper>
     </Container>
