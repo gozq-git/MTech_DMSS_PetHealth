@@ -1,20 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Grid2,
-    List,
-    ListItem,
-    ListItemText,
-    Paper,
-    Typography
-} from '@mui/material';
-import { VideoConsultationUI } from './VideoConsultationUI.tsx';
-import { Check } from '@mui/icons-material';
-import { FeesPage } from '../../payment/FeesPage'; // updated the path to the correct location
+import React, {useEffect, useState} from 'react';
+import {Alert, Box, Button, CircularProgress, Container, Grid2, List, Paper, Typography} from '@mui/material';
+import {VideoConsultationUI} from './VideoConsultationUI.tsx';
+import {Check} from '@mui/icons-material';
+import {FeesPage} from '../../payment/FeesPage'; // updated the path to the correct location
 
 // Define interfaces for our component props and state
 interface ConsultationRoomManagerProps {
@@ -41,6 +29,7 @@ interface ConsultationInfo {
 
 interface WebSocketMessage {
     type: string;
+
     [key: string]: any;
 }
 
@@ -62,7 +51,7 @@ interface WaitingRoomJoinedMessage extends WebSocketMessage {
     estimatedWaitMinutes: number;
 }
 
-export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = ({ userId, userRole, appointmentId }) => {
+export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = ({userId, userRole, appointmentId}) => {
     const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -200,12 +189,12 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
 
     if (!isConnected) {
         return (
-            <Container maxWidth="sm" sx={{ mt: 4 }}>
-                <Paper sx={{ p: 3, textAlign: 'center' }}>
-                    <CircularProgress sx={{ mb: 2 }} />
+            <Container maxWidth="sm" sx={{mt: 4}}>
+                <Paper sx={{p: 3, textAlign: 'center'}}>
+                    <CircularProgress sx={{mb: 2}}/>
                     <Typography variant="h6">Connecting to server...</Typography>
                     {connectionError && (
-                        <Typography color="error" sx={{ mt: 2 }}>
+                        <Typography color="error" sx={{mt: 2}}>
                             {connectionError}
                         </Typography>
                     )}
@@ -228,8 +217,8 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
     }
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 4 }}>
-            <Paper sx={{ p: 3 }}>
+        <Container maxWidth="xl" sx={{mt: 4}}>
+            <Paper sx={{p: 3}}>
                 <Grid2 container spacing={2}>
                     <Grid2 size={12}>
                         <Typography variant="h5" gutterBottom>
@@ -238,16 +227,17 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                     </Grid2>
 
                     {userRole === 'pet-owner' && (
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <Box sx={{mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1}}>
                             <Typography variant="h6" gutterBottom>
                                 You're in the waiting room
                             </Typography>
                             <Typography>
-                                Please wait while a veterinarian becomes available. You'll automatically be connected when it's your turn.
+                                Please wait while a veterinarian becomes available. You'll automatically be connected
+                                when it's your turn.
                             </Typography>
 
                             {waitPosition !== null && (
-                                <Alert severity="info" sx={{ mt: 2 }}>
+                                <Alert severity="info" sx={{mt: 2}}>
                                     Your position in queue: {waitPosition}
                                     {estimatedWaitMinutes !== null && (
                                         <span> • Estimated wait: {estimatedWaitMinutes} minutes</span>
@@ -255,8 +245,8 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                                 </Alert>
                             )}
 
-                            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                                <CircularProgress size={24} sx={{ mr: 2 }} />
+                            <Box sx={{mt: 2, display: 'flex', alignItems: 'center'}}>
+                                <CircularProgress size={24} sx={{mr: 2}}/>
                                 <Typography variant="body2" color="text.secondary">
                                     Waiting for a veterinarian...
                                 </Typography>
@@ -265,7 +255,7 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                     )}
 
                     {userRole === 'vet' && (
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <Box sx={{mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1}}>
                             <Typography variant="h6" gutterBottom>
                                 Waiting Pet Owners
                             </Typography>
@@ -273,38 +263,48 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                             {waitingPetOwners.length === 0 ? (
                                 <Typography>No pet owners are currently waiting.</Typography>
                             ) : (
-                                <List sx={{ width: '100%' }}>
+                                <Grid2 container spacing={2}>
                                     {waitingPetOwners.map((petOwner) => {
                                         const waitTime = Math.floor((new Date().getTime() - new Date(petOwner.waitingSince).getTime()) / 60000);
                                         return (
-                                            <ListItem
-                                                key={petOwner.id}
-                                                secondaryAction={
+                                            <>
+                                                <Grid2 size={4}>
+                                                    <Typography variant="body2" component="div">
+                                                        {`${petOwner.petInfo.name}(${petOwner.petInfo.species})`}
+                                                    </Typography>
+                                                </Grid2>
+                                                <Grid2 size={2}>
+                                                    <Typography variant="body2" component="div">
+                                                        {petOwner.reason}
+                                                    </Typography>
+                                                </Grid2>
+                                                <Grid2 size={3}>
+                                                    <Typography variant="body2" component="div">
+                                                        {`Wait time: ${waitTime} min`}
+                                                    </Typography>
+                                                </Grid2>
+
+                                                <Grid2 size={3}>
                                                     <Button
                                                         variant="contained"
                                                         size="small"
                                                         onClick={() => acceptConsultation(petOwner.id)}
                                                         disabled={acceptingConsultation}
-                                                        startIcon={<Check />}
+                                                        startIcon={<Check/>}
                                                     >
-                                                        {acceptingConsultation ? 'Connecting...' : 'Accept Consultation'}
+                                                        {acceptingConsultation ? 'Connecting...' : 'Accept'}
                                                     </Button>
-                                                }
-                                                sx={{ mb: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
-                                            >
-                                                <ListItemText primary={petOwner.petInfo.name} />
-                                                <ListItemText primary={petOwner.petInfo.species} secondary={petOwner.petInfo.age} />
-                                                <ListItemText primary={petOwner.reason} secondary={`Waiting: ${waitTime} min`} />
-                                            </ListItem>
+                                                </Grid2>
+                                            </>
                                         );
                                     })}
-                                </List>
+                                </Grid2>
                             )}
                         </Box>
                     )}
                 </Grid2>
             </Paper>
-            <FeesPage open={showFeeModal} onClose={() => setShowFeeModal(false)} />
+            <FeesPage open={showFeeModal} onClose={() => setShowFeeModal(false)}/>
         </Container>
     );
 };
