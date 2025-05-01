@@ -173,8 +173,20 @@ export const HealthcarePage: React.FC = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!selectedDate || !selectedVet || !userId || !selectedTime) {
-      showSnackbar("Error: Missing user ID, appointment details, or time", SNACKBAR_SEVERITY.ERROR);
+    if (!selectedDate) {
+      showSnackbar("Please select a date for the appointment", SNACKBAR_SEVERITY.ERROR);
+      return;
+    }
+    if (!selectedTime) {
+      showSnackbar("Please choose a time for the appointment", SNACKBAR_SEVERITY.ERROR);
+      return;
+    }
+    if (!selectedVet) {
+      showSnackbar("Please select a vet", SNACKBAR_SEVERITY.ERROR);
+      return;
+    }
+    if (!userId) {
+      showSnackbar("User ID missing. Please log in again.", SNACKBAR_SEVERITY.ERROR);
       return;
     }
 
