@@ -119,7 +119,7 @@ export const createPetApiClient = (baseClient: BaseApiClient): PetApi => {
 
         },
         getMedicationRecords: (petId) => baseClient.get<MedicationRecord[]>(`/api/medication_records/retrieve/${petId}`),
-        createMedicationRecord: (medicationData) => baseClient.post<MedicationRecord>(`/api/pets/medications/${medicationData.id}`, medicationData),
+        createMedicationRecord: (medicationData) => baseClient.post<MedicationRecord>(`/api/medication_records/insert/${medicationData.id}`, medicationData),
         createVaccinationRecord: async (petId: string, request: VaccinationRecordRequest) => {
             try {
                 const response = await baseClient.post<{
