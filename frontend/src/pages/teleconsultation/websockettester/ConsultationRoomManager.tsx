@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, Box, Button, CircularProgress, Container, Grid2, List, Paper, Typography} from '@mui/material';
+import React, {useContext, useEffect, useState} from 'react';
+import {Alert, Box, Button, CircularProgress, Container, Grid2, Paper, Typography} from '@mui/material';
 import {VideoConsultationUI} from './VideoConsultationUI.tsx';
 import {Check} from '@mui/icons-material';
-import {FeesPage} from '../../payment/FeesPage'; // updated the path to the correct location
+import {FeesPage} from '../../payment/FeesPage';
+import {AccountTypeContext} from "../../../contexts/AccountTypeContext.tsx"; // updated the path to the correct location
 
 // Define interfaces for our component props and state
 interface ConsultationRoomManagerProps {
@@ -64,6 +65,7 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
     const [acceptingConsultation, setAcceptingConsultation] = useState<boolean>(false);
     const [waitPosition, setWaitPosition] = useState<number | null>(null);
     const [estimatedWaitMinutes, setEstimatedWaitMinutes] = useState<number | null>(null);
+    const {accountType} = useContext(AccountTypeContext);
 
     useEffect(() => {
         const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
@@ -304,7 +306,7 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
                     )}
                 </Grid2>
             </Paper>
-            <FeesPage open={showFeeModal} onClose={() => setShowFeeModal(false)}/>
+            {accountType === "user" && (<FeesPage open={showFeeModal} onClose={() => setShowFeeModal(false)}/>)}
         </Container>
     );
 };
