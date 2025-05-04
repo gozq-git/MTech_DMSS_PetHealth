@@ -46,6 +46,7 @@ describe('Sign In Test', function () {
     await driver.wait(until.elementLocated(By.xpath('//*[@id="i0118"]')), 5000);
     let enterPasswordTextField = await driver.findElement(By.xpath('//*[@id="i0118"]'));
     await enterPasswordTextField.sendKeys("DMSSpass123");
+    await driver.sleep(3000);
     await driver.wait(until.elementLocated(By.xpath('//*[@id="lightbox"]/div[3]/div/div[2]/div/div[5]/div/div/div/div')), 5000);
     let entraSignInButton = await driver.findElement(By.xpath('//*[@id="lightbox"]/div[3]/div/div[2]/div/div[5]/div/div/div/div'));
     await entraSignInButton.click();
