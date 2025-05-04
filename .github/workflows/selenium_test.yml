@@ -19,13 +19,9 @@ jobs:
           sparse-checkout: 'tests/selenium'
           sparse-checkout-cone-mode: false
 
-    - name: Move files to root
+    - name: Enter test directory
       run: |
-        ls -lah
-        shopt -s dotglob
-        mv tests/selenium/* .
-        rm -rf tests/selenium
-        ls -lah
+        cd tests/selenium
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
