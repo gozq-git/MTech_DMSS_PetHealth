@@ -1,7 +1,7 @@
 name: OWASP ZAP Scan
 on:
   # push:
-  #   branches: [ "dev" ]
+  #   branches: [ "uat" ]
   # pull_request:
   #   types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -15,6 +15,6 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.14.0
         with:
-          target: 'https://pethealthplatform-dev.azurewebsites.net'
+          target: 'https://pethealthplatform-uat.azurewebsites.net'
           allow_issue_writing: false
           

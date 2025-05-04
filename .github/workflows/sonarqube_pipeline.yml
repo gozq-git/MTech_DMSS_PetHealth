@@ -1,7 +1,7 @@
 name: Sonarqube Scan
 on:
   # push:
-  #   branches: [ "dev" ]
+  #   branches: [ "uat" ]
   # pull_request:
   #   types: [opened, synchronize, reopened]
   workflow_dispatch:
