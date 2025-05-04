@@ -23,7 +23,7 @@ jobs:
       run: |
         ls -lah
         shopt -s dotglob
-        mv -f tests/selenium/* .
+        mv tests/selenium/* .
         rm -rf tests/selenium
         ls -lah
 
