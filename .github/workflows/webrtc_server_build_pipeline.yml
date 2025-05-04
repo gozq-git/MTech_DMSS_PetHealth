@@ -1,13 +1,13 @@
 name: Webrtc-server -- Build and deploy container to an Azure Web App
 
 env:
-  IMAGE_NAME: "webrtc-server-dev"
+  IMAGE_NAME: "webrtc-server-uat"
   AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
-  AZURE_WEBAPP_NAME: pethealthplatform-webrtc-dev
+  AZURE_WEBAPP_NAME: pethealthplatform-webrtc-uat
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "uat" ]
     paths:
     - webrtc-server/**
   workflow_dispatch:
@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZ_SP_WEBRTC_DEV }}
+          creds: ${{ secrets.AZ_SP_WEBRTC_UAT }}
 
       - name: 'Deploy to Azure Web App for Container'
         uses: azure/webapps-deploy@v2
