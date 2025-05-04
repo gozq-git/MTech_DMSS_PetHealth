@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import PaymentsController from "./payments.controller";
+import UsersController from "../users/users.controller";
 
 export const payments: express.Router = express.Router();
 
@@ -50,9 +51,26 @@ export const payments: express.Router = express.Router();
  *         description: Failed to create payment
  */
 payments.post("/create", async (req: Request, res: Response) => {
+    // console.debug("payments /create req.headers.userInfo",req.headers.userInfo);
     const { amount, currency, description, paymentType } = req.body;
+    let userInfo;
     try {
-        const paymentId = await PaymentsController.createPayment(req.headers.userInfo as string, amount, currency, description, paymentType);
+        userInfo = typeof req.headers.userInfo === 'string'
+            ? JSON.parse(req.headers.userInfo)
+            : req.headers.userInfo;
+    } catch (error) {
+        res.status(500).send({ error: "Invalid user information format" });
+    }
+    const preferred_username = userInfo.preferred_username
+    if (!preferred_username || typeof preferred_username !== 'string') {
+        res.status(500).send({ error: "Missing or invalid user information(preferred_username)" });
+    }
+    try {
+        const user = await UsersController.retrieveUser(preferred_username)
+        if (!user || !user.id) {
+            res.status(500).send({ error: "User not found" });
+        }
+        const paymentId = await PaymentsController.createPayment(user.id, amount, currency, description, paymentType);
         res.status(201).send({ paymentId });
     } catch (error: any) {
         res.status(500).send({ error: "Failed to create payment.", details: error.message });

@@ -183,13 +183,13 @@ const PetPage = () => {
 
             <Container
                 sx={{
-                    // py: 2,
-                    // px: 3,
-                    border: "2px solid pink",
-                    borderRadius: "8px",
                     height: '100%', // Take full height of parent
                     display: 'flex',
                     flexDirection: 'column',
+                    // py: 2,
+                    // px: 3,
+                    // border: "2px solid pink",
+                    // borderRadius: "8px",
                     // my: 2,
                     // mx: 2
                 }}

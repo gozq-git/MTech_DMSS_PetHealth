@@ -1,6 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {
-    Alert,
     Box,
     Button,
     Card,
@@ -18,6 +17,7 @@ import {
 } from '@mui/material';
 
 import {CallEnd, Mic, MicOff, ScreenShare, StopScreenShare, Videocam, VideocamOff} from "@mui/icons-material";
+import {SNACKBAR_SEVERITY, SnackbarContext} from "../../../providers/SnackbarProvider.tsx";
 
 // ICE Server configuration - using public STUN servers
 const iceServers = {
@@ -63,7 +63,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
     const [isVideoOff, setIsVideoOff] = useState<boolean>(false);
     const [isScreenSharing, setIsScreenSharing] = useState<boolean>(false);
     const [connectionState, setConnectionState] = useState<string>('new');
-    const [error, setError] = useState<string>("");
+    // const [error, setError] = useState<string>("");
+    const {showSnackbar} = useContext(SnackbarContext);
     // Track the original stream when screen sharing
     const [originalStream, setOriginalStream] = useState<MediaStream | null>(null);
     // Connection dialog state
@@ -119,7 +120,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
 
                 case 'peer_disconnected':
                     if (data.channelName === channelName) {
-                        setError('Your partner has disconnected.');
+                        showSnackbar('Your partner has disconnected.', SNACKBAR_SEVERITY.INFO);
                         // You might want to end the consultation here
                     }
                     break;
@@ -187,7 +188,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             }
         } catch (e) {
             console.error('Error initializing WebRTC:', e);
-            setError(`Could not access camera or microphone: ${(e as Error).message}`);
+            // setError(`Could not access camera or microphone: ${(e as Error).message}`);
+            showSnackbar(`Could not access camera or microphone: ${(e as Error).message}`, SNACKBAR_SEVERITY.ERROR);
         }
     };
 
@@ -236,7 +238,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             }));
         } catch (err) {
             console.error('Error creating offer:', err);
-            setError(`Failed to create offer: ${(err as Error).message}`);
+            // setError(`Failed to create offer: ${(err as Error).message}`);
+            showSnackbar(`Failed to create offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
         }
     };
 
@@ -258,7 +261,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             }));
         } catch (err) {
             console.error('Error handling offer:', err);
-            setError(`Failed to handle offer: ${(err as Error).message}`);
+            // setError(`Failed to handle offer: ${(err as Error).message}`);
+            showSnackbar(`Failed to handle offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
         }
     };
 
@@ -270,7 +274,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
         } catch (err: any) {
             console.error('Error handling answer:', err);
-            setError(`Failed to handle answer: ${(err as Error).message}`);
+            // setError(`Failed to handle answer: ${(err as Error).message}`);
+            showSnackbar(`Failed to handle answer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
         }
     };
 
@@ -383,7 +388,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                 }
             } catch (err) {
                 console.error('Error starting screen sharing:', err);
-                setError(`Failed to start screen sharing: ${(err as Error).message}`);
+                // setError(`Failed to start screen sharing: ${(err as Error).message}`);
+                showSnackbar(`Failed to start screen sharing: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
                 return;
             }
         }
@@ -451,11 +457,11 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                     </Typography>
                 </Box>
 
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+                {/*{error && (*/}
+                {/*    <Alert severity="error" sx={{ mb: 2 }}>*/}
+                {/*        {error}*/}
+                {/*    </Alert>*/}
+                {/*)}*/}
 
                 <Grid2 container spacing={2} sx={{ flexGrow: 1 }}>
                     {/* Remote video (larger) */}
