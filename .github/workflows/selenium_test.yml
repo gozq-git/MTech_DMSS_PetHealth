@@ -1,0 +1,41 @@
+name: Selenium Automated UI Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  automated-ui-test:
+    runs-on: ubuntu-latest
+
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        options: --shm-size=2gb
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+      with:
+          sparse-checkout: 'tests/selenium'
+          sparse-checkout-cone-mode: false
+
+    - name: Move files to root
+      run: |
+        ls -lah
+        shopt -s dotglob
+        mv tests/selenium/* .
+        rm -rf tests/selenium
+        ls -lah
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Selenium tests
+      env:
+        WEBSITE_LINK: https://pethealthplatform-dev.azurewebsites.net/
+      run: npm test
