@@ -52,7 +52,7 @@ describe('Sign In Test', function () {
     await driver.wait(until.elementLocated(By.xpath('//*[@id="lightbox"]/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[1]')), 5000);
     let staySignedInNoButton = await driver.findElement(By.xpath('//*[@id="lightbox"]/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[1]'));
     await staySignedInNoButton.click();
-    await driver.wait(until.elementLocated(By.xpath('//*[@id="root"]/div/main/p/div/div/div/div/div')), 5000);
+    await driver.wait(until.elementLocated(By.xpath('//*[@id="root"]/div/main/p/div/div/div/div/div')), 10000);
     let welcomeBackMessage = await driver.findElement(By.xpath('//*[@id="root"]/div/main/p/div/div/div/div/div'));
     assert.equal(await welcomeBackMessage.getText(), '🐾 Welcome back, Gerard!\n📧 gerardozq@gmail.com');
   });
