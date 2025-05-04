@@ -14,11 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const users_service_1 = __importDefault(require("./users.service"));
 const logger = require('../../utils/logger');
+const zohomail_notification_1 = require("../../models/notification/zohomail_notification");
+const templates_1 = require("../../models/email_template/templates");
 const UsersController = {
-    retrieveUser: (account_name) => __awaiter(void 0, void 0, void 0, function* () {
+    retrieveUser: (preferred_username) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const users = yield users_service_1.default.retrieveUser(account_name);
-            return users;
+            const user = yield users_service_1.default.retrieveUser(preferred_username);
+            return user;
         }
         catch (error) {
             logger.error(error);
@@ -27,8 +29,11 @@ const UsersController = {
     }),
     registerUser: (body) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const users = yield users_service_1.default.registerUser(body);
-            return users;
+            const user = yield users_service_1.default.registerUser(body);
+            const emailTemplate = templates_1.emailTemplates.welcomeEmailTemplate(user.email, user.display_name);
+            const notification = new zohomail_notification_1.ZohomailNotification(user.email, emailTemplate.subject, emailTemplate.body);
+            notification.sendEmail();
+            return user;
         }
         catch (error) {
             logger.error(error);
@@ -37,8 +42,8 @@ const UsersController = {
     }),
     updateUser: (body) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const users = yield users_service_1.default.updateUser(body);
-            return users;
+            const user = yield users_service_1.default.updateUser(body);
+            return user;
         }
         catch (error) {
             logger.error(error);
@@ -47,8 +52,8 @@ const UsersController = {
     }),
     deleteUser: (account_name) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const users = yield users_service_1.default.deleteUser(account_name);
-            return users;
+            const user = yield users_service_1.default.deleteUser(account_name);
+            return user;
         }
         catch (error) {
             logger.error(error);

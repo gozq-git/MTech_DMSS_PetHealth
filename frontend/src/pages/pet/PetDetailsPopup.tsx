@@ -30,16 +30,16 @@ const PetDetailsPopup: React.FC<PetDetailsPopupProps> = ({pet, onClose}) => {
         {key: 'species', label: 'Type', important: true},
         {key: 'breed', label: 'Breed', important: true},
         {key: 'gender', label: 'Gender', important: true},
-        {key: 'dateOfBirth', label: 'Date of Birth', important: true},
+        {key: 'date_of_birth', label: 'Date of Birth', important: true},
         {key: 'weight', label: 'Weight', format: (value) => `${value} kg`},
-        {key: 'height', label: 'Height', format: (value) => `${value} cm`},
-        {key: 'neckGirthCm', label: 'Neck Girth', format: (value) => `${value} cm`},
-        {key: 'chestGirthCm', label: 'Chest Girth', format: (value) => `${value} cm`},
-        {key: 'lastMeasured', label: 'Last Measured'},
-        {key: 'isNeutered', label: 'Neutered', format: (value) => value ? 'Yes' : 'No'},
-        {key: 'microchipNumber', label: 'Microchip Number'},
-        {key: 'createdAt', label: 'Added on'},
-        {key: 'updatedAt', label: 'Updated'}
+        {key: 'height_cm', label: 'Height', format: (value) => `${value} cm`},
+        {key: 'neck_girth_cm', label: 'Neck Girth', format: (value) => `${value} cm`},
+        {key: 'chest_girth_cm', label: 'Chest Girth', format: (value) => `${value} cm`},
+        {key: 'last_measured', label: 'Last Measured'},
+        {key: 'is_neutered', label: 'Neutered', format: (value) => value ? 'Yes' : 'No'},
+        {key: 'microchip_number', label: 'Microchip Number'},
+        {key: 'created_at', label: 'Added on'},
+        {key: 'updated_at', label: 'Updated'}
     ];
     const importantProperties = petProperties.filter(prop => prop.important);
     const standardProperties = petProperties.filter(prop => !prop.important);
@@ -91,7 +91,7 @@ const PetDetailsPopup: React.FC<PetDetailsPopupProps> = ({pet, onClose}) => {
                     }}
                 >
                     <Avatar
-                        src={pet.photoUrl}
+                        src={pet.photo_url}
                         alt={pet.name}
                         sx={{
                             width: 100,

@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, {Request, Response} from 'express';
 import PetsController from './pets.controller';
 
 export const pets = express.Router();
@@ -17,7 +17,7 @@ export const pets = express.Router();
  *         required: true
  *         description: Numeric ID of the pet to retrieve.
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: A single pet.
@@ -73,7 +73,7 @@ pets.get('/retrievePet/:id', async (req: Request, res: Response): Promise<void> 
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).type('text').send({ error: "Error retrieving pet" });
+        res.status(500).type('text').send({error: "Error retrieving pet"});
     }
 });
 
@@ -91,7 +91,7 @@ pets.get('/retrievePet/:id', async (req: Request, res: Response): Promise<void> 
  *         required: true
  *         description: Numeric ID of the owner.
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: A list of pets.
@@ -146,10 +146,19 @@ pets.get('/retrievePet/:id', async (req: Request, res: Response): Promise<void> 
 pets.get('/getPetsByOwner/:ownerId', async (req: Request, res: Response): Promise<void> => {
     try {
         const result = await PetsController.getPetsByOwner(req.params.ownerId);
-        res.status(200).send(result);
+        // res.status(200).send(result);
+        if (result === null || result === undefined || result.length === 0) {
+            res.status(200).type('json').send({status: 'error', message: 'No pets found!'});
+        } else {
+            res.status(200).type('json').send({
+                status: 'success',
+                data: result,
+                message: "Pets retrieved successfully"
+            });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).type('text').send({ error: "Error retrieving pets by owner ID" });
+        res.status(500).type('text').send({error: "Error retrieving pets by owner ID"});
     }
 });
 
@@ -243,11 +252,12 @@ pets.get('/getPetsByOwner/:ownerId', async (req: Request, res: Response): Promis
  */
 pets.post('/insertPet', async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log(req.body);
         const result = await PetsController.insertPet(req.body);
-        res.status(201).send(result);
+        res.status(201).type('json').send({status: 'success', data: result, message: "Pet added successfully"});
     } catch (error) {
         console.error(error);
-        res.status(500).type('text').send({ error: "Error inserting pet" });
+        res.status(500).type('text').send({error: "Error inserting pet"});
     }
 });
 
@@ -316,6 +326,6 @@ pets.get('/getPets', async (req: Request, res: Response): Promise<void> => {
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).type('text').send({ error: "Error retrieving pets" });
+        res.status(500).type('text').send({error: "Error retrieving pets"});
     }
 });

@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import Drawer from '@mui/material/Drawer';
 import Toolbar from '@mui/material/Toolbar';
 import Divider from '@mui/material/Divider';
@@ -6,101 +7,93 @@ import ListItem from '@mui/material/ListItem';
 import PetsIcon from '@mui/icons-material/Pets';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import {useNavigate} from 'react-router-dom';
-import {useMsal} from "@azure/msal-react";
-import {Button} from "@mui/material";
-import {loginRequest} from "../authConfig.ts";
-import {AutoAwesome, Home, MedicalServices, SvgIconComponent} from "@mui/icons-material";
-import {SideBarButton} from "./SideBarButton.tsx";
+import { useNavigate } from 'react-router-dom';
+import { useMsal } from "@azure/msal-react";
+import { Button, Box, Typography } from "@mui/material";
+import { loginRequest } from "../authConfig.ts";
+import { AutoAwesome, Home, MedicalServices } from "@mui/icons-material";
+import { SideBarButton } from "./SideBarButton.tsx";
+import { AccountTypeContext } from "../contexts/AccountTypeContext";
 
 const drawerWidth = 240;
 
-interface SideBarProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
 export interface SideBarItem {
-    id: String,
-    text: String,
-    description: String,
-    icon: SvgIconComponent,
-    endpoint: String
+    id: string;
+    text: string;
+    description: string;
+    icon: React.ElementType;
+    endpoint: string;
 }
 
-const sideBarItems: SideBarItem[] = [
-    {
-        id: 'home',
-        text: 'home',
-        description: 'Navigate to home',
-        icon: Home,
-        endpoint: '/home'
-    },
-    {
-        id: 'pets',
-        text: 'My Pets',
-        description: 'View my Pets',
-        icon: PetsIcon,
-        endpoint: '/pets'
-    },
-    {
-        id: 'healthcare',
-        text: 'Healthcare',
-        description: 'Medical and Healthcare Services',
-        icon: MedicalServices,
-        endpoint: '/healthcare'
-    },
-    {
-        id: 'services',
-        text: 'Other Services',
-        description: 'Other Services',
-        icon: AutoAwesome,
-        endpoint: '/services'
-    }
+const userSideBarItems: SideBarItem[] = [
+    { id: 'home', text: 'Home', icon: Home, description: 'Home', endpoint: '/home' },
+    { id: 'pets', text: 'My Pets', icon: PetsIcon, description: 'My Pets', endpoint: '/pets' },
+    { id: 'healthcare', text: 'Teleconsultation', icon: MedicalServices, description: 'Teleconsultation', endpoint: '/healthcare' }
 ];
 
-const SideBar = ({isOpen, onClose}: SideBarProps) => {
+const vetSideBarItems: SideBarItem[] = [
+    { id: 'vet-home', text: 'Vet Home', icon: Home, description: 'Vet Home', endpoint: '/vet/home' },
+    { id: 'vet-pets', text: 'Patient Records', icon: PetsIcon, description: 'Patient Records', endpoint: '/vet/pets' },
+    { id: 'vet-healthcare', text: 'Teleconsultation', icon: MedicalServices, description: 'Teleconsultation', endpoint: '/vet/healthcare' }
+];
+
+const SideBar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const navigate = useNavigate();
-    const handleNavigation = (endpoint: String) => {
-        navigate(endpoint.toString()); // Convert String to string if needed
-    }
-    const {instance} = useMsal();
+    const { instance } = useMsal();
     const activeAccount = instance.getActiveAccount();
-    const handleLoginRedirect = () => {
-        instance.loginRedirect(loginRequest).catch((error) => console.log(error));
+    const { accountType } = useContext(AccountTypeContext);
+
+    const computedItems = accountType === "vet" ? vetSideBarItems : userSideBarItems;
+
+    const handleNavigation = (endpoint: string) => {
+        navigate(endpoint);
+        onClose(); // Close sidebar when navigating
     };
+
     return (
         <Drawer
             variant="temporary"
             open={isOpen}
             onClose={onClose}
-            sx={{'& .MuiDrawer-paper': {width: drawerWidth}}}
+            sx={{
+                '& .MuiDrawer-paper': { 
+                    width: drawerWidth, 
+                    backgroundColor: '#f4f4f9', 
+                    borderRight: '2px solid #ccc',
+                    boxShadow: '3px 0 10px rgba(0, 0, 0, 0.1)',
+                },
+            }}
         >
             <Toolbar>
                 <IconButton onClick={onClose}>
-                    <ChevronLeftIcon/>
+                    <ChevronLeftIcon sx={{ color: '#2196F3' }} />
                 </IconButton>
             </Toolbar>
-            <Divider/>
-            {
-                activeAccount ?
+            <Divider />
+            <Box sx={{ padding: 2 }}>
+                {activeAccount ? (
                     <List>
-                        {sideBarItems.map((item) => (
-                            <ListItem key={String(item.id)} disablePadding>
-                                <SideBarButton
-                                    item={item}
-                                    onClick={handleNavigation}
-                                />
+                        {computedItems.map((item) => (
+                            <ListItem key={item.id} disablePadding>
+                                <SideBarButton item={item} onClick={() => handleNavigation(item.endpoint)} />
                             </ListItem>
                         ))}
                     </List>
-                    :
-                    <Button onClick={handleLoginRedirect}>Login to Access Features</Button>
-            }
-            <Divider/>
-            <List>
-
-            </List>
+                ) : (
+                    <Box sx={{ textAlign: 'center', marginTop: 2 }}>
+                        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+                            Please log in to access features
+                        </Typography>
+                        <Button
+                            onClick={() => instance.loginRedirect(loginRequest)}
+                            variant="contained"
+                            sx={{ width: '100%', backgroundColor: '#00897B', color: 'white' }}
+                        >
+                            Login
+                        </Button>
+                    </Box>
+                )}
+            </Box>
         </Drawer>
     );
 };

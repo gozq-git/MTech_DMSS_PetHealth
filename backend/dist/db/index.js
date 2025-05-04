@@ -18,7 +18,8 @@ const sequelize = new sequelize_1.Sequelize(config_1.config.db_name, config_1.co
     dialectOptions: {
         encrypt: true,
         acquireTimeout: 60000
-    }
+    },
+    logging: false
 });
 exports.sequelize = sequelize;
 // import models

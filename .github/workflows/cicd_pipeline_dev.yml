@@ -1,0 +1,315 @@
+name: CICD pipeline -- dev env
+on:
+  # push:
+  #   branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  sonarqube-scan:
+    name: SonarQube Scan (unit test & code_quality)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: npm install --prefix backend
+
+      - name: Test and coverage
+        run: npm test --prefix backend
+        continue-on-error: true
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  snyk-scan-FE:
+    name: Snyk Scan FE (SCA & SAST)
+    needs: sonarqube-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+            sparse-checkout: 'frontend'
+            sparse-checkout-cone-mode: false
+
+      - name: Move files to root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv frontend/* .
+          rm -rf frontend
+          ls -lah
+
+      - name: Run Snyk to check for vulnerabilities (SCA)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: test
+
+      - name: Run Snyk to check for vulnerabilities (SAST)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
+
+  snyk-scan-BE:
+    name: Snyk Scan BE (SCA & SAST)
+    needs: sonarqube-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+            sparse-checkout: 'backend'
+            sparse-checkout-cone-mode: false
+
+      - name: Move files to root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv backend/* .
+          rm -rf backend
+          ls -lah
+
+      - name: Run Snyk to check for vulnerabilities (SCA)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: test
+
+      - name: Run Snyk to check for vulnerabilities (SAST)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
+
+  snyk-scan-webrtc:
+    name: Snyk Scan WebRTC (SCA & SAST)
+    needs: sonarqube-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+            sparse-checkout: 'webrtc-server'
+            sparse-checkout-cone-mode: false
+
+      - name: Move files to root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv webrtc-server/* .
+          rm -rf webrtc-server
+          ls -lah
+
+      - name: Run Snyk to check for vulnerabilities (SCA)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: test
+
+      - name: Run Snyk to check for vulnerabilities (SAST)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: code test
+
+
+  build-FE:
+    name: Build & Publish in Azure Container Registry (FE)
+    needs: snyk-scan-FE
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: "frontend-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.AZ_REGISTRY }}
+          username: ${{ secrets.AZ_SP_CLIENT_ID }}
+          password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags:
+            type=raw,value=latest
+          
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+
+  deploy-FE:
+    name: Deploy to Azure App Service (FE)
+    needs: build-FE
+    runs-on: ubuntu-latest   
+
+    env:
+      IMAGE_NAME: "frontend-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-dev
+
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZ_SP_FE_DEV }}
+
+      - name: 'Deploy to Azure Web App for Container'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} 
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+
+  build-BE:
+    name: Build & Publish in Azure Container Registry (BE)
+    needs: snyk-scan-BE
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: "backend-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-api-dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.AZ_REGISTRY }}
+          username: ${{ secrets.AZ_SP_CLIENT_ID }}
+          password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags:
+            type=raw,value=latest
+          
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+
+  deploy-BE:
+    name: Deploy to Azure App Service (BE)
+    needs: build-BE
+    runs-on: ubuntu-latest   
+
+    env:
+      IMAGE_NAME: "backend-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-api-dev
+
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZ_SP_BE_DEV }}
+
+      - name: 'Deploy to Azure Web App for Container'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} 
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+
+  build-webrtc:
+    name: Build & Publish in Azure Container Registry (WebRTC)
+    needs: snyk-scan-webrtc
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: "webrtc-server-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-webrtc-dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.AZ_REGISTRY }}
+          username: ${{ secrets.AZ_SP_CLIENT_ID }}
+          password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags:
+            type=raw,value=latest
+          
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./webrtc-server
+          file: ./webrtc-server/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+
+  deploy-webrtc:
+    name: Deploy to Azure App Service (WebRTC)
+    needs: build-webrtc
+    runs-on: ubuntu-latest   
+
+    env:
+      IMAGE_NAME: "webrtc-server-dev"
+      AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
+      AZURE_WEBAPP_NAME: pethealthplatform-webrtc-dev
+
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZ_SP_WEBRTC_DEV }}
+
+      - name: 'Deploy to Azure Web App for Container'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} 
+          images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}

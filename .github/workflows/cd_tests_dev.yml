@@ -1,0 +1,32 @@
+name: CD Tests for deployed App -- dev env
+on:
+  # push:
+  #   branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  postman-api-tests:
+    name: Automated API tests using Postman CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Postman CLI
+        run: |
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      - name: Run API tests
+        run: |
+          postman collection run "43577423-671d4d5e-4bbc-4eb2-a033-a078c567e9fa" --environment "43577423-abe4c26f-3d50-41d6-b366-ac154014ae22"
+      
+  owasp-zap-scan:
+    name: OWASP ZAP Scan
+    needs: postman-api-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'https://pethealthplatform-dev.azurewebsites.net'
+          allow_issue_writing: false

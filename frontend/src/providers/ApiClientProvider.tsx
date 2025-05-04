@@ -3,8 +3,12 @@ import React, {createContext} from "react";
 import {createPetApiClient, PetApi} from "../api/client/petApi.ts";
 import {createUserApiClient, UserApi} from "../api/client/userApi.ts";
 import {createMockPetApiClient} from "../api/client/mockPetApi.ts";
+import { createAppointmentsApiClient, AppointmentsApi } from "../api/client/appointmentsApi.ts";
+import { createAvailabilitiesApiClient, AvailabilitiesApi } from "../api/client/availabilitiesApi.ts";
+import { createFeesApiClient, FeesApi } from "../api/client/feesApi.ts";
+import {createNotificationApiClient, NotificationApi} from "../api/client/notificationApi.ts";
 
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_AP
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API
 console.debug(`USE_MOCK_API: ${USE_MOCK_API}`);
 // Base url
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001"
@@ -18,10 +22,14 @@ interface ApiClients {
     baseApi: BaseApiClient;
     userApi: UserApi;
     petApi: PetApi;
+    appointmentsApi: AppointmentsApi;
+    availabilitiesApi: AvailabilitiesApi;
+    feesApi: FeesApi;
+    notificationApi: NotificationApi;
 }
 
 let apiClients: ApiClients;
-if (USE_MOCK_API === undefined || USE_MOCK_API == "true") {
+if (USE_MOCK_API == "true") {
     // Using mock APIs
     console.log('Using mock API clients');
     // minimal base API client (might not be used in mock mode)
@@ -29,7 +37,11 @@ if (USE_MOCK_API === undefined || USE_MOCK_API == "true") {
     apiClients = {
         baseApi: mockBaseClient,
         userApi: createUserApiClient(baseApiClient),
-        petApi: createMockPetApiClient()
+        petApi: createMockPetApiClient(),
+        appointmentsApi: createAppointmentsApiClient(baseApiClient),
+        availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
+        feesApi: createFeesApiClient(baseApiClient),
+        notificationApi: createNotificationApiClient(baseApiClient)
     };
 } else {
     // Using real APIs
@@ -39,8 +51,12 @@ if (USE_MOCK_API === undefined || USE_MOCK_API == "true") {
     apiClients = {
         baseApi: baseApiClient,
         userApi: createUserApiClient(baseApiClient),
-        petApi: createPetApiClient(baseApiClient)
-    };
+        petApi: createPetApiClient(baseApiClient),
+        appointmentsApi: createAppointmentsApiClient(baseApiClient),
+        availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
+        feesApi: createFeesApiClient(baseApiClient),
+        notificationApi: createNotificationApiClient(baseApiClient)
+       };
 }
 
 // Context

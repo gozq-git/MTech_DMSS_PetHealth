@@ -9,20 +9,26 @@ const client = jwksClient({
 });
 // Helper function to retrieve signing key from kid (key ID)
 function getKey(header, callback) {
-    client.getSigningKey(header.kid, (err, key) => {
-        if (err) {
-            return callback(err);
-        }
-        const signingKey = key.getPublicKey();
-        callback(null, signingKey);
-    });
+    try {
+        client.getSigningKey(header.kid, (err, key) => {
+            if (err) {
+                return callback(err);
+            }
+            const signingKey = key.getPublicKey();
+            callback(null, signingKey);
+        });
+    }
+    catch (error) {
+        console.error('Error retrieving signing key:', error);
+        callback(error, null);
+    }
 }
 // Function to verify token
 function verifyToken(token) {
     return new Promise((resolve, reject) => {
         jwt.verify(token, getKey, { algorithms: ['RS256'] }, (err, decoded) => {
             if (err) {
-                reject(`Token verification failed: ${err.message}`);
+                reject(new Error(`Token verification failed: ${err.message}`));
             }
             else {
                 resolve(decoded); // token is valid
@@ -41,7 +47,7 @@ module.exports = {
         })
             .catch((error) => {
             console.error(error);
-            res.status(401).send('Unauthorized');
+            res.status(401).type('text').send('Error');
         });
     }
 };

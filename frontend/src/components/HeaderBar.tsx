@@ -11,115 +11,141 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../authConfig";
+import {useMsal} from "@azure/msal-react";
+import {loginRequest} from "../authConfig";
 import {useNavigate} from "react-router-dom";
 import {ROUTES} from "../routes/routes.ts";
+import {AccountTypeContext} from "../contexts/AccountTypeContext";
+import {CopyAccessTokenComponent} from "./CopyAccessTokenComponent.tsx";
+import {Mail} from "@mui/icons-material";
 
 interface HeaderBarProps {
-  onMenuClick: () => void;
+    onMenuClick: () => void;
+    onNotificationDrawerClick: () => void;
 }
 
-const HeaderBar = ({ onMenuClick }: HeaderBarProps) => {
-  const { instance } = useMsal();
-  const activeAccount = instance.getActiveAccount();
-  const navigate = useNavigate();
-  const handleNavigation = (endpoint: String) => {
-    navigate(endpoint.toString()); // Convert String to string if needed
-  }
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+const HeaderBar = ({onMenuClick, onNotificationDrawerClick}: HeaderBarProps) => {
+    const {instance} = useMsal();
+    const activeAccount = instance.getActiveAccount();
+    const navigate = useNavigate();
+    const {accountType, setAccountType} = React.useContext(AccountTypeContext);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-  const handleLogin = () => {
-    instance.loginRedirect(loginRequest).catch(console.error);
-  };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
-  const handleSignUp = () => {
-    instance.loginRedirect({ ...loginRequest, prompt: 'create' }).catch(console.error);
-  };
+    const handleNavigation = (path: string) => {
+        navigate(path);
+        handleClose();
+    };
 
-  const handleLogout = () => {
-    instance.logoutRedirect().catch(console.error);
-  };
+    const handleToggleVetMode = () => {
+        if (accountType === "vet") {
+            setAccountType("user");
+            navigate("/home");  // Redirect to user home
+        } else {
+            setAccountType("vet");
+            navigate("/vetportal");  // Redirect to vet portal
+        }
+        handleClose();
+    };
 
-  const handleProfile = () => {
-    handleNavigation(ROUTES.PROFILE.path);
-    handleClose();
-  };
+    const handleLogin = () => {
+        instance.loginRedirect(loginRequest).catch(console.error);
+    };
 
-  const handleSettings = () => {
-    handleNavigation(ROUTES.SETTINGS.path);
-    handleClose();
-  };
+    const handleSignUp = () => {
+        instance.loginRedirect({...loginRequest, prompt: 'create'}).catch(console.error);
+    };
 
-  const handleVetPortal = () => {
-    handleNavigation(ROUTES.VET_PORTAL.path);
-    handleClose();
-  };
+    const handleLogout = () => {
+        instance.logoutRedirect().catch(console.error);
+    };
 
-  return (
-      <AppBar position="fixed" sx={{ backgroundColor: '#795548' }}>
-        <Toolbar>
-          <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          <PetsIcon sx={{ mr: 1 }} />
-          <Typography variant="h6" noWrap>
-            Pet Health Platform
-          </Typography>
-          <div style={{ marginLeft: 'auto' }}>
-            <IconButton color="inherit" onClick={handleMenu}>
-              <AccountCircle />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-            >
-              {activeAccount ? (
-                  <>
-                    <Box sx={{ px: 2, py: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Avatar
-                            sx={{ width: 40, height: 40, mr: 2 }}
-                            src={activeAccount.username ? `https://api.dicebear.com/9.x/pixel-art/svg` : undefined}
-                        />
-                        <Box>
-                          <Typography variant="subtitle1">
-                            {activeAccount.name || 'User'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {activeAccount.username || activeAccount.localAccountId}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Divider />
-                    <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                    <MenuItem onClick={handleSettings}>Settings</MenuItem>
-                    <MenuItem onClick={handleVetPortal}>Vet Portal</MenuItem>
-                    <Divider />
-                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                  </>
-              ) : (
-                  <>
-                    <MenuItem onClick={handleLogin}>Sign In</MenuItem>
-                    <MenuItem onClick={handleSignUp}>Sign Up</MenuItem>
-                  </>
-              )}
-            </Menu>
-          </div>
-        </Toolbar>
-      </AppBar>
-  );
+    return (
+        <>
+            <AppBar position="fixed" sx={{backgroundColor: '#00897B', boxShadow: 3}}>
+                <Toolbar>
+                    <IconButton color="inherit" edge="start" onClick={onMenuClick} sx={{mr: 2}}>
+                        <MenuIcon/>
+                    </IconButton>
+                    <PetsIcon sx={{color: 'white', mr: 1}}/>
+                    <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}} noWrap>
+                        Pet Health Platform
+                    </Typography>
+                    <div style={{marginLeft: 'auto'}}>
+                        {activeAccount &&
+                            <IconButton color="inherit" onClick={onNotificationDrawerClick}
+                                        sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
+                                <Mail/>
+                            </IconButton>
+                        }
+                        <IconButton color="inherit" onClick={handleMenu}
+                                    sx={{'&:hover': {transform: 'scale(1.1)', transition: 'transform 0.2s'}}}>
+                            <AccountCircle/>
+                        </IconButton>
+                        <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                            {activeAccount ? (
+                                <>
+                                    {/* User Avatar and Info */}
+                                    <Box sx={{px: 2, py: 1}}>
+                                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                            <Avatar sx={{width: 40, height: 40, mr: 2}}/>
+                                            <Box>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                    {activeAccount.name || 'User'}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {activeAccount.username || activeAccount.localAccountId}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Show access token in DEV mode */}
+                                    {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent/></MenuItem>}
+
+                                    <Divider sx={{my: 1}}/>
+
+                                    {/* Profile & Settings */}
+                                    <MenuItem onClick={() => handleNavigation(ROUTES.PROFILE.path)}>
+                                        Profile
+                                    </MenuItem>
+                                    <MenuItem onClick={() => handleNavigation(ROUTES.SETTINGS.path)}>
+                                        Settings
+                                    </MenuItem>
+
+                                    <Divider sx={{my: 1}}/>
+
+                                    {/* Vet Mode Toggle */}
+                                    <MenuItem onClick={handleToggleVetMode}>
+                                        {accountType === "vet" ? "Switch to User Mode" : "Go to Vet Portal"}
+                                    </MenuItem>
+
+                                    <Divider sx={{my: 1}}/>
+
+                                    {/* Logout */}
+                                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                </>
+                            ) : (
+                                <>
+                                    <MenuItem onClick={handleLogin}>Sign In</MenuItem>
+                                    <MenuItem onClick={handleSignUp}>Sign Up</MenuItem>
+                                </>
+                            )}
+                        </Menu>
+                    </div>
+                </Toolbar>
+            </AppBar>
+        </>
+    );
 };
 
 export default HeaderBar;

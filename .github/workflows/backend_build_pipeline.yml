@@ -1,14 +1,13 @@
 name: Backend -- Build and deploy container to an Azure Web App
 
 env:
-  IMAGE_NAME: "backend-uat"
-  GH_REGISTRY: "ghcr.io"
+  IMAGE_NAME: "backend-dev"
   AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
-  AZURE_WEBAPP_NAME: pethealthplatform-api-uat
+  AZURE_WEBAPP_NAME: pethealthplatform-api-dev
 
 on:
   push:
-    branches: [ "uat" ]
+    branches: [ "dev" ]
     paths:
     - backend/**
   workflow_dispatch:
@@ -43,6 +42,7 @@ jobs:
           images: ${{ env.AZ_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags:
             type=raw,value=latest
+
           
       - name: Build and Push Image
         uses: docker/build-push-action@v5
@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZ_SP_BE_UAT }}
+          creds: ${{ secrets.AZ_SP_BE_DEV }}
 
       - name: 'Deploy to Azure Web App for Container'
         uses: azure/webapps-deploy@v2
