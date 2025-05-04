@@ -1,5 +1,3 @@
-import path from "path";
-
 export const ROUTES = {
     LANDINGS: {
         path: '/',
@@ -36,6 +34,10 @@ export const ROUTES = {
     VET_PORTAL: {
         path: '/vetportal',
         label: 'Vet Portal'
+    },
+    PAYMENTS: {
+        path: '/payments',
+        label: 'Payments'
     },
     // Vet-specific routes
     VET: {
