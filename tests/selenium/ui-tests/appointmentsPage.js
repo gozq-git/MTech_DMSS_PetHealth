@@ -11,6 +11,7 @@ describe('Appointments Page Test', function () {
   before(async function () {
     driver = await new Builder()
     .forBrowser('chrome')
+    .usingServer(process.env.SELENIUM_REMOTE_URL)
     .setChromeOptions(new chrome.Options().addArguments("incognito"))
     .build();
   });
