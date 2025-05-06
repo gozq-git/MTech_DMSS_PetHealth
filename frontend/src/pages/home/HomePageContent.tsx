@@ -1,27 +1,28 @@
 import {
+    Alert,
     Avatar,
-    CircularProgress,
-    Container,
-    Paper,
     Box,
-    Typography,
-    Link,
     Card,
     CardContent,
     CardMedia,
+    CircularProgress,
+    Container,
     Grid,
-    Button
+    Grid2,
+    Link,
+    Paper,
+    Typography
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
-import { ApiClientContext } from "../../providers/ApiClientProvider.tsx";
-import { useNavigate } from "react-router-dom";
-import { SNACKBAR_SEVERITY, SnackbarContext } from "../../providers/SnackbarProvider.tsx";
-import { User } from "../../api/types/user.ts";
+import {useContext, useEffect, useState} from "react";
+import {ApiClientContext} from "../../providers/ApiClientProvider.tsx";
+import {useNavigate} from "react-router-dom";
+import {SNACKBAR_SEVERITY, SnackbarContext} from "../../providers/SnackbarProvider.tsx";
+import {User} from "../../api/types/user.ts";
 
 const HomePageContent = () => {
     const navigate = useNavigate();
-    const { userApi } = useContext(ApiClientContext);
-    const { showSnackbar } = useContext(SnackbarContext);
+    const {userApi} = useContext(ApiClientContext);
+    const {showSnackbar} = useContext(SnackbarContext);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -47,11 +48,15 @@ const HomePageContent = () => {
                 setLoading(false);
             }
         };
+        // Fetch data
+        fetchUserProfile();
+    }, []);
 
+    useEffect(() => {
         const fetchNews = async () => {
             try {
                 const response = await fetch(
-                    `https://newsapi.org/v2/everything?q=pet%20health%20OR%20veterinary%20medicine%20OR%20animal%20care%20OR%20pet%20care%20OR%20veterinary%20health&sortBy=publishedAt&pageSize=6&apiKey=665c79db2e9944edb41ee8f8433c57d5&language=en`
+                    `https://newsapi.org/v2/everything?q=pets+vets&language=en&pageSize=9&sortBy=relevancy&apiKey=665c79db2e9944edb41ee8f8433c57d5`
                 );
                 const data = await response.json();
                 if (data.articles) {
@@ -63,80 +68,142 @@ const HomePageContent = () => {
                 setNewsLoading(false);
             }
         };
-
-        // Fetch data
-        fetchUserProfile();
         fetchNews();
-    }, []);
+    }, [])
 
     if (loading) {
         return (
             <Container>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                    <CircularProgress />
+                <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px'}}>
+                    <CircularProgress/>
                 </Box>
             </Container>
         );
-    };
+    }
+    ;
 
     const sanitizeUrl = (url: string): boolean => {
         try {
-          const parsedUrl = new URL(url, window.location.origin);
-          if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-            return true;
-          }
+            const parsedUrl = new URL(url, window.location.origin);
+            if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+                return true;
+            }
         } catch (e) {
-          console.log(e);
+            console.log(e);
         }
         return false;
-      }
+    }
 
     return (
-        <Container>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 3 }}>
-                {/* 👤 Clean Profile Card */}
-                <Paper elevation={3} sx={{ p: 0, borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
+        <Container sx={{
+            width: '80vw',
+
+        }}>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, py: 3}}>
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 3,
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        background: 'linear-gradient(135deg, #e0f2f1 0%, #80cbc4 50%, #00897b 100%)',
+                    }}
+                >
+                    {/* Background decoration */}
                     <Box
                         sx={{
-                            background: 'linear-gradient(to right, #81C784, #66BB6A)', // Green gradient for header
-                            height: 120,
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            width: '150px',
+                            height: '150px',
+                            background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%)',
+                            zIndex: 0,
                         }}
-                    >
-                        <Avatar
-                            src={user?.profile_picture}
-                            alt={user?.display_name || 'User'}
-                            sx={{
-                                width: 100,
-                                height: 100,
-                                border: '4px solid white',
-                                position: 'absolute',
-                                bottom: -50,
-                                left: 24,
-                                boxShadow: 3,
-                                backgroundColor: '#fff',
-                            }}
-                        />
-                    </Box>
-                    <Box sx={{ pt: 7, pb: 3, px: 3 }}>
-                        <Typography variant="h5" fontWeight="bold" gutterBottom>
-                            🐾 Welcome back, {user?.display_name || 'Pet Lover'}!
-                        </Typography>
+                    />
+
+                    <Grid2 container spacing={3} justifyContent="center" alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                        <Grid2 size={{md: 12}} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                            <Avatar
+                                src={user?.profile_picture}
+                                alt={user?.display_name || 'User'}
+                                sx={{
+                                    width: 120,
+                                    height: 120,
+                                    border: '5px solid white',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                                    backgroundColor: '#fff',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    }
+                                }}
+                            />
+                        </Grid2>
+
+                        <Grid2 size={{md: 12}} sx={{ textAlign: 'center' }}>
+                            <Typography
+                                variant="h5"
+                                fontWeight="bold"
+                                gutterBottom
+                                sx={{
+                                    color: '#1a237e',
+                                    textShadow: '0 1px 1px rgba(255,255,255,0.7)'
+                                }}
+                            >
+                                🐾 Welcome back, {user?.display_name || 'Pet Lover'}!
+                            </Typography>
+                        </Grid2>
+
                         {user?.email && (
-                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                                📧 {user.email}
-                            </Typography>
+                            <Grid2 size={{md: 12}} sx={{ textAlign: 'center' }}>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    gutterBottom
+                                    sx={{
+                                        bgcolor: 'rgba(255,255,255,0.6)',
+                                        py: 0.5,
+                                        px: 2,
+                                        borderRadius: 5,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}
+                                >
+                                    📧 {user.email}
+                                </Typography>
+                            </Grid2>
                         )}
+
                         {user?.bio && (
-                            <Typography variant="body1" sx={{ mt: 1 }}>
-                                {user.bio}
-                            </Typography>
+                            <Grid2 size={{md: 12}} sx={{ textAlign: 'center', mt: 1 }}>
+                                <Box
+                                    sx={{
+                                        backgroundColor: 'rgba(255,255,255,0.6)',
+                                        p: 2,
+                                        borderRadius: 2,
+                                        maxWidth: '80%',
+                                        mx: 'auto',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    <Typography variant="body1">
+                                        {user.bio}
+                                    </Typography>
+                                </Box>
+                            </Grid2>
                         )}
+
                         {error && (
-                            <Typography color="error" sx={{ mt: 2 }}>
-                                {error}
-                            </Typography>
+                            <Grid2 size={{md: 12}} sx={{ textAlign: 'center' }}>
+                                <Alert severity="error" sx={{ mt: 2, display: 'inline-flex', maxWidth: '80%' }}>
+                                    {error}
+                                </Alert>
+                            </Grid2>
                         )}
-                    </Box>
+                    </Grid2>
                 </Paper>
 
                 {/* 💡 Pet Tip of the Day */}
@@ -155,14 +222,14 @@ const HomePageContent = () => {
                 </Paper>
 
                 {/* 📰 News Section (Clean + Modern) */}
-                <Paper elevation={1} sx={{ p: 3, borderRadius: 3, backgroundColor: '#fdfdfd' }}>
-                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Paper elevation={1} sx={{p: 3, borderRadius: 3, backgroundColor: '#fdfdfd'}}>
+                    <Typography variant="h6" gutterBottom sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         🐶 Latest Veterinary & Pet Health News
                     </Typography>
 
                     {newsLoading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                            <CircularProgress />
+                        <Box sx={{display: 'flex', justifyContent: 'center', py: 4}}>
+                            <CircularProgress/>
                         </Box>
                     ) : news.length === 0 ? (
                         <Typography variant="body2" color="text.secondary">
@@ -197,18 +264,18 @@ const HomePageContent = () => {
                                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom noWrap>
                                                 {article.title}
                                             </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} noWrap>
+                                            <Typography variant="body2" color="text.secondary" sx={{mb: 1}} noWrap>
                                                 {article.description || 'No summary available.'}
                                             </Typography>
-                                            {sanitizeUrl(article.url) && 
-                                            <Link
-                                                href={article.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                underline="hover"
-                                            >
-                                                Read more →
-                                            </Link>
+                                            {sanitizeUrl(article.url) &&
+                                                <Link
+                                                    href={article.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    underline="hover"
+                                                >
+                                                    Read more →
+                                                </Link>
                                             }
                                         </CardContent>
                                     </Card>
