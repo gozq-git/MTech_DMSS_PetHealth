@@ -1,0 +1,33 @@
+name: Load test (Azure)
+on:
+  # push:
+  #   branches: [ "uat" ]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  load-test:
+    name: Load Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        continue-on-error: false
+        with:
+          creds: ${{ secrets.AZ_SP_LOAD_TEST }}
+
+      - name: 'Azure Load Testing'
+        uses: azure/load-testing@v1
+        with:
+          loadTestConfigFile: './tests/load_test/config.yaml'
+          loadTestResource: azureloadtesting-uat
+          resourceGroup: php-rg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loadTestResults
+          path: ${{ github.workspace }}/loadTest
+      

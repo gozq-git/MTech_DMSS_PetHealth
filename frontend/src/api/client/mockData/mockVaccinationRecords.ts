@@ -1,0 +1,102 @@
+import {VaccinationRecord} from "../../types/vaccinationRecord.ts";
+
+export const mockVaccinationRecords: VaccinationRecord[] = [
+    {
+        id: "vac-001",
+        pet_id: "1",
+        name: "Rabies",
+        description: "Standard rabies vaccination, 3-year protection",
+        administered_at: "2023-11-15T09:30:00Z",
+        administered_by: "Dr. Sarah Lim",
+        next_due_at: "2026-11-15T00:00:00Z",
+        is_valid: true,
+        created_at: "2023-11-15T09:45:00Z",
+        updated_at: "2023-11-15T09:45:00Z",
+        expires_at: "2025-11-15T09:45:00Z",
+        lot_number: "lot-number-123"
+    },
+    {
+        id: "vac-002",
+        pet_id: "1",
+        name: "DHPP",
+        description: "Distemper, Hepatitis, Parainfluenza and Parvovirus combo vaccine",
+        administered_at: "2023-10-20T14:15:00Z",
+        administered_by: "Dr. Michael Chen",
+        next_due_at: "2024-10-20T00:00:00Z",
+        is_valid: true,
+        created_at: "2023-10-20T14:30:00Z",
+        updated_at: "2023-10-20T14:30:00Z",
+        expires_at: "2024-10-20T14:30:00Z",
+        lot_number: "lot-number-456"
+    },
+    {
+        id: "vac-003",
+        pet_id: "1",
+        name: "FVRCP",
+        description: "Feline Viral Rhinotracheitis, Calicivirus and Panleukopenia",
+        administered_at: "2023-09-05T11:00:00Z",
+        administered_by: "Dr. Sarah Johnson",
+        next_due_at: "2024-09-05T00:00:00Z",
+        is_valid: true,
+        created_at: "2023-09-05T11:20:00Z",
+        updated_at: "2023-09-05T11:20:00Z",
+        expires_at: "2024-09-05T11:20:00Z",
+        lot_number: "lot-number-789"
+    },
+    {
+        id: "vac-004",
+        pet_id: "2",
+        name: "Bordetella",
+        description: "Kennel cough vaccination",
+        administered_at: "2022-12-10T10:15:00Z",
+        administered_by: "Dr. Robert Martinez",
+        next_due_at: "2023-12-10T00:00:00Z",
+        is_valid: false,
+        created_at: "2022-12-10T10:30:00Z",
+        updated_at: "2022-12-10T10:30:00Z",
+        expires_at: "2023-12-10T10:30:00Z",
+        lot_number: "lot-number-101"
+    },
+    {
+        id: "vac-005",
+        pet_id: "2",
+        name: "Leptospirosis",
+        description: "Protects against bacterial infection",
+        administered_at: "2024-01-05T13:45:00Z",
+        administered_by: "Dr. Michael Chen",
+        next_due_at: "2025-01-05T00:00:00Z",
+        is_valid: true,
+        created_at: "2024-01-05T14:00:00Z",
+        updated_at: "2024-01-05T14:00:00Z",
+        expires_at: "2025-01-05T14:00:00Z",
+        lot_number: "lot-number-202"
+    },
+    {
+        id: "vac-006",
+        pet_id: "2",
+        name: "Rabies",
+        description: "Standard rabies vaccination, 1-year protection",
+        administered_at: "2023-08-12T15:30:00Z",
+        administered_by: "Dr. Sarah Johnson",
+        next_due_at: "2024-08-12T00:00:00Z",
+        is_valid: true,
+        created_at: "2023-08-12T15:45:00Z",
+        updated_at: "2023-08-12T15:45:00Z",
+        expires_at: "2024-08-12T15:45:00Z",
+        lot_number: "lot-number-303"
+    },
+    {
+        id: "vac-007",
+        pet_id: "1",
+        name: "Lyme Disease",
+        description: "Protection against Lyme disease for dogs",
+        administered_at: "2023-05-22T09:00:00Z",
+        administered_by: "Dr. Robert Martinez",
+        next_due_at: "2024-05-22T00:00:00Z",
+        is_valid: true,
+        created_at: "2023-05-22T09:15:00Z",
+        updated_at: "2023-05-22T09:15:00Z",
+        expires_at: "2024-05-22T09:15:00Z",
+        lot_number: "lot-number-404"
+    }
+];
