@@ -53,27 +53,32 @@ export const payments: express.Router = express.Router();
 payments.post("/create", async (req: Request, res: Response) => {
     // console.debug("payments /create req.headers.userInfo",req.headers.userInfo);
     const { amount, currency, description, paymentType } = req.body;
-    let userInfo;
+    let userInfo: any = {};
     try {
         userInfo = typeof req.headers.userInfo === 'string'
             ? JSON.parse(req.headers.userInfo)
             : req.headers.userInfo;
     } catch (error) {
         res.status(500).send({ error: "Invalid user information format" });
+        return;
     }
-    const preferred_username = userInfo.preferred_username
+    const preferred_username = userInfo?.preferred_username
     if (!preferred_username || typeof preferred_username !== 'string') {
         res.status(500).send({ error: "Missing or invalid user information(preferred_username)" });
+        return;
     }
     try {
         const user = await UsersController.retrieveUser(preferred_username)
         if (!user || !user.id) {
             res.status(500).send({ error: "User not found" });
+            return;
         }
         const paymentId = await PaymentsController.createPayment(user.id, amount, currency, description, paymentType);
         res.status(201).send({ paymentId });
+        return;
     } catch (error: any) {
         res.status(500).send({ error: "Failed to create payment.", details: error.message });
+        return;
     }
 });
 
