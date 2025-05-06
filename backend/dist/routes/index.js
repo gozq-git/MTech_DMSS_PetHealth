@@ -8,7 +8,7 @@ const express_1 = __importDefault(require("express"));
 const fs_1 = require("fs");
 const { verifyJWT } = require('../utils/user_verification');
 exports.routes = express_1.default.Router();
-// routes.use(verifyJWT);
+exports.routes.use(verifyJWT);
 ((0, fs_1.readdirSync)(__dirname)).forEach(routeName => {
     if (routeName === 'index.js')
         return;

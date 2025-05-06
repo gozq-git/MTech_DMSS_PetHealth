@@ -26,6 +26,18 @@ exports.appointments = {
                 key: 'id'
             },
         },
+        pet_id: {
+            type: DataTypes.UUID,
+            allowNull: true,
+            references: {
+                model: 'PETS',
+                key: 'id'
+            },
+        },
+        pet_name: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         appointment_date: {
             type: DataTypes.DATEONLY,
             allowNull: false
