@@ -10,7 +10,7 @@ export default defineConfig({
         watch: {
             usePolling: true,
         },
-        allowedHosts: ['pethealthplatform-uat.azurewebsites.net'],
+        allowedHosts: ['pethealthplatform.azurewebsites.net'],
         headers: {
             "Strict-Transport-Security": "max-age=86400; includeSubDomains",
             "X-Content-Type-Options": "nosniff",
