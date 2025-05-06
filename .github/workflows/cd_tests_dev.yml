@@ -28,5 +28,5 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.14.0
         with:
-          target: 'https://pethealthplatform-uat.azurewebsites.net'
+          target: 'https://pethealthplatform-dev.azurewebsites.net'
           allow_issue_writing: false
