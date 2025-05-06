@@ -7,6 +7,7 @@ import { createAppointmentsApiClient, AppointmentsApi } from "../api/client/appo
 import { createAvailabilitiesApiClient, AvailabilitiesApi } from "../api/client/availabilitiesApi.ts";
 import { createFeesApiClient, FeesApi } from "../api/client/feesApi.ts";
 import {createNotificationApiClient, NotificationApi} from "../api/client/notificationApi.ts";
+import {createPaymentApiClient, PaymentApi} from "../api/client/paymentApi.ts";
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API
 console.debug(`USE_MOCK_API: ${USE_MOCK_API}`);
@@ -26,6 +27,7 @@ interface ApiClients {
     availabilitiesApi: AvailabilitiesApi;
     feesApi: FeesApi;
     notificationApi: NotificationApi;
+    paymentApi: PaymentApi;
 }
 
 let apiClients: ApiClients;
@@ -41,7 +43,8 @@ if (USE_MOCK_API == "true") {
         appointmentsApi: createAppointmentsApiClient(baseApiClient),
         availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
         feesApi: createFeesApiClient(baseApiClient),
-        notificationApi: createNotificationApiClient(baseApiClient)
+        notificationApi: createNotificationApiClient(baseApiClient),
+        paymentApi: createPaymentApiClient(baseApiClient)
     };
 } else {
     // Using real APIs
@@ -55,7 +58,8 @@ if (USE_MOCK_API == "true") {
         appointmentsApi: createAppointmentsApiClient(baseApiClient),
         availabilitiesApi: createAvailabilitiesApiClient(baseApiClient),
         feesApi: createFeesApiClient(baseApiClient),
-        notificationApi: createNotificationApiClient(baseApiClient)
+        notificationApi: createNotificationApiClient(baseApiClient),
+        paymentApi: createPaymentApiClient(baseApiClient)
        };
 }
 
