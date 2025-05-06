@@ -1,13 +1,13 @@
 name: Frontend -- Build and deploy container to an Azure Web App
 
 env:
-  IMAGE_NAME: "frontend-uat"
+  IMAGE_NAME: "frontend-prod"
   AZ_REGISTRY: "phpcontainerregistry.azurecr.io"
-  AZURE_WEBAPP_NAME: pethealthplatform-uat
+  AZURE_WEBAPP_NAME: pethealthplatform
 
 on:
   push:
-    branches: [ "uat" ]
+    branches: [ "main" ]
     paths:
     - frontend/**
   workflow_dispatch:
@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZ_SP_FE_UAT }}
+          creds: ${{ secrets.AZ_SP_FE_PROD }}
 
       - name: 'Deploy to Azure Web App for Container'
         uses: azure/webapps-deploy@v2
