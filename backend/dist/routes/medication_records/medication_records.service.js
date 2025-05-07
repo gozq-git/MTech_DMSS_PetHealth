@@ -15,10 +15,10 @@ const date_fns_1 = require("date-fns");
 const models = db_1.sequelize.models;
 const MedicationRecordsService = {
     getMedicationRecords: () => __awaiter(void 0, void 0, void 0, function* () {
-        return yield models.MEDICATION_RECORD.findAll({});
+        return yield models.MEDICATION_RECORDS.findAll({});
     }),
     retrieveMedicationRecord: (id) => __awaiter(void 0, void 0, void 0, function* () {
-        return yield models.MEDICATION_RECORD.findOne({
+        return yield models.MEDICATION_RECORDS.findOne({
             where: { id }
         });
     }),
@@ -38,7 +38,7 @@ const MedicationRecordsService = {
             created_at: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss')
         };
         try {
-            const newRecord = yield models.MEDICATION_RECORD.create(preparedRecord);
+            const newRecord = yield models.MEDICATION_RECORDS.create(preparedRecord);
             return newRecord;
         }
         catch (error) {

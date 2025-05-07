@@ -16,7 +16,7 @@ import {loginRequest} from "../authConfig";
 import {useNavigate} from "react-router-dom";
 import {ROUTES} from "../routes/routes.ts";
 import {AccountTypeContext} from "../contexts/AccountTypeContext";
-import {CopyAccessTokenComponent} from "./CopyAccessTokenComponent.tsx";
+// import {CopyAccessTokenComponent} from "./CopyAccessTokenComponent.tsx";
 import {Mail} from "@mui/icons-material";
 
 interface HeaderBarProps {
@@ -110,7 +110,7 @@ const HeaderBar = ({onMenuClick, onNotificationDrawerClick}: HeaderBarProps) => 
                                     </Box>
 
                                     {/* Show access token in DEV mode */}
-                                    {import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent/></MenuItem>}
+                                    {/*{import.meta.env.DEV && <MenuItem><CopyAccessTokenComponent/></MenuItem>}*/}
 
                                     <Divider sx={{my: 1}}/>
 

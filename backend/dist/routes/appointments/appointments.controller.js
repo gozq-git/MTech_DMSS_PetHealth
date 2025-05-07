@@ -45,7 +45,18 @@ const AppointmentsController = {
         }
         catch (error) {
             logger.error(error);
-            throw new Error("Error retrieving pending appointments for vet");
+            throw new Error("Error retrieving appointments for vet on the specified date");
+        }
+    }),
+    // For a vet to fetch all appointments across all dates
+    getAllAppointmentsForVet: (vetId) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const result = yield appointments_service_1.default.getAllAppointmentsForVet(vetId);
+            return result;
+        }
+        catch (error) {
+            logger.error(error);
+            throw new Error("Error retrieving all appointments for vet");
         }
     }),
     // For a user to fetch all appointments
@@ -56,7 +67,7 @@ const AppointmentsController = {
         }
         catch (error) {
             logger.error(error);
-            throw new Error("Error retrieving pending appointments for user");
+            throw new Error("Error retrieving appointments for user");
         }
     }),
     // For a user to book an appointment
