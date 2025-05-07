@@ -150,7 +150,7 @@ exports.notifications.post('/broadcast', (req, res) => __awaiter(void 0, void 0,
             return;
         }
         for (const recipient of recipients) {
-            yield notification_controller_1.default.sendBroadcast(recipient, subject, message, engines);
+            yield notification_controller_1.default.sendNotification(recipient, subject, message, engines);
             logger.info(`Notification sent to ${recipient}`);
         }
         res.status(200).json({ success: true, message: "Broadcast message sent successfully." });
