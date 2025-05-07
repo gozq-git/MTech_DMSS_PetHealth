@@ -21,7 +21,7 @@ jobs:
         uses: azure/load-testing@v1.1.27
         with:
           loadTestConfigFile: './tests/load_test/config.yaml'
-          loadTestResource: azureloadtesting-uat
+          loadTestResource: azureloadtesting-dev
           resourceGroup: php-rg
 
       - uses: actions/upload-artifact@v4
