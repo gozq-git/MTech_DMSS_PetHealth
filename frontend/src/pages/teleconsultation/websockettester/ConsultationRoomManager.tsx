@@ -168,7 +168,7 @@ export const ConsultationRoomManager: React.FC<ConsultationRoomManagerProps> = (
         setShowFeeModal(true); // Show the price popup
 
         if (webSocket && webSocket.readyState !== WebSocket.OPEN) {
-            const newSocket = new WebSocket('ws://localhost:8080');
+            const newSocket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
             setWebSocket(newSocket);
         }
     };

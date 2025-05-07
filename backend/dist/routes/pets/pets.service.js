@@ -37,7 +37,7 @@ const PetsService = {
     insertPet: (petData) => __awaiter(void 0, void 0, void 0, function* () {
         const preparedPetData = {
             id: (0, uuid_1.v6)(),
-            owner_id: petData.ownerId || '',
+            owner_id: petData.owner_id || '',
             name: petData.name || '',
             gender: petData.gender || '',
             species: petData.species || '',

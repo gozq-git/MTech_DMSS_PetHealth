@@ -15,11 +15,11 @@ const date_fns_1 = require("date-fns");
 const models = db_1.sequelize.models;
 const MedicationsService = {
     getMedications: () => __awaiter(void 0, void 0, void 0, function* () {
-        const medications = yield models.MEDICATION.findAll({});
+        const medications = yield models.MEDICATIONS.findAll({});
         return medications;
     }),
     retrieveMedication: (id) => __awaiter(void 0, void 0, void 0, function* () {
-        const medication = yield models.MEDICATION.findOne({
+        const medication = yield models.MEDICATIONS.findOne({
             where: { id }
         });
         return medication;
@@ -35,7 +35,7 @@ const MedicationsService = {
         };
         try {
             console.log('Prepared Medication Data:', preparedMedicationData);
-            const newMedication = yield models.MEDICATION.create(preparedMedicationData);
+            const newMedication = yield models.MEDICATIONS.create(preparedMedicationData);
             return newMedication;
         }
         catch (error) {
