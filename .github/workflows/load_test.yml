@@ -2,8 +2,6 @@ name: Load test (Azure)
 on:
   # push:
   #   branches: [ "uat" ]
-  # pull_request:
-  #   types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
