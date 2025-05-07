@@ -61,7 +61,6 @@ jobs:
 
   owasp-zap-scan:
     name: OWASP ZAP Scan
-    needs: postman-api-tests
     runs-on: ubuntu-latest
 
     steps:
