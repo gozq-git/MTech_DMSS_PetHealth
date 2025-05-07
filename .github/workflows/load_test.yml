@@ -18,7 +18,7 @@ jobs:
           creds: ${{ secrets.AZ_SP_LOAD_TEST }}
 
       - name: 'Azure Load Testing'
-        uses: azure/load-testing@v1
+        uses: azure/load-testing@v1.1.27
         with:
           loadTestConfigFile: './tests/load_test/config.yaml'
           loadTestResource: azureloadtesting-uat
