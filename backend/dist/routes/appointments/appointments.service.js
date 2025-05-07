@@ -56,6 +56,8 @@ const AppointmentsService = {
                 id: (0, uuid_1.v4)(),
                 user_id: appointmentData.user_id,
                 vet_id: appointmentData.vet_id,
+                pet_id: appointmentData.pet_id,
+                pet_name: appointmentData.pet_name,
                 appointment_date: appointmentData.appointment_date,
                 appointment_time: appointmentData.appointment_time || null,
                 status: 'pending'
@@ -110,7 +112,28 @@ const AppointmentsService = {
             throw new Error("Error retrieving appointments");
         }
     }),
-    // Fetch all appointments for a given user(pending, accepted, and rejected)
+    // Fetch all appointments for a given vet, across all dates (pending, accepted, and rejected)
+    getAllAppointmentsForVet: (vetId) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const appointments = yield models.APPOINTMENTS.findAll({
+                where: {
+                    vet_id: vetId, // Only filter by vetId
+                },
+                include: [
+                    {
+                        model: models.USERS,
+                        required: true,
+                    },
+                ],
+            });
+            return appointments;
+        }
+        catch (error) {
+            logger.error(error);
+            throw new Error("Error retrieving all appointments for vet");
+        }
+    }),
+    // Fetch all appointments for a given user (pending, accepted, and rejected)
     getAppointmentsForUser: (userId) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const appointments = yield models.APPOINTMENTS.findAll({

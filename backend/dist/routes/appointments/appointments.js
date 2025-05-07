@@ -105,8 +105,37 @@ exports.appointments.get('/availableVets', (req, res) => __awaiter(void 0, void 
 exports.appointments.get('/getAppointmentsForVet', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { vet_id, date } = req.query;
     try {
-        // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
         const result = yield appointments_controller_1.default.getAppointmentsForVet(vet_id, date);
+        res.status(200).json({ status: 'success', data: result });
+    }
+    catch (error) {
+        logger.error(error);
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+}));
+/**
+ * @swagger
+ * /appointments/getAllAppointmentsForVet:
+ *   get:
+ *     summary: Get all appointments for a vet (across all dates).
+ *     tags:
+ *       - appointments
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet, regardless of the date.
+ *     parameters:
+ *       - in: query
+ *         name: vet_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vet ID
+ *     responses:
+ *       200:
+ *         description: List of all appointments (pending, accepted, rejected) across all dates.
+ */
+exports.appointments.get('/getAllAppointmentsForVet', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { vet_id } = req.query;
+    try {
+        const result = yield appointments_controller_1.default.getAllAppointmentsForVet(vet_id);
         res.status(200).json({ status: 'success', data: result });
     }
     catch (error) {
@@ -118,10 +147,10 @@ exports.appointments.get('/getAppointmentsForVet', (req, res) => __awaiter(void 
  * @swagger
  * /appointments/getAppointmentsForUser:
  *   get:
- *     summary: Get all appointments for a user on a given date.
+ *     summary: Get all appointments for a user.
  *     tags:
  *       - appointments
- *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a vet on a specific day.
+ *     description: Retrieve the list of all appointments (pending, accepted, rejected) for a user.
  *     parameters:
  *       - in: query
  *         name: user_id
@@ -136,7 +165,6 @@ exports.appointments.get('/getAppointmentsForVet', (req, res) => __awaiter(void 
 exports.appointments.get('/getAppointmentsForUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user_id } = req.query;
     try {
-        // Fetching all appointments (pending, accepted, and rejected) for the vet on the given date
         const result = yield appointments_controller_1.default.getAppointmentsForUser(user_id);
         res.status(200).json({ status: 'success', data: result });
     }
@@ -160,6 +188,8 @@ exports.appointments.get('/getAppointmentsForUser', (req, res) => __awaiter(void
  *           example:
  *             user_id: "user-uuid-here"
  *             vet_id: "vet-uuid-here"
+ *             pet_id: "pet-uuid-here"
+ *             pet_name: "Buddy"
  *             appointment_date: "2025-04-01"
  *             appointment_time: "14:00:00"
  *     responses:
