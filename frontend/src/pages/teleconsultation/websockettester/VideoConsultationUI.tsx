@@ -67,9 +67,12 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
     const [originalStream, setOriginalStream] = useState<MediaStream | null>(null);
     // Connection dialog state
     const [showReconnectDialog, setShowReconnectDialog] = useState(false);
+    const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set());
+    const [isInitiator, setIsInitiator] = useState<boolean>(role === 'vet'); // Vet initiates by default
+    const [isNegotiating, setIsNegotiating] = useState<boolean>(false);
 
     const meteredTurnServerApiKey = import.meta.env.VITE_METERED_API_KEY || `107d1251f774c45fe3bdd4a363fe758c3463`;
-    console.log(`meteredTurnServerApiKey = ${import.meta.env.VITE_METERED_API_KEY}`)
+    // console.log(`meteredTurnServerApiKey = ${import.meta.env.VITE_METERED_API_KEY}`)
 
     useEffect(() => {
         // Initialize WebRTC connection with Metered TURN servers
@@ -161,39 +164,68 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                 return;
             }
 
-            console.log('Received message:', data.type);
+            // Add message ID tracking to prevent duplicate processing
+            // If no ID is provided, create one from the message content
+            const messageId = data.id || `${data.type}-${JSON.stringify(data).slice(0, 50)}`;
+
+            // Skip if we've already processed this message
+            if (processedMessageIds.has(messageId)) {
+                console.log('Skipping already processed message:', messageId);
+                return;
+            }
+
+            // Mark this message as processed
+            setProcessedMessageIds(prev => new Set([...prev, messageId]));
+
+            console.log('Received message:', data.type, 'Signaling state:', peerConnection?.signalingState);
 
             switch (data.type) {
                 case 'send_offer':
-                    // Only process offers when we're in a state that can accept them
-                    if (peerConnection &&
-                        (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'closed')) {
-                        console.log('Processing incoming offer');
+                    if (!peerConnection) return;
+
+                    // Always accept offers when we're not the initiator
+                    if (!isInitiator) {
+                        console.log('Processing incoming offer as non-initiator');
                         handleIncomingOffer(data.offer);
+                    } else if (peerConnection.signalingState === 'stable') {
+                        // If we are the initiator but received an offer while stable,
+                        // apply "perfect negotiation" pattern - accept the offer only if
+                        // we should yield based on some tiebreaker (e.g., user IDs)
+                        const shouldYield = userId > partnerId; // Simple tiebreaker based on IDs
+
+                        if (shouldYield) {
+                            console.log('Initiator yielding to incoming offer due to tiebreaker');
+                            setIsInitiator(false);
+                            handleIncomingOffer(data.offer);
+                        } else {
+                            console.log('Initiator ignoring offer due to tiebreaker');
+                            // Continue with our own offer
+                        }
                     } else {
-                        console.warn('Received offer in invalid state:', peerConnection?.signalingState);
+                        console.warn('Initiator received offer in non-stable state:', peerConnection.signalingState);
                     }
                     break;
 
                 case 'send_answer':
-                    // Only process answers when we're in have-local-offer state
-                    if (peerConnection && peerConnection.signalingState === 'have-local-offer') {
+                    if (!peerConnection) return;
+
+                    // Process the answer if we're in have-local-offer state
+                    if (peerConnection.signalingState === 'have-local-offer') {
                         console.log('Processing incoming answer');
                         handleIncomingAnswer(data.answer);
                     } else {
-                        console.warn('Received answer in invalid state:', peerConnection?.signalingState);
-                        // If we receive an answer in the wrong state, we might need to reconnect
-                        if (peerConnection && peerConnection.signalingState === 'stable') {
-                            // We might be in a situation where both peers are trying to be the offerer
-                            // If we're the vet, we should be the one creating offers
-                            if (role === 'vet') {
-                                console.log('Vet is reinitializing connection');
-                                setTimeout(() => {
-                                    if (peerConnection && peerConnection.signalingState === 'stable') {
-                                        createAndSendOffer(peerConnection);
-                                    }
-                                }, 1000);
-                            }
+                        console.warn('Received answer in invalid state:', peerConnection.signalingState);
+
+                        // If we're in stable state and we're supposed to be the initiator,
+                        // we might have missed sending an offer or the previous negotiation
+                        // might have completed. Send a new offer after a delay.
+                        if (isInitiator && peerConnection.signalingState === 'stable' && !isNegotiating) {
+                            console.log('Initiator creating new offer after receiving answer in stable state');
+                            setTimeout(() => {
+                                if (peerConnection && peerConnection.signalingState === 'stable' && !isNegotiating) {
+                                    createAndSendOffer(peerConnection);
+                                }
+                            }, 1000);
                         }
                     }
                     break;
@@ -207,7 +239,6 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
 
                 case 'peer_disconnected':
                     showSnackbar('Your partner has disconnected.', SNACKBAR_SEVERITY.INFO);
-                    // You might want to end the consultation or implement reconnection logic
                     break;
 
                 default:
@@ -222,7 +253,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         return () => {
             ws.removeEventListener('message', handleMessage);
         };
-    }, [ws, channelName, peerConnection, role]);
+    }, [ws, channelName, peerConnection, isInitiator, isNegotiating, userId, partnerId, processedMessageIds]);
 
     // Update video elements when streams change
     useEffect(() => {
@@ -318,9 +349,14 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         // Add signaling state change handler
         peerConnection.onsignalingstatechange = () => {
             console.log('Signaling state changed:', peerConnection.signalingState);
+
+            // When we return to "stable", we've completed a negotiation cycle
+            if (peerConnection.signalingState === 'stable') {
+                setIsNegotiating(false);
+            }
+
             logConnectionState();
         };
-
         // Handle remote track event
         peerConnection.ontrack = (event) => {
             console.log('Track event:', event);
@@ -331,6 +367,8 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
     // Create and send WebRTC offer
     const createAndSendOffer = async (peerConnection: RTCPeerConnection) => {
         try {
+            setIsNegotiating(true);
+
             const offer = await peerConnection.createOffer({
                 offerToReceiveAudio: true,
                 offerToReceiveVideo: true
@@ -342,12 +380,14 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             ws.send(JSON.stringify({
                 type: 'send_offer',
                 channelName: channelName,
-                offer: peerConnection.localDescription
+                offer: peerConnection.localDescription,
+                id: `offer-${Date.now()}-${Math.random().toString(36).substring(2, 15)}` // Add unique ID
             }));
         } catch (err) {
             console.error('Error creating offer:', err);
-            // setError(`Failed to create offer: ${(err as Error).message}`);
-            showSnackbar(`Failed to create offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+            showSnackbar(`Failed to create offer: ${(err as Error).message}`, SNACKBAR_SEVERITY.ERROR);
+        } finally {
+            setIsNegotiating(false);
         }
     };
 
@@ -356,6 +396,18 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         if (!peerConnection) return;
 
         try {
+            setIsNegotiating(true);
+
+            // If we have a local description already and we're in the middle of setting up our own offer,
+            // we need to handle this differently (perfect negotiation pattern)
+            const hasLocalDescription = peerConnection.signalingState !== 'stable';
+
+            // If we need to handle simultaneous offers, rollback first
+            if (hasLocalDescription) {
+                console.log('Rolling back local description before accepting remote offer');
+                await peerConnection.setLocalDescription({type: 'rollback'});
+            }
+
             await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
             const answer = await peerConnection.createAnswer();
@@ -365,12 +417,14 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             ws.send(JSON.stringify({
                 type: 'send_answer',
                 channelName: channelName,
-                answer: peerConnection.localDescription
+                answer: peerConnection.localDescription,
+                id: `answer-${Date.now()}-${Math.random().toString(36).substring(2, 15)}` // Add unique ID
             }));
         } catch (err) {
             console.error('Error handling offer:', err);
-            // setError(`Failed to handle offer: ${(err as Error).message}`);
-            showSnackbar(`Failed to handle offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+            showSnackbar(`Failed to handle offer: ${(err as Error).message}`, SNACKBAR_SEVERITY.ERROR);
+        } finally {
+            setIsNegotiating(false);
         }
     };
 
@@ -379,12 +433,11 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         if (!peerConnection) return;
 
         try {
-            // Check if the connection is in the correct state to receive an answer
+            // Only try to set remote description if we're in the correct state
             if (peerConnection.signalingState === 'have-local-offer') {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
             } else {
-                console.warn('Received answer while in wrong signaling state:', peerConnection.signalingState);
-                // You may want to implement reconnection logic here or notify the user
+                console.warn('Cannot set remote answer in state:', peerConnection.signalingState);
             }
         } catch (err: any) {
             console.error('Error handling answer:', err);
