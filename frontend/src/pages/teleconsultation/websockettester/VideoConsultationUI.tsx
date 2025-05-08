@@ -20,13 +20,11 @@ import {CallEnd, Mic, MicOff, ScreenShare, StopScreenShare, Videocam, VideocamOf
 import {SNACKBAR_SEVERITY, SnackbarContext} from "../../../providers/SnackbarProvider.tsx";
 
 // ICE Server configuration - using public STUN servers
-const iceServers = {
+const publicIceServers = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' }
-        // Add TURN servers for production
-        // { urls: 'turn:your-turn-server.com', username: 'username', credential: 'credential' }
     ]
 };
 
@@ -70,6 +68,59 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
     // Connection dialog state
     const [showReconnectDialog, setShowReconnectDialog] = useState(false);
 
+    const meteredTurnServerApiKey = import.meta.env.VITE_METERED_API_KEY || `107d1251f774c45fe3bdd4a363fe758c3463`;
+    console.log(`meteredTurnServerApiKey = ${import.meta.env.VITE_METERED_API_KEY}`)
+
+    useEffect(() => {
+        // Initialize WebRTC connection with Metered TURN servers
+        const initializePeerConnection = async () => {
+            try {
+                // Initialize with empty config first
+                const peerConfiguration: RTCConfiguration = {};
+
+                // Fetch TURN credentials from Metered
+                const response = await fetch(
+                    `https://xeyndev.metered.live/api/v1/turn/credentials?apiKey=${meteredTurnServerApiKey}`
+                );
+
+                if (response.ok) {
+                    peerConfiguration.iceServers = await response.json();
+                    console.log("TURN servers loaded successfully");
+                } else {
+                    console.error("Failed to fetch TURN servers, falling back to defaults");
+                    // Fallback to public STUN servers if Metered request fails
+                    peerConfiguration.iceServers = publicIceServers.iceServers
+                }
+
+                // Create the peer connection with the configuration
+                const newPeerConnection = new RTCPeerConnection(peerConfiguration);
+
+                // Add logging for debugging
+                newPeerConnection.addEventListener('signalingstatechange', () => {
+                    console.log(`Signaling state changed: ${newPeerConnection.signalingState}`);
+                });
+
+                newPeerConnection.addEventListener('iceconnectionstatechange', () => {
+                    console.log(`ICE connection state: ${newPeerConnection.iceConnectionState}`);
+                });
+
+                // Set up other event handlers...
+
+                setPeerConnection(newPeerConnection);
+            } catch (error) {
+                console.error("Error initializing peer connection:", error);
+            }
+        };
+
+        initializePeerConnection();
+
+        // Clean up function
+        return () => {
+            if (peerConnection) {
+                peerConnection.close();
+            }
+        };
+    }, []);
     // Initialize WebRTC connection
     useEffect(() => {
         if (!channelName || !ws || ws.readyState !== WebSocket.OPEN) {
@@ -170,7 +221,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             setLocalStream(stream);
 
             // Create RTCPeerConnection
-            const peerConnection = new RTCPeerConnection(iceServers);
+            const peerConnection = new RTCPeerConnection(publicIceServers);
 
             // Add tracks to the peer connection
             stream.getTracks().forEach(track => {
