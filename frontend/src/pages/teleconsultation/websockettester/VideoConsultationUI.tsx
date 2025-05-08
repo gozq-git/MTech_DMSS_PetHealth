@@ -148,33 +148,70 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         if (!ws) return;
 
         const handleMessage = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
+            let data;
+            try {
+                data = JSON.parse(event.data);
+            } catch (err) {
+                console.error('Error parsing WebSocket message:', err);
+                return;
+            }
+
+            // Only process messages for our channel
+            if (data.channelName !== channelName) {
+                return;
+            }
+
+            console.log('Received message:', data.type);
 
             switch (data.type) {
                 case 'send_offer':
-                    if (data.channelName === channelName) {
+                    // Only process offers when we're in a state that can accept them
+                    if (peerConnection &&
+                        (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'closed')) {
+                        console.log('Processing incoming offer');
                         handleIncomingOffer(data.offer);
+                    } else {
+                        console.warn('Received offer in invalid state:', peerConnection?.signalingState);
                     }
                     break;
 
                 case 'send_answer':
-                    if (data.channelName === channelName) {
+                    // Only process answers when we're in have-local-offer state
+                    if (peerConnection && peerConnection.signalingState === 'have-local-offer') {
+                        console.log('Processing incoming answer');
                         handleIncomingAnswer(data.answer);
+                    } else {
+                        console.warn('Received answer in invalid state:', peerConnection?.signalingState);
+                        // If we receive an answer in the wrong state, we might need to reconnect
+                        if (peerConnection && peerConnection.signalingState === 'stable') {
+                            // We might be in a situation where both peers are trying to be the offerer
+                            // If we're the vet, we should be the one creating offers
+                            if (role === 'vet') {
+                                console.log('Vet is reinitializing connection');
+                                setTimeout(() => {
+                                    if (peerConnection && peerConnection.signalingState === 'stable') {
+                                        createAndSendOffer(peerConnection);
+                                    }
+                                }, 1000);
+                            }
+                        }
                     }
                     break;
 
                 case 'ice_candidate':
-                    if (data.channelName === channelName) {
+                    if (peerConnection) {
+                        console.log('Processing ICE candidate');
                         handleIncomingICECandidate(data.candidate);
                     }
                     break;
 
                 case 'peer_disconnected':
-                    if (data.channelName === channelName) {
-                        showSnackbar('Your partner has disconnected.', SNACKBAR_SEVERITY.INFO);
-                        // You might want to end the consultation here
-                    }
+                    showSnackbar('Your partner has disconnected.', SNACKBAR_SEVERITY.INFO);
+                    // You might want to end the consultation or implement reconnection logic
                     break;
+
+                default:
+                    console.warn('Unknown message type:', data.type);
             }
         };
 
@@ -185,7 +222,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         return () => {
             ws.removeEventListener('message', handleMessage);
         };
-    }, [ws, channelName, peerConnection]);
+    }, [ws, channelName, peerConnection, role]);
 
     // Update video elements when streams change
     useEffect(() => {
@@ -244,11 +281,23 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         }
     };
 
+    const logConnectionState = () => {
+        if (!peerConnection) return;
+
+        console.log('Connection States:', {
+            signalingState: peerConnection.signalingState,
+            connectionState: peerConnection.connectionState,
+            iceConnectionState: peerConnection.iceConnectionState,
+            iceGatheringState: peerConnection.iceGatheringState
+        });
+    };
+
     // Set up event handlers for the peer connection
-    const setupPeerConnectionEventHandlers = (peerConnection : RTCPeerConnection) => {
+    const setupPeerConnectionEventHandlers = (peerConnection: RTCPeerConnection) => {
         // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log('ICE candidate:', event.candidate);
                 sendICECandidate(event.candidate);
             }
         };
@@ -257,11 +306,19 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         peerConnection.onconnectionstatechange = () => {
             setConnectionState(peerConnection.connectionState);
             console.log('Connection state changed:', peerConnection.connectionState);
+            logConnectionState();
         };
 
         // Handle ICE connection state changes
         peerConnection.oniceconnectionstatechange = () => {
             console.log('ICE connection state:', peerConnection.iceConnectionState);
+            logConnectionState();
+        };
+
+        // Add signaling state change handler
+        peerConnection.onsignalingstatechange = () => {
+            console.log('Signaling state changed:', peerConnection.signalingState);
+            logConnectionState();
         };
 
         // Handle remote track event
@@ -322,11 +379,16 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         if (!peerConnection) return;
 
         try {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            // Check if the connection is in the correct state to receive an answer
+            if (peerConnection.signalingState === 'have-local-offer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            } else {
+                console.warn('Received answer while in wrong signaling state:', peerConnection.signalingState);
+                // You may want to implement reconnection logic here or notify the user
+            }
         } catch (err: any) {
             console.error('Error handling answer:', err);
-            // setError(`Failed to handle answer: ${(err as Error).message}`);
-            showSnackbar(`Failed to handle answer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+            showSnackbar(`Failed to handle answer: ${(err as Error).message}`, SNACKBAR_SEVERITY.ERROR);
         }
     };
 
