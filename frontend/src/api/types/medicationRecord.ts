@@ -1,14 +1,15 @@
 export interface MedicationRecord {
     id: string;
-    petId: string;
+    pet_id: string;
     name: string;
     description: string;
     dosage: string;
     frequency: string;
-    startDate: string;
-    endDate: string;
+    start_date: string;
+    end_date: string;
     requiresPrescription: boolean;
-    prescribedBy: string;
+    prescribed_by: string;
     created: string;
 
 }
+

@@ -36,15 +36,15 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
     const {showSnackbar} = useContext(SnackbarContext);
     const {petApi} = useContext(ApiClientContext)
     const [formData, setFormData] = useState<Partial<MedicationRecord>>({
-        petId: pet.id,
+        pet_id: pet.id,
         name: '',
         description: '',
         dosage: '',
         frequency: '',
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 2592000000).toISOString(), // Default to 30 days from now
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 2592000000).toISOString(), // Default to 30 days from now
         requiresPrescription: false,
-        prescribedBy: '1f00140f-acc8-6ed0-9cdc-5694cdc3ff77'
+        prescribed_by: '1f00140f-acc8-6ed0-9cdc-5694cdc3ff77'
     });
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -67,9 +67,9 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
     const handleSubmitMedication = async () => {
         setIsSubmitting(true);
         try {
-            // await petApi.createMedicationRecord(data);
-            // showSnackbar("Medication Record created successfully.", SNACKBAR_SEVERITY.SUCCESS);
-            showSnackbar("NOT IMPLEMENTED YET!!", SNACKBAR_SEVERITY.WARNING);
+            await petApi.createMedicationRecord(formData);
+            showSnackbar("Medication Record created successfully.", SNACKBAR_SEVERITY.SUCCESS);
+            // showSnackbar("NOT IMPLEMENTED YET!!", SNACKBAR_SEVERITY.WARNING);
         } catch (error) {
             console.error("Error adding medication record:", error);
             showSnackbar("An error occurred adding medication record.", SNACKBAR_SEVERITY.ERROR);
@@ -111,7 +111,7 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
                                 fullWidth
                                 label="Prescribed By"
                                 name="prescribedBy"
-                                value={formData.prescribedBy}
+                                value={formData.prescribed_by}
                                 onChange={handleChange}
                                 required
                             />
@@ -178,7 +178,7 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
                                     label="Start Date"
-                                    value={formData.startDate ? dayjs(formData.startDate) : null}
+                                    value={formData.start_date ? dayjs(formData.start_date) : null}
                                     onChange={handleDateChange('startDate')}
                                     slotProps={{textField: {fullWidth: true}}}
                                 />
@@ -189,7 +189,7 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
                                     label="End Date"
-                                    value={formData.endDate ? dayjs(formData.endDate) : null}
+                                    value={formData.end_date ? dayjs(formData.end_date) : null}
                                     onChange={handleDateChange('endDate')}
                                     slotProps={{textField: {fullWidth: true}}}
                                 />
@@ -217,7 +217,7 @@ export const MedicationForm: React.FC<MedicationFormProps> = ({open, onClose, pe
                     onClick={handleSubmitMedication}
                     color="primary"
                     variant="contained"
-                    disabled={!formData.name || !formData.dosage || !formData.frequency || !formData.prescribedBy}
+                    disabled={!formData.name || !formData.dosage || !formData.frequency || !formData.prescribed_by}
                     startIcon={isSubmitting ? <CircularProgress size={20}/> : null}
                 >
                     Save Record

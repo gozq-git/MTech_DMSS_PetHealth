@@ -106,6 +106,10 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
 
     const contentHeight = "calc(100vh - 250px)";
 
+    const petVaccinationRecords = vaccinationRecords.filter(record => record.pet_id === pet.id);
+    const petMedicationRecords = medicationRecords.filter(record => record.pet_id === pet.id);
+
+
 
     return (
         <Paper elevation={0} sx={{borderRadius: 4, display: 'flex', flexDirection: 'column', maxHeight: '60vh'}}>
@@ -220,9 +224,9 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                         >
                             Vaccination Record
                         </Button>
-                        {vaccinationRecords.length > 0 ? (
+                        {petVaccinationRecords.length > 0 ? (
                             <Grid2 container spacing={2}>
-                                {vaccinationRecords.map((record) => (
+                                {petVaccinationRecords.map((record) => (
                                     <Grid2 size={{xs: 12, sm: 6}} key={record.id}>
                                         <Card sx={{height: '100%'}}>
                                             <CardContent>
@@ -298,9 +302,9 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                         >
                             Medication Record
                         </Button>
-                        {medicationRecords.length > 0 ? (
+                        {petMedicationRecords.length > 0 ? (
                             <Grid2 container spacing={2}>
-                                {medicationRecords.map((medication) => (
+                                {petMedicationRecords.map((medication) => (
                                     <Grid2 size={{xs: 12, sm: 6}} key={medication.id}>
                                         <Card sx={{height: '100%', position: 'relative'}}>
                                             <CardContent>
@@ -324,8 +328,8 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                         )}
                                                         <Chip
                                                             size="small"
-                                                            color={new Date(medication.endDate) > new Date() ? "success" : "error"}
-                                                            label={new Date(medication.endDate) > new Date() ? "Active" : "Completed"}
+                                                            color={new Date(medication.end_date) > new Date() ? "success" : "error"}
+                                                            label={new Date(medication.end_date) > new Date() ? "Active" : "Completed"}
                                                         />
                                                     </Stack>
                                                 </Box>
@@ -350,21 +354,21 @@ export const PetDetailsPanel: React.FC<PetDetailsPopupContentProps> = ({
                                                         <Typography variant="body2" color="text.secondary">Start
                                                             Date</Typography>
                                                         <Typography variant="body1">
-                                                            {new Date(medication.startDate).toLocaleDateString()}
+                                                            {new Date(medication.start_date).toLocaleDateString()}
                                                         </Typography>
                                                     </Grid2>
                                                     <Grid2 size={{xs: 12, sm: 6}}>
                                                         <Typography variant="body2" color="text.secondary">End
                                                             Date</Typography>
                                                         <Typography variant="body1">
-                                                            {new Date(medication.endDate).toLocaleDateString()}
+                                                            {new Date(medication.end_date).toLocaleDateString()}
                                                         </Typography>
                                                     </Grid2>
                                                     <Grid2 size={{xs: 12}}>
                                                         <Typography variant="body2" color="text.secondary">Prescribed
                                                             By</Typography>
                                                         <Typography
-                                                            variant="body1">{medication.prescribedBy}</Typography>
+                                                            variant="body1">{medication.prescribed_by}</Typography>
                                                     </Grid2>
                                                 </Grid2>
                                             </CardContent>
