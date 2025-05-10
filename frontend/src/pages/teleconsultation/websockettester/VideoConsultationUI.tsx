@@ -41,7 +41,7 @@ export const VideoConsultationUI: React.FC<VideoConsultationUIProps> = ({
     const fetchTurnServerCredentials = async () => {
         try {
             // Get the API key from environment variables
-            const meteredTurnServerApiKey = import.meta.env.VITE_METERED_TURN_API_KEY;
+            const meteredTurnServerApiKey = import.meta.env.VITE_METERED_API_KEY;
 
             if (!meteredTurnServerApiKey) {
                 console.warn('Metered TURN API key not found, using default STUN servers only');
