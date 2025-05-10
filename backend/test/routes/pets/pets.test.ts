@@ -2,128 +2,120 @@ import request from 'supertest';
 import express from 'express';
 import { pets } from '../../../src/routes/pets/pets';
 import PetsController from '../../../src/routes/pets/pets.controller';
-import { sequelize } from "../../../src/db";
-import { describe, beforeEach, it } from 'node:test';
 
 jest.mock('../../../src/routes/pets/pets.controller');
-jest.mock('../../../src/db', () => ({
-  sequelize: {
-    close: jest.fn().mockResolvedValue(undefined),
-    authenticate: jest.fn().mockResolvedValue(undefined),
-  }
-}));
 
 const app = express();
 app.use(express.json());
 app.use('/pets', pets);
 
 describe('Pets Routes', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(async () => {
-    await sequelize.close();
-    jest.restoreAllMocks();
-  });
-
-  describe('GET /pets/retrievePet/:id', () => {
-    it('should retrieve a pet by ID', async () => {
-      const mockPet = { id: '1', name: 'Fluffy', type: 'Cat', age: 3, vaccinated: true };
-      (PetsController.retrievePet as jest.Mock).mockResolvedValue(mockPet);
-
-      const res = await request(app).get('/pets/retrievePet/1');
-
-      expect(res.status).toBe(200);
-      expect(res.body).toEqual(mockPet);
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('should handle errors when retrieving a pet by ID', async () => {
-      (PetsController.retrievePet as jest.Mock).mockRejectedValue(new Error('Database error'));
+    describe('GET /pets/retrievePet/:id', () => {
+        it('should retrieve a pet by ID', async () => {
+            const mockPet = { id: '1', name: 'Buddy', species: 'Dog' };
+            (PetsController.retrievePet as jest.Mock).mockResolvedValue(mockPet);
 
-      const res = await request(app).get('/pets/retrievePet/1');
+            const response = await request(app).get('/pets/retrievePet/1');
 
-      expect(res.status).toBe(500);
-      expect(res.body).toEqual({});
-    });
-  });
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(mockPet);
+            expect(PetsController.retrievePet).toHaveBeenCalledWith('1');
+        });
 
-  describe('GET /pets/getPetsByOwner/:ownerId', () => {
-    it('should retrieve all pets by owner ID', async () => {
-      const mockPets = [
-        { id: '1', name: 'Buddy', owner_id: '1' },
-        { id: '2', name: 'Whiskers', owner_id: '1' }
-      ];
-      (PetsController.getPetsByOwner as jest.Mock).mockResolvedValue(mockPets);
+        it('should return 500 if an error occurs', async () => {
+            (PetsController.retrievePet as jest.Mock).mockRejectedValue(new Error('Error'));
 
-      const res = await request(app).get('/pets/getPetsByOwner/1');
+            const response = await request(app).get('/pets/retrievePet/1');
 
-      expect(res.status).toBe(200);
-      expect(res.body).toEqual({
-        status: 'success',
-        message: 'Pets retrieved successfully',
-        data: mockPets
-      });
+            expect(response.status).toBe(500);            
+        });
     });
 
-    it('should handle errors when retrieving pets by owner ID', async () => {
-      (PetsController.getPetsByOwner as jest.Mock).mockRejectedValue(new Error('Database error'));
+    describe('GET /pets/getPetsByOwner/:ownerId', () => {
+        it('should retrieve pets by owner ID', async () => {
+            const mockPets = [{ id: '1', name: 'Buddy' }, { id: '2', name: 'Max' }];
+            (PetsController.getPetsByOwner as jest.Mock).mockResolvedValue(mockPets);
 
-      const res = await request(app).get('/pets/getPetsByOwner/1');
+            const response = await request(app).get('/pets/getPetsByOwner/123');
 
-      expect(res.status).toBe(500);
-      expect(res.body).toEqual({});
-    });
-  });
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                status: 'success',
+                data: mockPets,
+                message: 'Pets retrieved successfully',
+            });
+            expect(PetsController.getPetsByOwner).toHaveBeenCalledWith('123');
+        });
 
-  describe('POST /pets/insertPet', () => {
-    it('should create a new pet', async () => {
-      const newPet = { name: 'Max', type: 'Dog', age: 2, vaccinated: true };
-      const createdPet = { id: '3', ...newPet };
-      (PetsController.insertPet as jest.Mock).mockResolvedValue(createdPet);
+        it('should return a message if no pets are found', async () => {
+            (PetsController.getPetsByOwner as jest.Mock).mockResolvedValue([]);
 
-      const res = await request(app).post('/pets/insertPet').send(newPet);
+            const response = await request(app).get('/pets/getPetsByOwner/123');
 
-      expect(res.status).toBe(201);
-      expect(res.body).toEqual({
-        status: 'success',
-        message: 'Pet added successfully',
-        data: createdPet
-      });
-    });
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({ status: 'error', message: 'No pets found!' });
+        });
 
-    it('should handle errors when creating a new pet', async () => {
-      (PetsController.insertPet as jest.Mock).mockRejectedValue(new Error('Database error'));
+        it('should return 500 if an error occurs', async () => {
+            (PetsController.getPetsByOwner as jest.Mock).mockRejectedValue(new Error('Error'));
 
-      const res = await request(app).post('/pets/insertPet').send({ name: 'Max' });
+            const response = await request(app).get('/pets/getPetsByOwner/123');
 
-      expect(res.status).toBe(500);
-      expect(res.body).toEqual({});
-    });
-  });
-
-  describe('GET /pets/getPets', () => {
-    it('should retrieve all pets', async () => {
-      const mockPets = [
-        { id: '1', name: 'Buddy' },
-        { id: '2', name: 'Whiskers' }
-      ];
-      (PetsController.getPets as jest.Mock).mockResolvedValue(mockPets);
-
-      const res = await request(app).get('/pets/getPets');
-
-      expect(res.status).toBe(200);
-      expect(res.body).toEqual(mockPets);
+            expect(response.status).toBe(500);
+        });
     });
 
-    it('should handle errors when retrieving all pets', async () => {
-      (PetsController.getPets as jest.Mock).mockRejectedValue(new Error('Database error'));
+    describe('POST /pets/insertPet', () => {
+        it('should insert a new pet', async () => {
+            const mockPet = { id: '1', name: 'Buddy' };
+            (PetsController.insertPet as jest.Mock).mockResolvedValue(mockPet);
 
-      const res = await request(app).get('/pets/getPets');
+            const response = await request(app)
+                .post('/pets/insertPet')
+                .send({ name: 'Buddy', species: 'Dog' });
 
-      expect(res.status).toBe(500);
-      expect(res.body).toEqual({});
+            expect(response.status).toBe(201);
+            expect(response.body).toEqual({
+                status: 'success',
+                data: mockPet,
+                message: 'Pet added successfully',
+            });
+            expect(PetsController.insertPet).toHaveBeenCalledWith({ name: 'Buddy', species: 'Dog' });
+        });
+
+        it('should return 500 if an error occurs', async () => {
+            (PetsController.insertPet as jest.Mock).mockRejectedValue(new Error('Error'));
+
+            const response = await request(app)
+                .post('/pets/insertPet')
+                .send({ name: 'Buddy', species: 'Dog' });
+
+            expect(response.status).toBe(500);
+        });
     });
-  });
+
+    describe('GET /pets/getPets', () => {
+        it('should retrieve all pets', async () => {
+            const mockPets = [{ id: '1', name: 'Buddy' }, { id: '2', name: 'Max' }];
+            (PetsController.getPets as jest.Mock).mockResolvedValue(mockPets);
+
+            const response = await request(app).get('/pets/getPets');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(mockPets);
+            expect(PetsController.getPets).toHaveBeenCalled();
+        });
+
+        it('should return 500 if an error occurs', async () => {
+            (PetsController.getPets as jest.Mock).mockRejectedValue(new Error('Error'));
+
+            const response = await request(app).get('/pets/getPets');
+
+            expect(response.status).toBe(500);
+        });
+    });
 });
-
