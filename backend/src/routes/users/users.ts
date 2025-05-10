@@ -241,6 +241,7 @@ users.post('/updateUser', async (req: Request, res: Response): Promise<void> => 
     logger.info(req.headers.userInfo);
     logger.info(req.body);
     const userInfo = req.headers.userInfo as any;
+    console.log(req.headers);
     try {
         // Pass along vet fields along with user fields
         const result = await UsersController.updateUser({

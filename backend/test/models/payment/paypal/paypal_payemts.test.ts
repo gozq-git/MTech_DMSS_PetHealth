@@ -1,71 +1,170 @@
-import { PayPalPaymentAdapter } from "../../../../src/models/payment/paypal/paypal_adapter";
+import { PayPalPayment } from "../../../../src/models/payment/paypal/paypal_payment";
+import axios from "axios";
 
-describe("PayPalPaymentAdapter", () => {
-    let paypalAdapter: PayPalPaymentAdapter;
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+describe("PayPalPayment", () => {
+    let paypalPayment: PayPalPayment;
 
     beforeEach(() => {
-        paypalAdapter = new PayPalPaymentAdapter();
     });
 
-    it("should initialize the PayPal adapter", async () => {
-        const consoleSpy = jest.spyOn(console, "log");
-        await paypalAdapter.initialize();
-        expect(consoleSpy).toHaveBeenCalledWith("PayPal Payment Adapter initialized");
-        consoleSpy.mockRestore();
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
-    it("should create a payment and return an order ID", async () => {
-        const mockOrderId = "ORDER123";
-        const createOrderSpy = jest.spyOn(paypalAdapter["paypal"], "createOrder").mockResolvedValue(mockOrderId);
+    // describe("getAccessToken", () => {
+    //     paypalPayment = new PayPalPayment();
+    //     it("should return a cached access token if it is still valid", async () => {
+    //         const mockToken = "mockAccessToken";
+    //         const mockExpiry = new Date(new Date().getTime() + 10 * 60 * 1000); // 10 minutes from now
+    //         (paypalPayment as any).accessToken = mockToken;
+    //         (paypalPayment as any).tokenExpiry = mockExpiry;
 
-        const orderId = await paypalAdapter.createPayment(100, "USD", "Test Payment");
-        expect(orderId).toBe(mockOrderId);
-        expect(createOrderSpy).toHaveBeenCalledWith(100, "USD", "Test Payment");
+    //         const token = await (paypalPayment as any).getAccessToken();
 
-        createOrderSpy.mockRestore();
+    //         expect(token).toBe(mockToken);
+    //         expect(mockedAxios.post).not.toHaveBeenCalled();
+    //     });
+
+    //     it("should fetch a new access token if the cached one is expired", async () => {
+    //         mockedAxios.post.mockResolvedValueOnce({
+    //             data: { access_token: "newAccessToken" },
+    //         });
+
+    //         const token = await (paypalPayment as any).getAccessToken();
+
+    //         expect(token).toBe("newAccessToken");
+    //         expect(mockedAxios.post).toHaveBeenCalledWith(
+    //             "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+    //             "grant_type=client_credentials",
+    //             expect.objectContaining({
+    //                 auth: {
+    //                     username: expect.any(String),
+    //                     password: expect.any(String),
+    //                 },
+    //             })
+    //         );
+    //     });
+
+    //     it("should throw an error if the token request fails", async () => {
+    //         mockedAxios.post.mockRejectedValueOnce(new Error("Request failed"));
+
+    //         await expect((paypalPayment as any).getAccessToken()).rejects.toThrow("Request failed");
+    //     });
+    // });
+
+    describe("createOrder", () => {
+        PayPalPayment.prototype.getAccessToken = jest.fn(async x => {
+            return 'mockAccessToken';
+        });
+        paypalPayment = new PayPalPayment();
+
+        it("should create a PayPal order and return the order ID", async () => {
+            mockedAxios.post.mockResolvedValueOnce({
+                data: { id: "mockOrderId" },
+            });
+
+
+            const orderId = await paypalPayment.createOrder(100, "USD", "Test Payment");
+
+            expect(orderId).toBe("mockOrderId");
+            expect(mockedAxios.post).toHaveBeenCalledWith(
+                "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+                expect.objectContaining({
+                    intent: "CAPTURE",
+                    purchase_units: [
+                        {
+                            amount: { currency_code: "USD", value: "100.00" },
+                            description: "Test Payment",
+                        },
+                    ],
+                }),
+                expect.objectContaining({
+                    headers: {
+                        Authorization: "Bearer mockAccessToken",
+                        "Content-Type": "application/json",
+                    },
+                })
+            );
+        });
+
+        it("should throw an error if the order creation fails", async () => {
+            mockedAxios.post.mockRejectedValueOnce(new Error("Order creation failed"));
+
+
+            await expect(paypalPayment.createOrder(100, "USD", "Test Payment")).rejects.toThrow(
+                "Order creation failed"
+            );
+        });
     });
 
-    it("should capture a payment and return true if successful", async () => {
-        const mockPaymentId = "PAYMENT123";
-        const captureOrderSpy = jest.spyOn(paypalAdapter["paypal"], "captureOrder").mockResolvedValue(true);
+    describe("captureOrder", () => {
+        PayPalPayment.prototype.getAccessToken = jest.fn(async x => {
+            return 'mockAccessToken';
+        });
+        paypalPayment = new PayPalPayment();
 
-        const isCaptured = await paypalAdapter.capturePayment(mockPaymentId);
-        expect(isCaptured).toBe(true);
-        expect(captureOrderSpy).toHaveBeenCalledWith(mockPaymentId);
+        it("should capture a PayPal order and return true if successful", async () => {
+            mockedAxios.post.mockResolvedValueOnce({
+                data: { status: "COMPLETED" },
+            });
 
-        captureOrderSpy.mockRestore();
+
+            const result = await paypalPayment.captureOrder("mockOrderId");
+
+            expect(result).toBe(true);
+            expect(mockedAxios.post).toHaveBeenCalledWith(
+                "https://api-m.sandbox.paypal.com/v2/checkout/orders/mockOrderId/capture",
+                {},
+                expect.objectContaining({
+                    headers: {
+                        Authorization: "Bearer mockAccessToken",
+                        "Content-Type": "application/json",
+                    },
+                })
+            );
+        });
+
+        it("should throw an error if the capture fails", async () => {
+            mockedAxios.post.mockRejectedValueOnce(new Error("Capture failed"));
+
+            await expect(paypalPayment.captureOrder("mockOrderId")).rejects.toThrow("Capture failed");
+        });
     });
 
-    it("should return the payment status", async () => {
-        const mockPaymentId = "PAYMENT123";
-        const mockStatus = "COMPLETED";
-        const getOrderStatusSpy = jest.spyOn(paypalAdapter["paypal"], "getOrderStatus").mockResolvedValue(mockStatus);
+    describe("getOrderStatus", () => {
+        PayPalPayment.prototype.getAccessToken = jest.fn(async x => {
+            return 'mockAccessToken';
+        });
+        paypalPayment = new PayPalPayment();
 
-        const status = await paypalAdapter.checkPaymentStatus(mockPaymentId);
-        expect(status).toBe(mockStatus);
-        expect(getOrderStatusSpy).toHaveBeenCalledWith(mockPaymentId);
+        it("should retrieve the status of a PayPal order", async () => {
+            mockedAxios.get.mockResolvedValueOnce({
+                data: { status: "COMPLETED" },
+            });
 
-        getOrderStatusSpy.mockRestore();
-    });
+            const status = await paypalPayment.getOrderStatus("mockOrderId");
 
-    it("should throw an error if createPayment fails", async () => {
-        const createOrderSpy = jest.spyOn(paypalAdapter["paypal"], "createOrder").mockRejectedValue(new Error("Create payment error"));
+            expect(status).toBe("COMPLETED");
+            expect(mockedAxios.get).toHaveBeenCalledWith(
+                "https://api-m.sandbox.paypal.com/v2/checkout/orders/mockOrderId",
+                expect.objectContaining({
+                    headers: {
+                        Authorization: "Bearer mockAccessToken",
+                        "Content-Type": "application/json",
+                    },
+                })
+            );
+        });
 
-        await expect(paypalAdapter.createPayment(100, "USD", "Test Payment")).rejects.toThrow("Create payment error");
-        createOrderSpy.mockRestore();
-    });
+        it("should throw an error if the status retrieval fails", async () => {
+            mockedAxios.get.mockRejectedValueOnce(new Error("Status retrieval failed"));
 
-    it("should throw an error if capturePayment fails", async () => {
-        const captureOrderSpy = jest.spyOn(paypalAdapter["paypal"], "captureOrder").mockRejectedValue(new Error("Capture payment error"));
-
-        await expect(paypalAdapter.capturePayment("PAYMENT123")).rejects.toThrow("Capture payment error");
-        captureOrderSpy.mockRestore();
-    });
-
-    it("should throw an error if checkPaymentStatus fails", async () => {
-        const getOrderStatusSpy = jest.spyOn(paypalAdapter["paypal"], "getOrderStatus").mockRejectedValue(new Error("Check status error"));
-
-        await expect(paypalAdapter.checkPaymentStatus("PAYMENT123")).rejects.toThrow("Check status error");
-        getOrderStatusSpy.mockRestore();
+            await expect(paypalPayment.getOrderStatus("mockOrderId")).rejects.toThrow(
+                "Status retrieval failed"
+            );
+        });
     });
 });

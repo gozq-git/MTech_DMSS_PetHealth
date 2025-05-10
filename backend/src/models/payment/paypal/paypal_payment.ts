@@ -19,7 +19,7 @@ export class PayPalPayment {
      * Generates an access token for PayPal API, caching it for 50 minutes.
      * @returns The access token.
      */
-    private async getAccessToken(): Promise<string> {
+    public async getAccessToken(): Promise<string> {
         try {
             // Check if the token is still valid
             if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
