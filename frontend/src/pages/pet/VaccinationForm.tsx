@@ -132,7 +132,7 @@ export const VaccinationForm: React.FC<VaccinationFormProps> = ({open, onClose, 
                             <TextField
                                 fullWidth
                                 label="Administered By"
-                                name="administeredBy"
+                                name="administered_by"
                                 value={formData.administered_by}
                                 onChange={handleChange}
                                 required
@@ -155,7 +155,7 @@ export const VaccinationForm: React.FC<VaccinationFormProps> = ({open, onClose, 
                             <TextField
                                 fullWidth
                                 label="Lot Number"
-                                name="lotNumber"
+                                name="lot_number"
                                 value={formData.lot_number}
                                 onChange={handleChange}
                                 required

@@ -279,7 +279,8 @@ export const HealthcarePage: React.FC = () => {
                       setBookingDialogOpen(true);
                     }}
                   >
-                    {vet.vet_name || "Unknown Vet"} ({vet.vet_center || "N/A"})
+                    {/* {vet.vet_name || "Unknown Vet"}  */}
+                    ({vet.vet_center || "N/A"})
                   </Button>
                 ))}
               </Paper>
@@ -320,9 +321,9 @@ export const HealthcarePage: React.FC = () => {
                 <Typography>
                   <strong>Time:</strong> {formatTime(appointment.appointment_time)}
                 </Typography>
-                <Typography>
+                {/* <Typography>
                   <strong>Vet Name:</strong> {vet?.vet_name || "N/A"}
-                </Typography>
+                </Typography> */}
                 <Typography>
                   <strong>Vet Center:</strong> {vet?.vet_center || "N/A"}
                 </Typography>

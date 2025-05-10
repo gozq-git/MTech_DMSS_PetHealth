@@ -159,21 +159,21 @@ export const NotificationCreateModal: React.FC<NotificationCreateModalProps> = (
                 );
             } else if (formData.recipientType === 'all') {
                 const response = await notificationApi.broadcast({
-                    recipients: formData.selectedUsers.map((user) => user.email),
+                    recipients: ['all'],
                     subject: formData.title,
                     message: formData.message,
                     engines: ["ntfy"]
                 });
-                showSnackbar(
-                    response.message,
-                    response.success ? SNACKBAR_SEVERITY.SUCCESS : SNACKBAR_SEVERITY.ERROR
-                );
+                // showSnackbar(
+                //     response.message,
+                //     response.success ? SNACKBAR_SEVERITY.SUCCESS : SNACKBAR_SEVERITY.ERROR
+                // );
             } else {
                 console.warn("Invalid recipient type");
-                showSnackbar(
-                    "Invalid recipient type",
-                    SNACKBAR_SEVERITY.ERROR
-                );
+                // showSnackbar(
+                //     "Invalid recipient type",
+                //     SNACKBAR_SEVERITY.ERROR
+                // );
             }
         } catch (err) {
             setError('Failed to send notification. Please try again.');
