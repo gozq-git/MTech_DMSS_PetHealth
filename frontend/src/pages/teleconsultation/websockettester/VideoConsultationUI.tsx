@@ -1,308 +1,461 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    Box,
-    Button,
-    Card,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Grid2,
-    IconButton,
-    Paper,
-    Stack,
-    Typography
+    Box, Button, Card, Container, Dialog, DialogActions, DialogContent,
+    DialogContentText, DialogTitle, IconButton, Paper, Stack, Typography, Grid2
 } from '@mui/material';
+import { CallEnd, Mic, MicOff, Videocam, VideocamOff } from '@mui/icons-material';
 
-import {CallEnd, Mic, MicOff, ScreenShare, StopScreenShare, Videocam, VideocamOff} from "@mui/icons-material";
-import {SNACKBAR_SEVERITY, SnackbarContext} from "../../../providers/SnackbarProvider.tsx";
-
-// ICE Server configuration - using public STUN servers
-const iceServers = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
-        // Add TURN servers for production
-        // { urls: 'turn:your-turn-server.com', username: 'username', credential: 'credential' }
-    ]
-};
-
-interface VideoConsultationProps {
-    userId : string;
-    role: string;
+interface VideoConsultationUIProps {
+    userId: string;
+    role: 'vet' | 'pet-owner';
     partnerId: string;
     channelName: string;
-    ws: WebSocket
+    ws: WebSocket;
     onConsultationEnd: () => void;
 }
 
-/**
- * WebRTC Video Consultation Component
- */
-export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
-                                                                         userId,
-                                                                         role,
-                                                                         partnerId,
-                                                                         channelName,
-                                                                         ws,
-                                                                         onConsultationEnd
-                                                                     }) => {
-    // References to video elements
+export const VideoConsultationUI: React.FC<VideoConsultationUIProps> = ({
+                                                                            userId,
+                                                                            role,
+                                                                            partnerId,
+                                                                            channelName,
+                                                                            ws,
+                                                                            onConsultationEnd
+                                                                        }) => {
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+    const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+    const localStreamRef = useRef<MediaStream | null>(null);
 
-    // WebRTC state
-    const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-    const [isConnected, setIsConnected] = useState<boolean>(false);
+    const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'failed'>('connecting');
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isVideoOff, setIsVideoOff] = useState<boolean>(false);
-    const [isScreenSharing, setIsScreenSharing] = useState<boolean>(false);
-    const [connectionState, setConnectionState] = useState<string>('new');
-    // const [error, setError] = useState<string>("");
-    const {showSnackbar} = useContext(SnackbarContext);
-    // Track the original stream when screen sharing
-    const [originalStream, setOriginalStream] = useState<MediaStream | null>(null);
-    // Connection dialog state
-    const [showReconnectDialog, setShowReconnectDialog] = useState(false);
+    const [callDuration, setCallDuration] = useState<number>(0);
+    const [timerInterval, setTimerInterval] = useState<number | null>(null);
+    const [showReconnectDialog, setShowReconnectDialog] = useState<boolean>(false);
 
-    // Initialize WebRTC connection
-    useEffect(() => {
-        if (!channelName || !ws || ws.readyState !== WebSocket.OPEN) {
-            return;
+    // Store ICE candidates that arrive before the remote description
+    const [pendingIceCandidates, setPendingIceCandidates] = useState<RTCIceCandidateInit[]>([]);
+
+    // Fetch TURN server credentials from Metered
+    const fetchTurnServerCredentials = async () => {
+        try {
+            // Get the API key from environment variables
+            const meteredTurnServerApiKey = import.meta.env.VITE_METERED_API_KEY;
+
+            if (!meteredTurnServerApiKey) {
+                console.warn('Metered TURN API key not found, using default STUN servers only');
+                return {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
+                };
+            }
+
+            const response = await fetch(
+                `https://xeyndev.metered.live/api/v1/turn/credentials?apiKey=${meteredTurnServerApiKey}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch TURN credentials: ${response.status}`);
+            }
+
+            const turnServers = await response.json();
+            console.log('Retrieved TURN servers:', turnServers);
+
+            return {
+                iceServers: turnServers
+            };
+        } catch (error) {
+            console.error('Error fetching TURN credentials:', error);
+            // Fallback to STUN servers only
+            return {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            };
         }
+    };
 
-        // Join the channel
+    // Create RTC peer connection and set up local media
+    useEffect(() => {
+        const setupLocalStream = async () => {
+            try {
+                // Request access to user's camera and microphone
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localStreamRef.current = stream;
+
+                // Display local video
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = stream;
+                }
+
+                // Fetch ICE server configuration with TURN credentials
+                const configuration = await fetchTurnServerCredentials();
+
+                const peerConnection = new RTCPeerConnection(configuration);
+                peerConnectionRef.current = peerConnection;
+
+                // Add local tracks to the RTCPeerConnection
+                stream.getTracks().forEach(track => {
+                    if (peerConnectionRef.current) {
+                        peerConnectionRef.current.addTrack(track, stream);
+                    }
+                });
+
+                // Set up event handlers for the peer connection
+                setupPeerConnectionEvents();
+
+                // Join the channel and start signaling
+                joinChannel();
+
+                // Start call as offerer (vet) or wait for offer (pet owner)
+                if (role === 'vet') {
+                    createOffer();
+                }
+
+                // Start call timer
+                const interval = window.setInterval(() => {
+                    setCallDuration(prev => prev + 1);
+                }, 1000);
+
+                setTimerInterval(interval);
+
+            } catch (error) {
+                console.error('Error setting up media devices:', error);
+                setConnectionStatus('failed');
+            }
+        };
+
+        setupLocalStream();
+
+        // Cleanup function
+        return () => {
+            // Stop all tracks in local stream
+            if (localStreamRef.current) {
+                localStreamRef.current.getTracks().forEach(track => track.stop());
+            }
+
+            // Close peer connection
+            if (peerConnectionRef.current) {
+                peerConnectionRef.current.close();
+            }
+
+            // Clear timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        };
+    }, []);
+
+    // Set up WebSocket message handler for signaling
+    useEffect(() => {
+        const handleWebSocketMessage = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('WebSocket message received:', data.type);
+
+                switch (data.type) {
+                    case 'send_offer':
+                        if (role === 'pet-owner' && peerConnectionRef.current && data.recipient === userId) {
+                            handleReceivedOffer(data);
+                        }
+                        break;
+                    case 'send_answer':
+                        if (role === 'vet' && peerConnectionRef.current && data.recipient === userId) {
+                            handleReceivedAnswer(data);
+                        }
+                        break;
+                    case 'ice_candidate':
+                        handleIceCandidate(data);
+                        break;
+                    case 'peer_disconnected':
+                        handlePeerDisconnected();
+                        break;
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+
+        // Add message event listener
+        ws.addEventListener('message', handleWebSocketMessage);
+
+        // Add a fallback timer to check connection status after a reasonable time
+        const connectionTimer = setTimeout(() => {
+            // If we're still in connecting state after 15 seconds but have video,
+            // force the status to connected
+            if (connectionStatus === 'connecting' && remoteVideoRef.current?.srcObject) {
+                console.log('Connection status still spinning after timeout - force updating to connected');
+                setConnectionStatus('connected');
+            }
+        }, 15000);
+
+        // Cleanup function
+        return () => {
+            ws.removeEventListener('message', handleWebSocketMessage);
+            clearTimeout(connectionTimer);
+        };
+    }, [ws, role, connectionStatus]);
+
+    const setupPeerConnectionEvents = () => {
+        if (!peerConnectionRef.current) return;
+
+        // Handle ICE candidates
+        peerConnectionRef.current.onicecandidate = (event) => {
+            if (event.candidate) {
+                // Send ICE candidate to the other peer
+                ws.send(JSON.stringify({
+                    type: 'ice_candidate',
+                    channelName: channelName,
+                    candidate: event.candidate,
+                    sender: userId,
+                    recipient: partnerId
+                }));
+            }
+        };
+
+        // Handle connection state changes
+        peerConnectionRef.current.onconnectionstatechange = () => {
+            console.log('Connection state:', peerConnectionRef.current?.connectionState);
+            if (peerConnectionRef.current?.connectionState === 'connected') {
+                setConnectionStatus('connected');
+            } else if (peerConnectionRef.current?.connectionState === 'failed' ||
+                peerConnectionRef.current?.connectionState === 'disconnected' ||
+                peerConnectionRef.current?.connectionState === 'closed') {
+                setConnectionStatus('failed');
+                setShowReconnectDialog(true);
+            }
+        };
+
+        // Handle ICE connection state changes
+        peerConnectionRef.current.oniceconnectionstatechange = () => {
+            console.log('ICE connection state:', peerConnectionRef.current?.iceConnectionState);
+            if (peerConnectionRef.current?.iceConnectionState === 'connected' ||
+                peerConnectionRef.current?.iceConnectionState === 'completed') {
+                setConnectionStatus('connected');
+            }
+        };
+
+        // Handle remote tracks
+        peerConnectionRef.current.ontrack = (event) => {
+            console.log('Remote track received:', event.track.kind);
+            if (remoteVideoRef.current && event.streams[0]) {
+                remoteVideoRef.current.srcObject = event.streams[0];
+                setConnectionStatus('connected'); // Also update status when we receive media
+            }
+        };
+    };
+
+    const joinChannel = () => {
+        // Notify server we're joining this channel
         ws.send(JSON.stringify({
             type: 'join',
             channelName: channelName,
             userId: userId
         }));
-
-        // Set up WebRTC connection
-        initializeWebRTC();
-
-        // Cleanup function
-        return () => {
-            cleanupWebRTC();
-        };
-    }, [channelName, ws]);
-
-    // Handle WebSocket messages for WebRTC signaling
-    useEffect(() => {
-        if (!ws) return;
-
-        const handleMessage = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-
-            switch (data.type) {
-                case 'send_offer':
-                    if (data.channelName === channelName) {
-                        handleIncomingOffer(data.offer);
-                    }
-                    break;
-
-                case 'send_answer':
-                    if (data.channelName === channelName) {
-                        handleIncomingAnswer(data.answer);
-                    }
-                    break;
-
-                case 'ice_candidate':
-                    if (data.channelName === channelName) {
-                        handleIncomingICECandidate(data.candidate);
-                    }
-                    break;
-
-                case 'peer_disconnected':
-                    if (data.channelName === channelName) {
-                        showSnackbar('Your partner has disconnected.', SNACKBAR_SEVERITY.INFO);
-                        // You might want to end the consultation here
-                    }
-                    break;
-            }
-        };
-
-        // Add message event listener
-        ws.addEventListener('message', handleMessage);
-
-        // Cleanup
-        return () => {
-            ws.removeEventListener('message', handleMessage);
-        };
-    }, [ws, channelName, peerConnection]);
-
-    // Update video elements when streams change
-    useEffect(() => {
-        if (localVideoRef.current && localStream) {
-            localVideoRef.current.srcObject = localStream;
-        }
-
-        if (remoteVideoRef.current && remoteStream) {
-            remoteVideoRef.current.srcObject = remoteStream;
-        }
-    }, [localStream, remoteStream]);
-
-    // Handle connection state changes
-    useEffect(() => {
-        if (connectionState === 'connected') {
-            setIsConnected(true);
-            setShowReconnectDialog(false);
-        } else if (connectionState === 'disconnected' || connectionState === 'failed') {
-            setIsConnected(false);
-            setShowReconnectDialog(true);
-        }
-    }, [connectionState]);
-
-    // Initialize WebRTC connection and get user media
-    const initializeWebRTC = async () => {
-        try {
-            // Get user media (camera and microphone)
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            });
-
-            setLocalStream(stream);
-
-            // Create RTCPeerConnection
-            const peerConnection = new RTCPeerConnection(iceServers);
-
-            // Add tracks to the peer connection
-            stream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, stream);
-            });
-
-            // Set up event handlers for the peer connection
-            setupPeerConnectionEventHandlers(peerConnection);
-
-            setPeerConnection(peerConnection);
-
-            // If we're the vet, we'll initiate the call
-            if (role === 'vet') {
-                setTimeout(() => createAndSendOffer(peerConnection), 1000);
-            }
-        } catch (e) {
-            console.error('Error initializing WebRTC:', e);
-            // setError(`Could not access camera or microphone: ${(e as Error).message}`);
-            showSnackbar(`Could not access camera or microphone: ${(e as Error).message}`, SNACKBAR_SEVERITY.ERROR);
-        }
     };
 
-    // Set up event handlers for the peer connection
-    const setupPeerConnectionEventHandlers = (peerConnection : RTCPeerConnection) => {
-        // Handle ICE candidates
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                sendICECandidate(event.candidate);
-            }
-        };
+    const createOffer = async () => {
+        if (!peerConnectionRef.current) return;
 
-        // Handle connection state changes
-        peerConnection.onconnectionstatechange = () => {
-            setConnectionState(peerConnection.connectionState);
-            console.log('Connection state changed:', peerConnection.connectionState);
-        };
-
-        // Handle ICE connection state changes
-        peerConnection.oniceconnectionstatechange = () => {
-            console.log('ICE connection state:', peerConnection.iceConnectionState);
-        };
-
-        // Handle remote track event
-        peerConnection.ontrack = (event) => {
-            console.log('Track event:', event);
-            setRemoteStream(event.streams[0]);
-        };
-    };
-
-    // Create and send WebRTC offer
-    const createAndSendOffer = async (peerConnection: RTCPeerConnection) => {
         try {
-            const offer = await peerConnection.createOffer({
-                offerToReceiveAudio: true,
-                offerToReceiveVideo: true
-            });
+            const offer = await peerConnectionRef.current.createOffer();
+            await peerConnectionRef.current.setLocalDescription(offer);
 
-            await peerConnection.setLocalDescription(offer);
-
-            // Send the offer to the other peer
+            // Send offer to the other peer
             ws.send(JSON.stringify({
                 type: 'send_offer',
                 channelName: channelName,
-                offer: peerConnection.localDescription
+                offer: offer,
+                sender: userId,
+                recipient: partnerId
             }));
-        } catch (err) {
-            console.error('Error creating offer:', err);
-            // setError(`Failed to create offer: ${(err as Error).message}`);
-            showSnackbar(`Failed to create offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+        } catch (error) {
+            console.error('Error creating offer:', error);
+            setConnectionStatus('failed');
         }
     };
 
-    // Handle incoming WebRTC offer
-    const handleIncomingOffer = async (offer: RTCSessionDescriptionInit) => {
-        if (!peerConnection) return;
+    const handleReceivedOffer = async (data: any) => {
+        if (!peerConnectionRef.current) return;
+        console.log('Received offer from peer');
 
         try {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await peerConnectionRef.current.createAnswer();
+            await peerConnectionRef.current.setLocalDescription(answer);
 
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-
-            // Send the answer to the other peer
+            // Send answer to the offerer
             ws.send(JSON.stringify({
                 type: 'send_answer',
                 channelName: channelName,
-                answer: peerConnection.localDescription
+                answer: answer,
+                sender: userId,
+                recipient: partnerId
             }));
-        } catch (err) {
-            console.error('Error handling offer:', err);
-            // setError(`Failed to handle offer: ${(err as Error).message}`);
-            showSnackbar(`Failed to handle offer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+
+            console.log('Answer sent to peer');
+
+            // Process any pending ICE candidates now that remote description is set
+            if (pendingIceCandidates.length > 0) {
+                console.log(`Processing ${pendingIceCandidates.length} pending ICE candidates after setting remote description`);
+
+                for (const candidate of pendingIceCandidates) {
+                    try {
+                        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (error) {
+                        console.error('Error adding stored ICE candidate:', error);
+                    }
+                }
+
+                setPendingIceCandidates([]);
+            }
+        } catch (error) {
+            console.error('Error handling offer:', error);
+            setConnectionStatus('failed');
         }
     };
 
-    // Handle incoming WebRTC answer
-    const handleIncomingAnswer = async (answer: RTCSessionDescriptionInit) => {
-        if (!peerConnection) return;
+    const handleReceivedAnswer = async (data: any) => {
+        if (!peerConnectionRef.current) return;
+        console.log('Received answer from peer');
 
         try {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-        } catch (err: any) {
-            console.error('Error handling answer:', err);
-            // setError(`Failed to handle answer: ${(err as Error).message}`);
-            showSnackbar(`Failed to handle answer: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
+            await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+            console.log('Remote description set successfully');
+
+            // Process any pending ICE candidates now that remote description is set
+            if (pendingIceCandidates.length > 0) {
+                console.log(`Processing ${pendingIceCandidates.length} pending ICE candidates after setting remote description`);
+
+                for (const candidate of pendingIceCandidates) {
+                    try {
+                        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (error) {
+                        console.error('Error adding stored ICE candidate:', error);
+                    }
+                }
+
+                setPendingIceCandidates([]);
+            }
+
+            // If we've received an answer, we should be getting connected soon
+            // But in case the ICE connection state or ontrack doesn't trigger,
+            // we'll update the status after a short delay if tracks have been received
+            setTimeout(() => {
+                if (remoteVideoRef.current?.srcObject && connectionStatus === 'connecting') {
+                    console.log('Forcing connection status update after receiving answer');
+                    setConnectionStatus('connected');
+                }
+            }, 3000);
+        } catch (error) {
+            console.error('Error handling answer:', error);
+            setConnectionStatus('failed');
         }
     };
 
-    // Send ICE candidate to the other peer
-    const sendICECandidate = (candidate: RTCIceCandidateInit) => {
-        ws.send(JSON.stringify({
-            type: 'ice_candidate',
-            channelName: channelName,
-            candidate: candidate
-        }));
-    };
-
-    // Handle incoming ICE candidate
-    const handleIncomingICECandidate = async (candidate: RTCIceCandidateInit) => {
-        if (!peerConnection) return;
+    const handleIceCandidate = async (data: any) => {
+        if (!peerConnectionRef.current || !data.candidate || data.recipient !== userId) return;
 
         try {
-            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (err) {
-            console.error('Error adding ICE candidate:', err);
+            // Check if we have a remote description set
+            if (peerConnectionRef.current.remoteDescription &&
+                peerConnectionRef.current.remoteDescription.type) {
+                // We can add the candidate immediately
+                await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+                console.log('ICE candidate added successfully');
+            } else {
+                // Store the candidate to add later when remote description is set
+                console.log('Storing ICE candidate for later');
+                setPendingIceCandidates(prev => [...prev, data.candidate]);
+            }
+        } catch (error) {
+            console.error('Error adding ICE candidate:', error);
         }
     };
 
-    // Toggle mute
+    // Process any pending ICE candidates when remote description is set
+    useEffect(() => {
+        const processPendingCandidates = async () => {
+            if (!peerConnectionRef.current ||
+                !peerConnectionRef.current.remoteDescription ||
+                pendingIceCandidates.length === 0) return;
+
+            console.log(`Processing ${pendingIceCandidates.length} pending ICE candidates`);
+
+            for (const candidate of pendingIceCandidates) {
+                try {
+                    await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (error) {
+                    console.error('Error adding stored ICE candidate:', error);
+                }
+            }
+
+            // Clear the pending candidates after processing
+            setPendingIceCandidates([]);
+        };
+
+        processPendingCandidates();
+    }, [pendingIceCandidates, peerConnectionRef.current?.remoteDescription]);
+
+    const handlePeerDisconnected = () => {
+        // The other peer has disconnected
+        setConnectionStatus('failed');
+        setShowReconnectDialog(true);
+    };
+
+    const attemptReconnect = () => {
+        setShowReconnectDialog(false);
+        setConnectionStatus('connecting');
+
+        // Close existing peer connection
+        if (peerConnectionRef.current) {
+            peerConnectionRef.current.close();
+        }
+
+        // Re-setup connection
+        const setupNewConnection = async () => {
+            try {
+                // Fetch ICE server configuration with TURN credentials
+                const configuration = await fetchTurnServerCredentials();
+
+                const peerConnection = new RTCPeerConnection(configuration);
+                peerConnectionRef.current = peerConnection;
+
+                // Add local tracks to the RTCPeerConnection
+                if (localStreamRef.current) {
+                    const stream = localStreamRef.current;
+                    stream.getTracks().forEach(track => {
+                        if (peerConnectionRef.current) {
+                            peerConnectionRef.current.addTrack(track, stream);
+                        }
+                    });
+                }
+
+                // Set up event handlers for the peer connection
+                setupPeerConnectionEvents();
+
+                // Join the channel and start signaling
+                joinChannel();
+
+                // Start call as offerer (always when reconnecting)
+                createOffer();
+            } catch (error) {
+                console.error('Error reconnecting:', error);
+                setConnectionStatus('failed');
+                setShowReconnectDialog(true);
+            }
+        };
+
+        setupNewConnection();
+    };
+
     const toggleMute = () => {
-        if (localStream) {
-            const audioTracks = localStream.getAudioTracks();
+        if (localStreamRef.current) {
+            const audioTracks = localStreamRef.current.getAudioTracks();
             audioTracks.forEach(track => {
                 track.enabled = !track.enabled;
             });
@@ -310,10 +463,9 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         }
     };
 
-    // Toggle video
     const toggleVideo = () => {
-        if (localStream) {
-            const videoTracks = localStream.getVideoTracks();
+        if (localStreamRef.current) {
+            const videoTracks = localStreamRef.current.getVideoTracks();
             videoTracks.forEach(track => {
                 track.enabled = !track.enabled;
             });
@@ -321,120 +473,44 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
         }
     };
 
-    // Toggle screen sharing
-    const toggleScreenSharing = async () => {
-        if (isScreenSharing) {
-            // Switch back to camera
-            if (originalStream) {
-                // Replace the current track with the original camera track
-                const screenTrack = localStream?.getVideoTracks()[0];
-                const cameraTrack = originalStream.getVideoTracks()[0];
+    const endCall = () => {
+        // Notify the server that we're ending the call
+        ws.send(JSON.stringify({
+            type: 'end_call',
+            channelName: channelName,
+            userId: userId
+        }));
 
-                if (screenTrack && cameraTrack) {
-                    const sender = peerConnection?.getSenders().find(s =>
-                        s.track && s.track.kind === 'video'
-                    );
-
-                    if (sender) {
-                        sender.replaceTrack(cameraTrack);
-                    }
-
-                    screenTrack.stop();
-
-                    // Update local video
-                    setLocalStream(originalStream);
-                    setOriginalStream(null);
-                }
-            }
-        } else {
-            // Switch to screen sharing
-            try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: true
-                });
-
-                // Save original stream for when we switch back
-                setOriginalStream(localStream);
-
-                // Replace the camera track with the screen track
-                const cameraTrack = localStream?.getVideoTracks()[0];
-                const screenTrack = screenStream.getVideoTracks()[0];
-
-                // Add listener for when user stops screen sharing
-                screenTrack.onended = () => {
-                    toggleScreenSharing();
-                };
-
-                if (cameraTrack && screenTrack) {
-                    const sender = peerConnection?.getSenders().find(s =>
-                        s.track && s.track.kind === 'video'
-                    );
-
-                    if (sender) {
-                        sender.replaceTrack(screenTrack);
-                    }
-
-                    // Create a new stream with the screen video and original audio
-                    const newStream = new MediaStream();
-                    newStream.addTrack(screenTrack);
-
-                    // Add all audio tracks from the original stream
-                    localStream?.getAudioTracks().forEach(track => {
-                        newStream.addTrack(track);
-                    });
-
-                    // Update local video
-                    setLocalStream(newStream);
-                }
-            } catch (err) {
-                console.error('Error starting screen sharing:', err);
-                // setError(`Failed to start screen sharing: ${(err as Error).message}`);
-                showSnackbar(`Failed to start screen sharing: ${(err as Error).message}`,SNACKBAR_SEVERITY.ERROR);
-                return;
-            }
+        // Close local stream and peer connection
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => track.stop());
         }
 
-        setIsScreenSharing(!isScreenSharing);
+        if (peerConnectionRef.current) {
+            peerConnectionRef.current.close();
+        }
+
+        // Clear timer
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+
+        // Trigger callback to parent component
+        onConsultationEnd();
     };
 
-    // End consultation and clean up
-    const endConsultation = () => {
-        cleanupWebRTC();
-
-        if (onConsultationEnd) {
-            onConsultationEnd();
-        }
+    // Format call duration as MM:SS
+    const formatCallDuration = () => {
+        const minutes = Math.floor(callDuration / 60);
+        const seconds = callDuration % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // Attempt to reconnect after connection failure
-    const attemptReconnect = () => {
-        cleanupWebRTC();
-        initializeWebRTC();
-        setShowReconnectDialog(false);
-    };
-
-    // Clean up WebRTC resources
-    const cleanupWebRTC = () => {
-        // Stop all tracks
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-        }
-
-        if (originalStream) {
-            originalStream.getTracks().forEach(track => track.stop());
-        }
-
-        // Close peer connection
-        if (peerConnection) {
-            peerConnection.close();
-        }
-
-        // Clear state
-        setLocalStream(null);
-        setRemoteStream(null);
-        setPeerConnection(null);
-        setOriginalStream(null);
-    };
+    // Check if remote stream exists
+    const remoteStream = remoteVideoRef.current?.srcObject !== null;
+    const localStream = localVideoRef.current?.srcObject !== null;
+    const isConnected = connectionStatus === 'connected';
+    const connectionState = isConnected ? "Connected" : "Disconnected";
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -453,15 +529,9 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                         {role === 'vet' ? 'Consultation with Pet Owner' : 'Consultation with Veterinarian'}
                     </Typography>
                     <Typography variant="body2" color={isConnected ? 'success.main' : 'error.main'}>
-                        {isConnected ? 'Connected' : 'Disconnected'} • {connectionState}
+                        {connectionState} • {formatCallDuration()}
                     </Typography>
                 </Box>
-
-                {/*{error && (*/}
-                {/*    <Alert severity="error" sx={{ mb: 2 }}>*/}
-                {/*        {error}*/}
-                {/*    </Alert>*/}
-                {/*)}*/}
 
                 <Grid2 container spacing={2} sx={{ flexGrow: 1 }}>
                     {/* Remote video (larger) */}
@@ -501,7 +571,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                     </Grid2>
 
                     {/* Local video (smaller) */}
-                    <Grid2 size={{xs:12, md:4}}>
+                    <Grid2 size={{xs:12, md:4}} >
                         <Stack spacing={2} sx={{ height: '100%' }}>
                             <Paper
                                 sx={{
@@ -516,7 +586,12 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                                     autoPlay
                                     playsInline
                                     muted
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        transform: 'scaleX(-1)' // Mirror effect
+                                    }}
                                 />
 
                                 {!localStream && (
@@ -546,7 +621,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                                         borderRadius: 1
                                     }}
                                 >
-                                    You{isScreenSharing ? ' (Screen)' : ''}
+                                    You
                                 </Typography>
                             </Paper>
 
@@ -598,24 +673,11 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                             }
                         }}
                     >
-                        {isVideoOff ? <Videocam /> : <VideocamOff />}
+                        {isVideoOff ? <VideocamOff /> : <Videocam />}
                     </IconButton>
 
                     <IconButton
-                        onClick={toggleScreenSharing}
-                        sx={{
-                            backgroundColor: isScreenSharing ? 'success.main' : 'primary.main',
-                            color: 'white',
-                            '&:hover': {
-                                backgroundColor: isScreenSharing ? 'success.dark' : 'primary.dark',
-                            }
-                        }}
-                    >
-                        {isScreenSharing ? <StopScreenShare /> : <ScreenShare />}
-                    </IconButton>
-
-                    <IconButton
-                        onClick={endConsultation}
+                        onClick={endCall}
                         sx={{
                             backgroundColor: 'error.main',
                             color: 'white',
@@ -638,7 +700,7 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={endConsultation} color="error">End Consultation</Button>
+                    <Button onClick={endCall} color="error">End Consultation</Button>
                     <Button onClick={attemptReconnect} variant="contained" autoFocus>
                         Reconnect
                     </Button>
@@ -646,4 +708,4 @@ export const VideoConsultationUI:React.FC<VideoConsultationProps> = ({
             </Dialog>
         </Container>
     );
-};
+}

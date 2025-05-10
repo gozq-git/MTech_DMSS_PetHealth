@@ -18,10 +18,49 @@ jobs:
       - name: Run API tests
         run: |
           postman collection run "43577423-671d4d5e-4bbc-4eb2-a033-a078c567e9fa" --environment "43577423-abe4c26f-3d50-41d6-b366-ac154014ae22"
-      
+
+  automated-ui-test:
+    runs-on: ubuntu-latest
+
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+        options: --shm-size=2gb
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+      with:
+          sparse-checkout: 'tests/selenium'
+          sparse-checkout-cone-mode: false
+
+    - name: Move files to root
+      run: |
+        ls -lah
+        shopt -s dotglob
+        mv tests/selenium/* .
+        rm -rf tests/selenium
+        ls -lah
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Selenium tests
+      env:
+        SELENIUM_REMOTE_URL: http://localhost:4444/wd/hub
+        WEBSITE_LINK: https://pethealthplatform-dev.azurewebsites.net/
+      run: npm test
+      continue-on-error: true
+
   owasp-zap-scan:
     name: OWASP ZAP Scan
-    needs: postman-api-tests
     runs-on: ubuntu-latest
 
     steps:

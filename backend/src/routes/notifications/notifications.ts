@@ -131,15 +131,22 @@ notifications.post('/sendNotification', async (req: Request, res: Response) => {
 notifications.post('/broadcast', async (req: Request, res: Response) => {
     try {
         const { recipients, subject, message, engines } = req.body;
+        logger.info("Broadcast request received with values:", {
+            recipients,
+            subject,
+            message,
+            engines
+        });
         if (!recipients || !Array.isArray(recipients) || recipients.length === 0 || !subject || !message || !engines || !Array.isArray(engines)) {
             logger.error("Missing or invalid required fields in request body");
             res.status(400).json({ success: false, message: "Missing or invalid required fields in request body." });
             return;
         }
-        for (const recipient of recipients) {
-            await NotificationController.sendNotification(recipient, subject, message, engines);
-            logger.info(`Notification sent to ${recipient}`);
-        }
+        // for (const recipient of recipients) {
+        //     await NotificationController.sendNotification(recipient, subject, message, engines);
+        //     logger.info(`Notification sent to ${recipient}`);
+        // }
+        await NotificationController.sendBroadcast(recipients, subject, message, engines);
         res.status(200).json({ success: true, message: "Broadcast message sent successfully." });
         return;
     } catch (error) {
