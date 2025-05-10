@@ -63,7 +63,9 @@ function AddPetPopup({open, onClose, onAdd}: AddPetPopupProps) {
         const {name, value, type, checked} = e.target;
         setNewPet(prev => ({
             ...prev,
-            [name]: type === "checkbox" ? checked : type === "number" ? parseFloat(value) || 0 : value
+            [name]: type === "checkbox" ? checked :
+                type === "number" ? (value === "" ? "" : parseFloat(value) || 0) :
+                    value
         }));
     }
 
@@ -80,7 +82,7 @@ function AddPetPopup({open, onClose, onAdd}: AddPetPopupProps) {
                 isNeutered: newPet.isNeutered ?? false, // Ensure isNeutered is always a boolean
             };
             const createPetApiResponse = await petApi.insertPet(petToInsert); // Now passing the proper object to API
-            if(createPetApiResponse.success) {
+            if (createPetApiResponse.success) {
                 setLoading(false);
                 showSnackbar("Successfully added pet!", SNACKBAR_SEVERITY.SUCCESS);
             } else {
